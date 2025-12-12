@@ -3,7 +3,6 @@ import type { Pane } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
 import { DirectoryContents } from "../../bindings/lazydir/internal";
-import React from "react";
 
 /**
  * Single pane representation

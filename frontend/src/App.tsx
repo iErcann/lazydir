@@ -3,7 +3,7 @@ import { FileManagerPane } from "./components/FileManagerPane";
  
 function App() {
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-screen bg-gray-700">
       <FileManagerPane pane={{ 
         id: "Root",
         path: "/",

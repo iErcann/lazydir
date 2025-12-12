@@ -1,4 +1,3 @@
-import React from "react";
 import { DirectoryContents } from "../../bindings/lazydir/internal";
 import { FileItem } from "./FileItem";
 

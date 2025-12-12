@@ -8,7 +8,6 @@ import {
   File,
 } from "lucide-react";
 import { FileInfo } from "../../bindings/lazydir/internal";
-import React from "react";
 
 
 interface FileItemProps {
