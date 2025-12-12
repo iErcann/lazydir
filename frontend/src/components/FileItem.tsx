@@ -9,16 +9,12 @@ import {
 } from "lucide-react";
 import { FileInfo } from "../../bindings/lazydir/internal";
 
-
 interface FileItemProps {
-  file:  FileInfo;
+  file: FileInfo;
   isSelected: boolean;
 }
 
-export function FileItem({
-  file,
-  isSelected,
-}: FileItemProps) {
+export function FileItem({ file, isSelected }: FileItemProps) {
   const formatSize = (bytes: number): string => {
     if (bytes === 0) return "";
     const k = 1024;
@@ -27,11 +23,11 @@ export function FileItem({
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
   };
 
-  const getFileIcon = (file:  FileInfo) => {
+  const getFileIcon = (file: FileInfo) => {
     if (file.isDir) return Folder;
 
     // TODO: move this to the backend.
-  const ext = file.extension?.toLowerCase();
+    const ext = file.extension?.toLowerCase();
     if ([".jpg", ".jpeg", ".png", ".gif", ".svg"].includes(ext || ""))
       return Image;
     if ([".mp4", ".mov", ".avi", ".mkv"].includes(ext || "")) return Film;
@@ -45,10 +41,9 @@ export function FileItem({
   };
 
   const Icon = getFileIcon(file);
-  
+
   const onSelect = (file: FileInfo) => {
     console.log("Select file or directory:", file.path);
-    
   };
   const onOpen = (file: FileInfo) => {
     console.log("Open file or directory:", file.path);
@@ -58,14 +53,12 @@ export function FileItem({
       onClick={() => onSelect(file)}
       onDoubleClick={() => onOpen(file)}
       className={`flex flex-col items-center p-3 rounded-lg transition-colors ${
-        isSelected
-          ? "bg-blue-600 ring-2 ring-blue-500"
-          : "hover:bg-gray-800"
+        isSelected ? "bg-blue-600 ring-2 ring-blue-500" : "hover:bg-[var(--bg-tertiary)]"
       }`}
     >
       <Icon
         className={`w-16 h-16 mb-2 ${
-          file.isDir ? "text-blue-400" : "text-gray-500"
+          file.isDir ? "text-[var(--accent)]" : "text-gray-500"
         }`}
       />
       <span className="text-sm text-center text-gray-100 w-full break-words">
@@ -77,6 +70,5 @@ export function FileItem({
         </span>
       )}
     </div>
-
-    )
-  };
+  );
+}

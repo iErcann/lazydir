@@ -1,1 +1,9 @@
- @import "tailwindcss";
+@import "tailwindcss";
+
+@theme {
+  --bg-primary: #1e1e1e; /* Main background (file grid area) */
+  --bg-secondary: #303030; /* Secondary surfaces (topbar, headers) */
+  --bg-tertiary: #444444; /* Hover states, elevated elements */
+  --accent: #c75478; /* Selection, active states, focus */
+  /* ... */
+}

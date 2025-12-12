@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { Home, Image, Video, Trash2, Folder, HardDrive } from "lucide-react";
 
-// Types
-interface SidebarLocation {
-  id: string;
-  icon: React.ElementType;
-  label: string;
-  path: string;
-  type: "quick" | "standard" | "other";
-}
+ 
 
 interface SidebarProps {
   activeLocation: string;
@@ -29,7 +22,7 @@ export function Sidebar({
   ];
 
   return (
-    <div className="w-48 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div className="w-48 bg-[var(--bg-secondary)] border-r border-gray-800 flex flex-col">
       <div className="p-3">
         <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2">
           Favorites
@@ -42,10 +35,10 @@ export function Sidebar({
                 key={item.label}
                 onClick={() => {}}
                 className={
-                  "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors text-gray-300 hover:bg-gray-800"
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors text-gray-300 hover:bg-[var(--bg-tertiary)]"
                 }
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4 bg-" />
                 <span>{item.label}</span>
               </button>
             );

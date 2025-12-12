@@ -15,7 +15,7 @@ function App() {
   if (!activeTab) return null;
 
   return (
-    <div className="flex h-full w-full bg-zinc-900 text-zinc-100">
+    <div className="flex h-screen w-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <FileManagerTab tab={activeTab} />
