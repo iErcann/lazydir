@@ -1,4 +1,4 @@
-module changeme
+module lazydir
 
 go 1.24.0
 

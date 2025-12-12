@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	_ "embed"
+	"lazydir/internal"
 	"log"
 	"time"
 
@@ -38,7 +39,7 @@ func main() {
 		Name:        "testw3",
 		Description: "A demo of using raw HTML & CSS",
 		Services: []application.Service{
-			application.NewService(&GreetService{}),
+			application.NewService(&internal.FileManagerService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
