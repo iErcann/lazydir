@@ -1,12 +1,9 @@
-import { FileManager } from "./FileManager";
+import { FileGrid } from "./FileGrid";
 import type { Pane } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
 import { DirectoryContents } from "../../bindings/lazydir/internal";
-
-/**
- * Single pane representation
- */
+ 
 export function FileManagerPane({ pane }: { pane: Pane }) {
   const { loadDirectory } = useFileSystemStore();
 
@@ -27,7 +24,7 @@ export function FileManagerPane({ pane }: { pane: Pane }) {
   return (
     <div className="flex h-full">
       <div className="flex-1 flex flex-col">
-        <FileManager contents={contents} />
+        <FileGrid contents={contents} />
       </div>
     </div>
   );

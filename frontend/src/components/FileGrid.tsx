@@ -1,14 +1,11 @@
 import { DirectoryContents } from "../../bindings/lazydir/internal";
 import { FileItem } from "./FileItem";
 
-// Stateless component for rendering file manager grid
-export function FileManager({
+export function FileGrid({
   contents,
 }: {
   contents: DirectoryContents;
 }) {
-  // Just the grid rendering logic from your original code
-  // No state, just presentation
   return (
     <div className="grid grid-cols-8 gap-4 p-4">
       {contents.files.map((file) => (
