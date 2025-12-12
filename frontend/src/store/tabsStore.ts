@@ -14,6 +14,7 @@ interface TabsStore {
   createPane: (tabId: string, path?: string) => Pane;
   closePane: (tabId: string, paneId: string) => void;
   // navigatePane: (tabId: string, paneId: string, path: string) => void;
+  updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
   // updatePane: (tabId: string, paneId: string, updates: Partial<Pane>) => void;
 
   // splitPane: (
@@ -43,6 +44,11 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           path,
           name: "Root",
         },
+        {
+          id: `pane-${Date.now() + 1}`,
+          path,
+          name: "Root 2",
+        }
       ],
     };
     set((state) => ({
@@ -97,23 +103,30 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
     }));
     return newPane;
   },
+  updatePanePath: (tabId: string, paneId: string, newPath: string) => {
+    set((state) => ({
+      tabs: state.tabs.map((tab) => {
+        if (tab.id !== tabId) return tab;
+        return {
+          ...tab,
+          panes: tab.panes.map((pane) => {
+            if (pane.id !== paneId) return pane;
+            return { ...pane, path: newPath };
+          }),
+        };
+      }),
+    }));
+  },
   closePane: (tabId: string, paneId: string) => {
-    set((state) => {
-      // Get the tab we are modifying
-      const tab = state.tabs.find((t) => t.id === tabId);
-      if (!tab) return state; // Safety guard (tab may not exist)
-      if (tab.panes.length <= 1) return state; // Don't close last pane
-
-      // Remove the pane from the tab
-      const updatedPanes = tab.panes.filter((p) => p.id !== paneId);
-
-      return {
-        // Update tabs with modified pane list
-        tabs: state.tabs.map((t) =>
-          t.id === tabId ? { ...t, panes: updatedPanes } : t
-        ),
-      };
-    });
+    set((state) => ({
+      tabs: state.tabs.map((tab) => {
+        if (tab.id !== tabId) return tab;
+        return {
+          ...tab,
+          panes: tab.panes.filter((p) => p.id !== paneId),
+        };
+      }),
+    }));
   },
   getActiveTab: () => {
     const { tabs, activeTabId } = get();

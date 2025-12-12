@@ -6,7 +6,7 @@ export function FileManagerTab({ tab }: { tab: Tab }) {
   return (
     <>
       <TabBar />
-      <SplitView panes={tab.panes} />
+      <SplitView  tab={tab} />
     </>
   );
 }

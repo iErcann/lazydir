@@ -13,7 +13,7 @@ function App() {
   }, [activeTab, createTab]);
 
   if (!activeTab) return null;
-
+ 
   return (
     <div className="flex h-screen w-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
       <Sidebar />

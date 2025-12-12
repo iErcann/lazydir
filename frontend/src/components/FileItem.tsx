@@ -8,13 +8,16 @@ import {
   File,
 } from "lucide-react";
 import { FileInfo } from "../../bindings/lazydir/internal";
+import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 
 interface FileItemProps {
   file: FileInfo;
   isSelected: boolean;
+  onDirectoryOpen: (file: FileInfo) => void;
+  onFileOpen: (file: FileInfo) => void;
 }
 
-export function FileItem({ file, isSelected }: FileItemProps) {
+export function FileItem({ file, isSelected, onDirectoryOpen, onFileOpen }: FileItemProps) {
   const formatSize = (bytes: number): string => {
     if (bytes === 0) return "";
     const k = 1024;
@@ -46,14 +49,20 @@ export function FileItem({ file, isSelected }: FileItemProps) {
     console.log("Select file or directory:", file.path);
   };
   const onOpen = (file: FileInfo) => {
-    console.log("Open file or directory:", file.path);
+    if (file.isDir) {
+      onDirectoryOpen(file);
+    } else { 
+      onFileOpen(file);
+    }
   };
   return (
     <div
       onClick={() => onSelect(file)}
       onDoubleClick={() => onOpen(file)}
-      className={`flex flex-col items-center p-3 rounded-lg transition-colors ${
-        isSelected ? "bg-blue-600 ring-2 ring-blue-500" : "hover:bg-[var(--bg-tertiary)]"
+      className={`flex flex-col items-center p-3 rounded-lg   ${
+        isSelected
+          ? "bg-blue-600 ring-2 ring-blue-500"
+          : "hover:bg-[var(--bg-tertiary)]"
       }`}
     >
       <Icon
