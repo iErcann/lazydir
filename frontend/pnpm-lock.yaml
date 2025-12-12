@@ -11,6 +11,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.1.17(vite@7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2))
+      '@wailsio/runtime':
+        specifier: latest
+        version: 3.0.0-alpha.75
       lucide-react:
         specifier: ^0.559.0
         version: 0.559.0(react@19.2.1)
@@ -671,6 +674,9 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+
+  '@wailsio/runtime@3.0.0-alpha.75':
+    resolution: {integrity: sha512-/CFHb/JUXJ2ZWgyWqw+GG3YL2JaL/+Jtv0Ab/RCWRN7bAivJDk2rcOTI/EsU+VXqqz0r4TGZrjd6isILBfmTgA==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -1838,6 +1844,8 @@ snapshots:
       vite: 7.2.7(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)
     transitivePeerDependencies:
       - supports-color
+
+  '@wailsio/runtime@3.0.0-alpha.75': {}
 
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:

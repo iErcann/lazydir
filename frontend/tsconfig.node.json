@@ -4,6 +4,7 @@
     "target": "ES2023",
     "lib": ["ES2023"],
     "module": "ESNext",
+    "jsx": "react-jsx",
     "types": ["node"],
     "skipLibCheck": true,
 
@@ -21,6 +22,7 @@
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
+    
   },
   "include": ["vite.config.ts"]
 }

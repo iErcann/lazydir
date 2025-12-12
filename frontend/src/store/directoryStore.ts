@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import { FileManagerService } from "../../bindings/lazydir/internal/index";
-import { DirectoryContents } from "../../bindings/lazydir/internal/models";
+import { DirectoryContents, FileManagerService } from "../../bindings/lazydir/internal";
 
 interface FileSystemStore {
   // Actions

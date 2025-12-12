@@ -1,8 +1,9 @@
 import { FileManager } from "./FileManager";
 import type { Pane } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
-import type { internal } from "../../wailsjs/go/models";
 import { useEffect, useState } from "react";
+import { DirectoryContents } from "../../bindings/lazydir/internal";
+import React from "react";
 
 /**
  * Single pane representation
@@ -12,7 +13,7 @@ export function FileManagerPane({ pane }: { pane: Pane }) {
 
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
-  const [contents, setContents] = useState<internal.DirectoryContents | null>(
+  const [contents, setContents] = useState<DirectoryContents | null>(
     null
   );
   

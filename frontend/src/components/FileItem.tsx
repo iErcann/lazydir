@@ -7,10 +7,12 @@ import {
   Archive,
   File,
 } from "lucide-react";
-import { internal } from "../../wailsjs/go/models";
+import { FileInfo } from "../../bindings/lazydir/internal";
+import React from "react";
+
 
 interface FileItemProps {
-  file: internal.FileInfo;
+  file:  FileInfo;
   isSelected: boolean;
 }
 
@@ -26,11 +28,11 @@ export function FileItem({
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
   };
 
-  const getFileIcon = (file: internal.FileInfo) => {
+  const getFileIcon = (file:  FileInfo) => {
     if (file.isDir) return Folder;
 
     // TODO: move this to the backend.
-    const ext = file.extension?.toLowerCase();
+  const ext = file.extension?.toLowerCase();
     if ([".jpg", ".jpeg", ".png", ".gif", ".svg"].includes(ext || ""))
       return Image;
     if ([".mp4", ".mov", ".avi", ".mkv"].includes(ext || "")) return Film;
@@ -45,11 +47,11 @@ export function FileItem({
 
   const Icon = getFileIcon(file);
   
-  const onSelect = (file: internal.FileInfo) => {
+  const onSelect = (file: FileInfo) => {
     console.log("Select file or directory:", file.path);
     
   };
-  const onOpen = (file: internal.FileInfo) => {
+  const onOpen = (file: FileInfo) => {
     console.log("Open file or directory:", file.path);
   };
   return (

@@ -1,11 +1,12 @@
-import type { internal } from "../../wailsjs/go/models";
+import React from "react";
+import { DirectoryContents } from "../../bindings/lazydir/internal";
 import { FileItem } from "./FileItem";
 
 // Stateless component for rendering file manager grid
 export function FileManager({
   contents,
 }: {
-  contents: internal.DirectoryContents;
+  contents: DirectoryContents;
 }) {
   // Just the grid rendering logic from your original code
   // No state, just presentation
