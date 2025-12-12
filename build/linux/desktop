@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=My Product
+Comment=A testw3 application
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/testw3 %u
+Terminal=false
+Type=Application
+Icon=testw3
+Categories=Utility;
+StartupWMClass=testw3
+
+ 
