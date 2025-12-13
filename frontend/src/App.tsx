@@ -3,12 +3,11 @@ import { FileManagerTab } from "./components/FileManagerTab";
 import { Sidebar } from "./components/SideBar";
 import { useTabsStore } from "./store/tabsStore";
 import { TabBar } from "./components/TabBar";
-import { PathBar } from "./components/PathBar";
 
 function App() {
   const createTab = useTabsStore((state) => state.createTab);
   const activeTab = useTabsStore((state) => state.getActiveTab());
-
+  const tabs = useTabsStore((state) => state.tabs);
   // Create initial tab once
   useEffect(() => {
     if (!activeTab) createTab("/");
@@ -24,8 +23,7 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
-        <PathBar />
-          <TabBar />
+          {/* <TabBar /> Only render this when tabs.length > 1 */}
           <FileManagerTab tab={activeTab} />
         </div>
       </div>

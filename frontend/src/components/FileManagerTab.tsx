@@ -4,7 +4,7 @@ import { SplitView } from "./SplitView";
 export function FileManagerTab({ tab }: { tab: Tab }) {
   return (
     <>
-      <SplitView  tab={tab} />
+      <SplitView tab={tab} />
     </>
   );
 }

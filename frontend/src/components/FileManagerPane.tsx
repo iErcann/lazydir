@@ -5,16 +5,15 @@ import { useEffect, useState } from "react";
 import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
+import { PathBar } from "./PathBar";
 
-export function FileManagerPane({ tab, pane }: { tab: Tab, pane: Pane }) {
+export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
   const { loadDirectory } = useFileSystemStore();
-  const { updatePanePath, activatePane} = useTabsStore();
+  const { updatePanePath, activatePane } = useTabsStore();
 
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
-  const [contents, setContents] = useState<DirectoryContents | null>(
-    null
-  );
+  const [contents, setContents] = useState<DirectoryContents | null>(null);
 
   useEffect(() => {
     loadDirectory(pane.path).then((data) => setContents(data));
@@ -22,28 +21,37 @@ export function FileManagerPane({ tab, pane }: { tab: Tab, pane: Pane }) {
 
   const handleDirectoryOpen = (file: FileInfo) => {
     if (!file.isDir) return;
-    updatePanePath(tab.id, pane.id, file.path);  
+    handlePathChange(file.path);
   };
 
-  const handleFileOpen = (file: FileInfo) => {  
+  const handlePathChange = (newPath: string) => {
+    console.log("Changing path to:", newPath);
+    updatePanePath(tab.id, pane.id, newPath);
+  }
+
+  const handleFileOpen = (file: FileInfo) => {
     if (file.isDir) return;
     OpenFileWithDefaultApp(file.path);
-  }
+  };
 
   const handlePaneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     activatePane(tab.id, pane.id);
-   }
+  };
 
   if (!contents) {
     return <div>Loading...</div>;
   }
-  
 
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
       <div className="flex-1 flex flex-col">
-        <FileGrid contents={contents} onDirectoryOpen={handleDirectoryOpen} onFileOpen={handleFileOpen} />
+        <PathBar pane={pane} onPathChange={handlePathChange} />
+        <FileGrid
+          contents={contents}
+          onDirectoryOpen={handleDirectoryOpen}
+          onFileOpen={handleFileOpen}
+        />
       </div>
     </div>
   );
