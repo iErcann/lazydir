@@ -8,7 +8,7 @@ import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemana
 
 export function FileManagerPane({ tab, pane }: { tab: Tab, pane: Pane }) {
   const { loadDirectory } = useFileSystemStore();
-  const {  updatePanePath } = useTabsStore();
+  const { updatePanePath, activatePane} = useTabsStore();
 
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
@@ -30,12 +30,18 @@ export function FileManagerPane({ tab, pane }: { tab: Tab, pane: Pane }) {
     OpenFileWithDefaultApp(file.path);
   }
 
+  const handlePaneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    activatePane(tab.id, pane.id);
+   }
+
   if (!contents) {
     return <div>Loading...</div>;
   }
+  
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full" onClick={handlePaneClick}>
       <div className="flex-1 flex flex-col">
         <FileGrid contents={contents} onDirectoryOpen={handleDirectoryOpen} onFileOpen={handleFileOpen} />
       </div>

@@ -25,7 +25,7 @@ export function Sidebar({
     <div className="w-48 bg-[var(--bg-secondary)] border-r border-gray-800 flex flex-col">
       <div className="p-3">
         <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2">
-          Favorites
+          lazydir
         </h2>
         <div className="space-y-0.5">
           {sidebarItems.map((item) => {

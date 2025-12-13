@@ -10,29 +10,21 @@ interface TabsStore {
   createTab: (path?: string) => Tab;
   closeTab: (tabId: string) => void;
   activateTab: (tabId: string) => void;
+  activatePane: (tabId: string, paneId: string) => void;
 
   createPane: (tabId: string, path?: string) => Pane;
   closePane: (tabId: string, paneId: string) => void;
-  // navigatePane: (tabId: string, paneId: string, path: string) => void;
   updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
-  // updatePane: (tabId: string, paneId: string, updates: Partial<Pane>) => void;
 
-  // splitPane: (
-  //   tabId: string,
-  //   paneId: string,
-  //   direction: "horizontal" | "vertical"
-  // ) => void;
-  // unsplitPane: (tabId: string, paneId: string) => void;
-
-  // // Getters
+  // Getters
   getActiveTab: () => Tab | null;
+  getActivePane: () => Pane | null;
   getPane: (tabId: string, paneId: string) => Pane | null;
 }
 
 export const useTabsStore = create<TabsStore>((set, get) => ({
   tabs: [],
   activeTabId: null,
-  activePaneIds: {},
 
   createTab: (path = ".") => {
     const newTab: Tab = {
@@ -43,11 +35,13 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           id: `pane-${Date.now()}`,
           path,
           name: "Root",
+          active: true,
         },
         {
           id: `pane-${Date.now() + 1}`,
           path,
           name: "Root 2",
+          active: false,
         }
       ],
     };
@@ -59,18 +53,46 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
   },
 
   activateTab: (tabId: string) => {
-    set({ activeTabId: tabId });
+    set((state) => ({
+      activeTabId: tabId,
+      // When activating a tab, make sure only one pane in that tab is active
+      tabs: state.tabs.map(tab => {
+        if (tab.id !== tabId) return tab;
+        // Find the currently active pane in this tab
+        const hasActivePane = tab.panes.some(pane => pane.active);
+        // If no pane is active, activate the first one
+        if (!hasActivePane && tab.panes.length > 0) {
+          return {
+            ...tab,
+            panes: tab.panes.map((pane, index) => ({
+              ...pane,
+              active: index === 0
+            }))
+          };
+        }
+        return tab;
+      })
+    }));
+  },
+
+  activatePane: (tabId: string, paneId: string) => {
+    set((state) => ({
+      tabs: state.tabs.map(tab => {
+        if (tab.id !== tabId) return tab;
+        return {
+          ...tab,
+          panes: tab.panes.map(pane => ({
+            ...pane,
+            active: pane.id === paneId
+          }))
+        };
+      })
+    }));
   },
 
   closeTab: (tabId: string) => {
     set((state) => {
-      // Remove the closed tab from the tabs array
       const updatedTabs = state.tabs.filter((tab) => tab.id !== tabId);
-
-      // Determine the new active tab:
-      // - If the closed tab was active AND there are other tabs → activate the first remaining tab
-      // - If the closed tab was active AND there are no tabs left → activeTabId becomes null
-      // - Otherwise → keep the current activeTabId
       const newActiveTabId =
         state.activeTabId === tabId && updatedTabs.length > 0
           ? updatedTabs[0].id
@@ -78,7 +100,6 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           ? null
           : state.activeTabId;
 
-      // Final updated state
       return {
         tabs: updatedTabs,
         activeTabId: newActiveTabId,
@@ -91,18 +112,22 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
       id: `pane-${Date.now()}`,
       path,
       name: "New Pane",
+      active: true, // New pane becomes active
     };
+    
     set((state) => ({
       tabs: state.tabs.map((tab) => {
         if (tab.id !== tabId) return tab;
         return {
           ...tab,
-          panes: [...tab.panes, newPane],
+          // Deactivate all other panes, activate the new one
+          panes: tab.panes.map(pane => ({ ...pane, active: false })).concat(newPane),
         };
       }),
     }));
     return newPane;
   },
+
   updatePanePath: (tabId: string, paneId: string, newPath: string) => {
     set((state) => ({
       tabs: state.tabs.map((tab) => {
@@ -117,20 +142,38 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
       }),
     }));
   },
+
   closePane: (tabId: string, paneId: string) => {
     set((state) => ({
       tabs: state.tabs.map((tab) => {
         if (tab.id !== tabId) return tab;
+        const updatedPanes = tab.panes.filter((p) => p.id !== paneId);
+        
+        // If we closed the active pane and there are other panes,
+        // activate the first remaining pane
+        const closedPane = tab.panes.find(p => p.id === paneId);
+        if (closedPane?.active && updatedPanes.length > 0) {
+          updatedPanes[0].active = true;
+        }
+        
         return {
           ...tab,
-          panes: tab.panes.filter((p) => p.id !== paneId),
+          panes: updatedPanes,
         };
       }),
     }));
   },
+
   getActiveTab: () => {
     const { tabs, activeTabId } = get();
     return tabs.find((t) => t.id === activeTabId) || null;
+  },
+
+  getActivePane: () => {
+    const { tabs, activeTabId } = get();
+    const tab = tabs.find((t) => t.id === activeTabId);
+    if (!tab) return null;
+    return tab.panes.find((p) => p.active) || null;
   },
 
   getPane: (tabId: string, paneId: string) => {

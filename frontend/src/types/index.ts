@@ -4,6 +4,7 @@ export interface Pane {
   name: string;
   viewMode?: "grid" | "list";
   sortBy?: "name" | "size" | "date";
+  active: boolean;
 }
 
 export interface Tab {
