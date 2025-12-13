@@ -2,10 +2,7 @@ import { FileGrid } from "./FileGrid";
 import type { Pane, Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
-import {
-  DirectoryContents,
-  FileInfo,
-} from "../../bindings/lazydir/internal";
+import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 import { PathBar } from "./PathBar";
@@ -59,11 +56,17 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
         )}
         {!error && !contents && <div>Loading...</div>}
         {contents && (
-          <FileGrid
-            contents={contents}
-            onDirectoryOpen={handleDirectoryOpen}
-            onFileOpen={handleFileOpen}
-          />
+          <>
+            <FileGrid
+              contents={contents}
+              onDirectoryOpen={handleDirectoryOpen}
+              onFileOpen={handleFileOpen}
+            />
+            <div className="p-2 text-sm text-gray-500">
+              {contents.files.length} item
+              {contents.files.length !== 1 ? "s" : ""}
+            </div>
+          </>
         )}
       </div>
     </div>
