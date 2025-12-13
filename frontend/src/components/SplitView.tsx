@@ -12,9 +12,9 @@ export function SplitView({ tab }: { tab: Tab }) {
     return <FileManagerPane tab={tab} pane={tab.panes[0]} />;
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleDragMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsDragging(true);
+     setIsDragging(true);
   };
 
   useEffect(() => {
@@ -49,6 +49,7 @@ export function SplitView({ tab }: { tab: Tab }) {
     };
   }, [isDragging]);
 
+  console.log("Split rerendered.")
   // Two panes with draggable splitter
   return (
     <div 
@@ -65,11 +66,11 @@ export function SplitView({ tab }: { tab: Tab }) {
 
       {/* Draggable Divider */}
       <div
-        onMouseDown={handleMouseDown}
+        onMouseDown={handleDragMouseDown}
         className={`
           w-1 bg-[var(--bg-tertiary)] cursor-col-resize 
-          hover:bg-accent transition-colors
-          ${isDragging ? 'bg-accent' : ''}
+          hover:bg-[var(--bg-secondary)] transition-colors
+          ${isDragging ? 'bg-[var(--bg-accent)]' : ''}
         `}
       />
 

@@ -1,4 +1,4 @@
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, HardDrive } from "lucide-react";
 import { Pane } from "../types";
 
 export function PathBar({
@@ -15,7 +15,7 @@ export function PathBar({
   return (
     <div className="flex items-center gap-2 px-4 py-2">
       <button className="p-1.5 rounded-lg" onClick={() => onPathChange(separator)}>
-        <Home className="w-5 h-5 text-white" />
+        <HardDrive className="w-5 h-5 text-white" />
       </button>
 
       {parts.map((part: string, i: number) => {

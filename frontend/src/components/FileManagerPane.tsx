@@ -16,14 +16,26 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
   const [contents, setContents] = useState<DirectoryContents | null>(null);
+
   useEffect(() => {
-    loadDirectory(pane.path).then((result) => {
-      if (result.error) {
-        setError(result.error.message);
-      } else if (result.data) {
-        setContents(result.data);
+    const fetchDirectory = async () => {
+      // Reset state before loading
+      setError(null);
+      setContents(null);
+
+      try {
+        const result = await loadDirectory(pane.path);
+        if (result.error) {
+          setError(result.error.message);
+        } else if (result.data) {
+          setContents(result.data);
+        }
+      } catch (err) {
+        setError((err as Error).message);
       }
-    });
+    };
+
+    fetchDirectory();
   }, [pane.path, loadDirectory]);
 
   const handleDirectoryOpen = (file: FileInfo) => {
@@ -42,19 +54,43 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
 
   const handlePaneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    activatePane(tab.id, pane.id);
+    //activatePane(tab.id, pane.id);
   };
+
+  // Size in bytes
+  const calculateDirectorySize = (contents: DirectoryContents) => {
+    return contents.files.reduce((total, file) => total + file.size, 0);
+  };
+
+  // Size in bytes to human readable
+  const formatSize = (size: number) => {
+    if (size === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(size) / Math.log(k));
+    return `${(size / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+  };
+
+  console.log("Rendering FileManagerPane for path:", pane.path);
 
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
       <div className="flex-1 flex flex-col">
         <PathBar pane={pane} onPathChange={handlePathChange} />
+
+        {/* Error message */}
         {error && (
           <div className="bg-red-100 text-red-800 p-2 rounded">
             Error: {error}
           </div>
         )}
-        {!error && !contents && <div>Loading...</div>}
+
+        {/* Loading state */}
+        {!error && !contents && (
+          <div className="p-2 text-gray-500">Loading...</div>
+        )}
+
+        {/* Directory contents */}
         {contents && (
           <>
             <FileGrid
@@ -62,9 +98,12 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
               onDirectoryOpen={handleDirectoryOpen}
               onFileOpen={handleFileOpen}
             />
-            <div className="p-2 text-sm text-gray-500">
-              {contents.files.length} item
-              {contents.files.length !== 1 ? "s" : ""}
+
+            <div className="p-2 text-sm text-white tracking-wide bg-[var(--bg-secondary)] truncate">
+              {contents.files.filter((f) => f.isDir).length} folders |{" "}
+              {contents.files.filter((f) => !f.isDir).length} files :{" "}
+              {formatSize(calculateDirectorySize(contents))} (
+              {calculateDirectorySize(contents).toLocaleString()} bytes)
             </div>
           </>
         )}
