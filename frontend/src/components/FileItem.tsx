@@ -8,7 +8,6 @@ import {
   File,
 } from "lucide-react";
 import { FileInfo } from "../../bindings/lazydir/internal";
-import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 
 interface FileItemProps {
   file: FileInfo;

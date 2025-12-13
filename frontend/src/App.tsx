@@ -7,7 +7,7 @@ import { TabBar } from "./components/TabBar";
 function App() {
   const createTab = useTabsStore((state) => state.createTab);
   const activeTab = useTabsStore((state) => state.getActiveTab());
-  const tabs = useTabsStore((state) => state.tabs);
+  // const tabs = useTabsStore((state) => state.tabs);
   // Create initial tab once
   useEffect(() => {
     if (!activeTab) createTab("/");

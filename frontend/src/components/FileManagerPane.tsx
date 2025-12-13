@@ -8,8 +8,9 @@ import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemana
 import { PathBar } from "./PathBar";
 
 export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
-  const { loadDirectory } = useFileSystemStore();
-  const { updatePanePath, activatePane } = useTabsStore();
+  const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
+  const updatePanePath = useTabsStore((state) => state.updatePanePath);
+  const activatePane = useTabsStore((state) => state.activatePane);
 
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
