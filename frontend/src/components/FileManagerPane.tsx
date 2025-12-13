@@ -22,7 +22,7 @@ export function FileManagerPane({ tab, pane }: { tab: Tab, pane: Pane }) {
 
   const handleDirectoryOpen = (file: FileInfo) => {
     if (!file.isDir) return;
-    updatePanePath(tab.id, pane.id, file.path);
+    updatePanePath(tab.id, pane.id, file.path);  
   };
 
   const handleFileOpen = (file: FileInfo) => {  
