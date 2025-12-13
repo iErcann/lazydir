@@ -58,7 +58,7 @@ export function FileItem({ file, isSelected, onDirectoryOpen, onFileOpen }: File
     <div
       onClick={() => onSelect(file)}
       onDoubleClick={() => onOpen(file)}
-      className={`flex flex-col items-center p-3 rounded-lg   ${
+      className={`flex flex-col items-center p-3 rounded-lg select-none  ${
         isSelected
           ? "bg-blue-600 ring-2 ring-blue-500"
           : "hover:bg-[var(--bg-tertiary)]"

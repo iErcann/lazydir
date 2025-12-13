@@ -3,7 +3,6 @@ import type { Pane, Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
 import {
-  AppError,
   DirectoryContents,
   FileInfo,
 } from "../../bindings/lazydir/internal";
@@ -20,7 +19,6 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
   const [contents, setContents] = useState<DirectoryContents | null>(null);
-  // https://github.com/williamsjokvist/cfn-tracker/blob/master/app/pkg/model/error.go#L82
   useEffect(() => {
     loadDirectory(pane.path).then((result) => {
       if (result.error) {
@@ -37,7 +35,6 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
   };
 
   const handlePathChange = (newPath: string) => {
-    console.log("Changing path to:", newPath);
     updatePanePath(tab.id, pane.id, newPath);
   };
 
