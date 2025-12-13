@@ -12,38 +12,34 @@ import (
 type FileManagerService struct{}
 
 // ListDirectory lists the contents of a directory.
-func (f *FileManagerService) ListDirectory(dirPath string) DirectoryContents {
+func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryContents] {
 	if dirPath == "" {
 		dirPath = "."
 	}
 
 	absPath, err := filepath.Abs(dirPath)
 	if err != nil {
-		return DirectoryContents{
-			Path:  dirPath,
-			Error: fmt.Sprintf("Invalid path: %v", err),
-		}
+		return Result[DirectoryContents]{Error: &AppError{Code: ResolvePathError, Message: fmt.Sprintf("resolve path error: %v", err), InnerError: err}}
 	}
 
 	entries, err := os.ReadDir(absPath)
 	if err != nil {
-		return DirectoryContents{
-			Path:  absPath,
-			Error: fmt.Sprintf("Error reading directory: %v", err),
-		}
+		return Result[DirectoryContents]{Error: &AppError{Code: ReadDirectoryError, Message: fmt.Sprintf("read directory error: %v", err), InnerError: err}}
 	}
 
-	var files []FileInfo
-	dirCount := 0
-	fileCount := 0
+	var (
+		files     []FileInfo
+		dirCount  int
+		fileCount int
+	)
 
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
-			continue
+			return Result[DirectoryContents]{Error: &AppError{Code: FileInfoError, Message: fmt.Sprintf("get info for %q: %v", entry.Name(), err), InnerError: err}}
 		}
 
-		fileInfo := FileInfo{
+		files = append(files, FileInfo{
 			Name:      entry.Name(),
 			Path:      filepath.Join(absPath, entry.Name()),
 			Size:      info.Size(),
@@ -51,9 +47,7 @@ func (f *FileManagerService) ListDirectory(dirPath string) DirectoryContents {
 			Mode:      info.Mode().String(),
 			Modified:  info.ModTime(),
 			Extension: filepath.Ext(entry.Name()),
-		}
-
-		files = append(files, fileInfo)
+		})
 
 		if entry.IsDir() {
 			dirCount++
@@ -62,12 +56,14 @@ func (f *FileManagerService) ListDirectory(dirPath string) DirectoryContents {
 		}
 	}
 
-	return DirectoryContents{
-		Path:       absPath,
-		Files:      files,
-		Total:      len(files),
-		Dirs:       dirCount,
-		FilesCount: fileCount,
+	return Result[DirectoryContents]{
+		Data: &DirectoryContents{
+			Path:       absPath,
+			Files:      files,
+			Total:      len(files),
+			Dirs:       dirCount,
+			FilesCount: fileCount,
+		},
 	}
 }
 

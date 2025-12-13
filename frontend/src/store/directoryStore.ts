@@ -1,14 +1,18 @@
 import { create } from "zustand";
-import { DirectoryContents, FileManagerService } from "../../bindings/lazydir/internal";
+import {
+  AppError,
+  DirectoryContents,
+  FileManagerService,
+} from "../../bindings/lazydir/internal";
+import { Result } from "../../bindings/lazydir/internal/models";
 
 interface FileSystemStore {
   // Actions
-  loadDirectory: (path: string) => Promise<DirectoryContents>;
+  loadDirectory: (path: string) => Promise<Result<DirectoryContents>>;
 }
 
 export const useFileSystemStore = create<FileSystemStore>((_set, _get) => ({
   loadDirectory: async (path) => {
-    // Fetch from backend
     return await FileManagerService.ListDirectory(path);
   },
 }));
