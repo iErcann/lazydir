@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/amd64, darwin/universal, windows/amd64]
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Build with snider/build
+      - name: Build Application
+        uses: snider/build@v3
+        with:
+          build-name: lazydir
+          build-platform: ${{ matrix.platform }}
+
+      # 3. Upload artifacts
+      - name: Upload Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lazydir-${{ matrix.platform }}
+          path: |
+            ./dist/**/* 
