@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.13",
     "@wailsio/runtime": "latest",
     "lucide-react": "^0.559.0",
