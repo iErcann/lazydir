@@ -122,6 +122,7 @@ export const ErrorCode = {
     ReadDirectoryError: "ReadDirectoryError",
     FileInfoError: "FileInfoError",
     FileOpenWithDefaultAppError: "FileOpenWithDefaultAppError",
+    InvalidPathIndex: "InvalidPathIndex",
 };
 
 /**

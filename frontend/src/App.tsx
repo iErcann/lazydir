@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { FileManagerTab } from "./components/FileManagerTab";
 import { Sidebar } from "./components/SideBar";
 import { useTabsStore } from "./store/tabsStore";
-import { TabBar } from "./components/TabBar";
 import { useFileSystemStore } from "./store/directoryStore";
 
 function App() {
@@ -14,7 +13,7 @@ function App() {
     // Fetch OS and create initial tab once
     getOperatingSystem(); 
     if (!activeTab) {
-      createTab("/");
+      createTab("C:");
     }
   }, [getOperatingSystem, createTab, activeTab]);
 
