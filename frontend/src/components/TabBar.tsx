@@ -1,39 +1,18 @@
 import { useTabsStore } from "../store/tabsStore";
+import { TabItem } from "./TabItem";
 
 export function TabBar() {
   const tabs = useTabsStore((state) => state.tabs);
   const activeTabId = useTabsStore((state) => state.activeTabId);
-  const activateTab = useTabsStore((state) => state.activateTab);
   const createTab = useTabsStore((state) => state.createTab);
 
   return (
     <div className="h-10 bg-[var(--bg-primary)] flex items-center px-2 text-[var(--text-primary)]">
-      {/* Tabs container grows to fill space */}
+      {/* Tabs container */}
       <div className="flex flex-1 h-full overflow-hidden">
-        {tabs.map((tab) => {
-          const firstPane = tab.panes[0];
-          const path = firstPane?.path ?? "";
-
-          const parts = path.split(/[/\\]+/).filter(Boolean);
-          const folderName = parts.at(-1) || path || "Untitled";
-
-          return (
-            <div
-              key={tab.id}
-              className={`flex-1 flex items-center justify-center cursor-pointer 
-                border-b-2 pb-1 transition 
-                ${
-                  tab.id === activeTabId
-                    ? "border-[var(--accent)] font-semibold"
-                    : "border-transparent text-[var(--text-secondary)]"
-                }`}
-              onClick={() => activateTab(tab.id)}
-              title={folderName}
-            >
-              <span className="truncate">{folderName}</span>
-            </div>
-          );
-        })}
+        {tabs.map((tab) => (
+          <TabItem key={tab.id} tab={tab} isActive={tab.id === activeTabId} />
+        ))}
       </div>
 
       {/* + New Tab Button */}
