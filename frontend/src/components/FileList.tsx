@@ -1,7 +1,16 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { File, Folder } from "lucide-react";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useState } from "react";
 
 export function FileList({
   contents,
@@ -13,13 +22,7 @@ export function FileList({
   onFileOpen: (file: FileInfo) => void;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: contents.files.length,
-    getScrollElement: () => listRef.current,
-    estimateSize: () => 48,
-    overscan: 5,
-  });
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const formatSize = (bytes: number) => {
     if (bytes === 0) return "-";
@@ -40,22 +43,141 @@ export function FileList({
     });
   };
 
+  const columns = useMemo<ColumnDef<FileInfo>[]>(
+    () => [
+      {
+        id: "icon",
+        header: "",
+        cell: ({ row }) => (
+          <div className="w-8 flex items-center justify-center">
+            {row.original.isDir ? (
+              <Folder className="w-5 h-5" style={{ color: "var(--accent)" }} />
+            ) : (
+              <File
+                className="w-5 h-5"
+                style={{ color: "var(--text-secondary)" }}
+              />
+            )}
+          </div>
+        ),
+        enableSorting: false,
+        size: 32,
+      },
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ getValue }) => (
+          <div className="truncate text-sm font-medium">
+            {getValue() as string}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "modified",
+        header: "Modified",
+        cell: ({ getValue }) => {
+          const value = getValue() as string | undefined;
+          return (
+            <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {value ? formatDate(value) : "-"}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "size",
+        header: "Size",
+        cell: ({ row, getValue }) => (
+          <div
+            className="text-sm text-right"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {row.original.isDir ? "-" : formatSize(getValue() as number)}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: contents.files,
+    columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  const { rows } = table.getRowModel();
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => listRef.current,
+    estimateSize: () => 48,
+    overscan: 5,
+  });
+
+  const onOpen = (file: FileInfo) => {
+    if (file.isDir) {
+      onDirectoryOpen(file);
+    } else {
+      onFileOpen(file);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
       <div className="min-w-[600px]">
         {/* Header */}
-        <div 
+        <div
           className="sticky top-0 px-4 py-2 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 text-sm font-medium border-b"
           style={{
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-secondary)',
-            borderColor: 'var(--bg-tertiary)',
+            backgroundColor: "var(--bg-secondary)",
+            color: "var(--text-secondary)",
+            borderColor: "var(--bg-tertiary)",
+            zIndex: 1,
           }}
         >
-          <div className="w-8"></div>
-          <div>Name</div>
-          <div>Modified</div>
-          <div className="text-right">Size</div>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <>
+              {headerGroup.headers.map((header) => (
+                <div
+                  key={header.id}
+                  className={
+                    header.column.getCanSort()
+                      ? "cursor-pointer select-none"
+                      : ""
+                  }
+                  onClick={header.column.getToggleSortingHandler()}
+                  title={
+                    header.column.getCanSort()
+                      ? header.column.getNextSortingOrder() === "asc"
+                        ? "Sort ascending"
+                        : header.column.getNextSortingOrder() === "desc"
+                        ? "Sort descending"
+                        : "Clear sort"
+                      : undefined
+                  }
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  {
+                    {
+                      asc: " ↑",
+                      desc: " ↓",
+                    }[header.column.getIsSorted() as string]
+                  }
+                </div>
+              ))}
+            </>
+          ))}
         </div>
 
         {/* Virtual rows */}
@@ -66,8 +188,8 @@ export function FileList({
           }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const file = contents.files[virtualRow.index];
-            const isDir = file.isDir;
+            const row = rows[virtualRow.index];
+            const file = row.original;
 
             return (
               <div
@@ -79,41 +201,30 @@ export function FileList({
                 }}
               >
                 <button
-                  onClick={() => {
-                    if (isDir) {
-                      onDirectoryOpen(file);
-                    } else {
-                      onFileOpen(file);
-                    }
+                  onDoubleClick={() => {
+                    onOpen(file);
                   }}
-                  className="w-full px-4 py-2 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 items-center text-left   border-b"
+                  className="w-full px-4 py-4 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 items-center text-left border-b"
                   style={{
-                    borderColor: 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
+                    borderColor: "var(--bg-tertiary)",
+                    color: "var(--text-primary)",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+                    e.currentTarget.style.backgroundColor =
+                      "var(--bg-secondary)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.backgroundColor = "transparent";
                   }}
                 >
-                  <div className="w-8 flex items-center justify-center">
-                    {isDir ? (
-                      <Folder className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-                    ) : (
-                      <File className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
-                    )}
-                  </div>
-                  <div className="truncate text-sm font-medium">
-                    {file.name}
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    {file.modified ? formatDate(file.modified) : "-"}
-                  </div>
-                  <div className="text-sm text-right" style={{ color: 'var(--text-secondary)' }}>
-                    {isDir ? "-" : formatSize(file.size)}
-                  </div>
+                  {row.getVisibleCells().map((cell) => (
+                    <div key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </div>
+                  ))}
                 </button>
               </div>
             );

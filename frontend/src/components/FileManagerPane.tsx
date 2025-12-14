@@ -1,4 +1,5 @@
 import { FileGrid } from "./FileGrid";
+import { FileList } from "./FileList";
 import type { Pane, Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
@@ -97,7 +98,7 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
         {/* Directory contents */}
         {contents && (
           <>
-            <FileGrid
+            <FileList
               contents={contents}
               onDirectoryOpen={handleDirectoryOpen}
               onFileOpen={handleFileOpen}
