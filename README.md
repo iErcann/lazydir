@@ -1,59 +1,35 @@
-# Welcome to Your New Wails3 Project!
+# Lazydir
 
-Congratulations on generating your Wails3 application! This README will guide you through the next steps to get your project up and running.
+A cross platform file manager you probably don't need.
 
-## Getting Started
+My toy project.
 
-1. Navigate to your project directory in the terminal.
+![
+lazydir.png
+](lazydir.png)
 
-2. To run your application in development mode, use the following command:
+## Features
 
-   ```
-   wails3 dev
-   ```
+- Split screen file management
+- Tabs
+- Support for custom themes
+- Cross platform (Linux, Windows, MacOS)
 
-   This will start your application and enable hot-reloading for both frontend and backend changes.
+![SplitScreen](splitscreen.png)
 
-3. To build your application for production, use:
+## Dev
 
-   ```
-   wails3 build
-   ```
+Download and install [Wails v3 alpha](https://v3alpha.wails.io/).
 
-   This will create a production-ready executable in the `build` directory.
+Install [taskfile](https://taskfile.dev/docs/installation).
 
-## Exploring Wails3 Features
+Run `task dev` to start the development server.
 
-Now that you have your project set up, it's time to explore the features that Wails3 offers:
+Run `task build` to build the
+application.
 
-1. **Check out the examples**: The best way to learn is by example. Visit the `examples` directory in the `v3/examples` directory to see various sample applications.
+Run `task package` to package the application for distribution.
 
-2. **Run an example**: To run any of the examples, navigate to the example's directory and use:
+on linux, you might need :
 
-   ```
-   go run .
-   ```
-
-   Note: Some examples may be under development during the alpha phase.
-
-3. **Explore the documentation**: Visit the [Wails3 documentation](https://v3.wails.io/) for in-depth guides and API references.
-
-4. **Join the community**: Have questions or want to share your progress? Join the [Wails Discord](https://discord.gg/JDdSxwjhGf) or visit the [Wails discussions on GitHub](https://github.com/wailsapp/wails/discussions).
-
-## Project Structure
-
-Take a moment to familiarize yourself with your project structure:
-
-- `frontend/`: Contains your frontend code (HTML, CSS, JavaScript/TypeScript)
-- `main.go`: The entry point of your Go backend
-- `app.go`: Define your application structure and methods here
-- `wails.json`: Configuration file for your Wails project
-
-## Next Steps
-
-1. Modify the frontend in the `frontend/` directory to create your desired UI.
-2. Add backend functionality in `main.go`.
-3. Use `wails3 dev` to see your changes in real-time.
-4. When ready, build your application with `wails3 build`.
-
-Happy coding with Wails3! If you encounter any issues or have questions, don't hesitate to consult the documentation or reach out to the Wails community.
+`sudo apt install build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.0-dev`
