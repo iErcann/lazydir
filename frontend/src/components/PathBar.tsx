@@ -16,7 +16,7 @@ export function PathBar({
   let separator = "/";
   if (operatingSystem === OperatingSystem.OSWindows) {
     separator = "\\";
-  } else if (operatingSystem === OperatingSystem.OSLinux || operatingSystem === OperatingSystem.OSMacOS) {
+  } else if (operatingSystem === OperatingSystem.OSLinux || operatingSystem === OperatingSystem.OSMac) {
     separator = "/";
   }
   const parts = pane.path.split(separator).filter(Boolean);
