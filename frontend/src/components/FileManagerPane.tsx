@@ -104,7 +104,7 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
               onFileOpen={handleFileOpen}
             />
 
-            <div className="p-2 text-sm text-[var(--text-secondary)] tracking-wide bg-[var(--bg-secondary)] truncate">
+            <div className="p-2 text-sm text-[var(--text-secondary)] tracking-wide bg-[var(--bg-primary)] truncate">
               {contents.files.filter((f) => f.isDir).length} folders |{" "}
               {contents.files.filter((f) => !f.isDir).length} files :{" "}
               {formatSize(calculateDirectorySize(contents))} (

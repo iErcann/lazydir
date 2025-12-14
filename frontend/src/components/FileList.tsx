@@ -155,11 +155,10 @@ export function FileList({
       <div className="min-w-[600px]">
         {/* Header */}
         <div
-          className="sticky top-0 px-4 py-2 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 text-sm font-medium border-b"
+          className="sticky top-0 px-4 py-2 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 text-sm font-medium "
           style={{
-            backgroundColor: "var(--bg-secondary)",
+            backgroundColor: "var(--bg-primary)",
             color: "var(--text-secondary)",
-            borderColor: "var(--bg-tertiary)",
             zIndex: 1,
           }}
         >
