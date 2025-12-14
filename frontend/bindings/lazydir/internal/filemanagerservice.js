@@ -16,13 +16,22 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
+ * @returns {$CancellablePromise<$models.Result<string>>}
+ */
+export function GetInitialPath() {
+    return $Call.ByID(2587646473).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
+/**
  * GetOperatingSystem simply returns the OS as a string.
  * https://stackoverflow.com/questions/20728767/all-possible-goos-value
  * @returns {$CancellablePromise<$models.Result<$models.OperatingSystem>>}
  */
 export function GetOperatingSystem() {
     return $Call.ByID(3299187408).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType0($result);
+        return $$createType1($result);
     }));
 }
 
@@ -34,7 +43,7 @@ export function GetOperatingSystem() {
  */
 export function GetPathAtIndex(fullPath, index) {
     return $Call.ByID(1690715716, fullPath, index).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType1($result);
+        return $$createType0($result);
     }));
 }
 
@@ -65,7 +74,7 @@ export function ListDirectory(dirPath) {
  */
 export function OpenFileWithDefaultApp(filePath) {
     return $Call.ByID(2060842792, filePath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType1($result);
+        return $$createType0($result);
     }));
 }
 

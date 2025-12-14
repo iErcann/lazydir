@@ -8,14 +8,21 @@ function App() {
   const createTab = useTabsStore((state) => state.createTab);
   const activeTab = useTabsStore((state) => state.getActiveTab());
   const getOperatingSystem = useFileSystemStore((state) => state.getOperatingSystem);
-
+  const getInitialPath = useFileSystemStore((state) => state.getInitialPath);
+  
   useEffect(() => {
     // Fetch OS and create initial tab once
     getOperatingSystem(); 
     if (!activeTab) {
-      createTab("C:");
+      getInitialPath().then(result => {
+        if (result.data) {
+          createTab(result.data);
+        } else {
+          createTab("."); // Fallback to current directory
+        }
+      });
     }
-  }, [getOperatingSystem, createTab, activeTab]);
+  }, [getOperatingSystem, getInitialPath, createTab, activeTab]);
 
   if (!activeTab) return null;
 

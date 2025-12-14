@@ -45,7 +45,7 @@ const (
 	ReadDirectoryError          ErrorCode = "ReadDirectoryError"
 	FileInfoError               ErrorCode = "FileInfoError"
 	FileOpenWithDefaultAppError ErrorCode = "FileOpenWithDefaultAppError"
-	InvalidPathIndex		   ErrorCode = "InvalidPathIndex"
+	InvalidPathIndex            ErrorCode = "InvalidPathIndex"
 )
 
 // AppError implements error.

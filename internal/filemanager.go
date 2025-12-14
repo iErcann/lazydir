@@ -14,7 +14,7 @@ type FileManagerService struct{}
 
 // ListDirectory lists the contents of a directory.
 func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryContents] {
-	pathResult:= canonicalPath(dirPath)
+	pathResult := canonicalPath(dirPath)
 	if pathResult.Error != nil {
 		return Result[DirectoryContents]{Error: pathResult.Error}
 	}
@@ -69,32 +69,31 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 }
 
 func canonicalPath(p string) Result[string] {
-    if p == "" {
-        return Result[string]{Error: &AppError{Code: ResolvePathError, Message: "empty path"}}
-    }
+	if p == "" {
+		return Result[string]{Error: &AppError{Code: ResolvePathError, Message: "empty path"}}
+	}
 
-    // Convert slashes to OS-native
-    p = filepath.FromSlash(p)
+	// Convert slashes to OS-native
+	p = filepath.FromSlash(p)
 
-    // Expand drive root: C: → C:\
-    if runtime.GOOS == "windows" {
-        if len(p) == 2 && p[1] == ':' {
-            p += `\`
-        }
-    }
+	// Expand drive root: C: → C:\
+	if runtime.GOOS == "windows" {
+		if len(p) == 2 && p[1] == ':' {
+			p += `\`
+		}
+	}
 
-    // Make absolute
-    abs, err := filepath.Abs(p)
-    if err != nil {
-        return  Result[string]{Error: &AppError{Code: ResolvePathError, Message: fmt.Sprintf("failed to get absolute path for %s: %v", p, err), InnerError: err}}
-    }
+	// Make absolute
+	abs, err := filepath.Abs(p)
+	if err != nil {
+		return Result[string]{Error: &AppError{Code: ResolvePathError, Message: fmt.Sprintf("failed to get absolute path for %s: %v", p, err), InnerError: err}}
+	}
 
-    // Clean (. .. double separators)
-    clean := filepath.Clean(abs)
+	// Clean (. .. double separators)
+	clean := filepath.Clean(abs)
 
-    return  Result[string]{Data: &clean};
+	return Result[string]{Data: &clean}
 }
-
 
 func (f *FileManagerService) OpenFileWithDefaultApp(filePath string) Result[string] {
 	pathResult := canonicalPath(filePath)
@@ -132,75 +131,72 @@ func (f *FileManagerService) OpenFileWithDefaultApp(filePath string) Result[stri
 }
 
 func (f *FileManagerService) GetPathInfo(p string) Result[PathInfo] {
-    pathResult := canonicalPath(p)
-    if pathResult.Error != nil {
-        return Result[PathInfo]{Error: pathResult.Error}
-    }
-    abs := *pathResult.Data
+	pathResult := canonicalPath(p)
+	if pathResult.Error != nil {
+		return Result[PathInfo]{Error: pathResult.Error}
+	}
+	abs := *pathResult.Data
 
-    volume := filepath.VolumeName(abs) // e.g., "C:" or "\\server\share"
-    rest := strings.TrimPrefix(abs, volume)
-    rest = strings.TrimPrefix(rest, string(os.PathSeparator))
+	volume := filepath.VolumeName(abs) // e.g., "C:" or "\\server\share"
+	rest := strings.TrimPrefix(abs, volume)
+	rest = strings.TrimPrefix(rest, string(os.PathSeparator))
 
-    parts := []string{}
-    if volume != "" {
-        parts = append(parts, volume) // include root as first part (Windows drive or UNC share)
-    } else {
-        parts = append(parts, string(os.PathSeparator))
-    }
+	parts := []string{}
+	if volume != "" {
+		parts = append(parts, volume) // include root as first part (Windows drive or UNC share)
+	} else {
+		parts = append(parts, string(os.PathSeparator))
+	}
 
-    if rest != "" {
-        parts = append(parts, strings.Split(rest, string(os.PathSeparator))...)
-    }
+	if rest != "" {
+		parts = append(parts, strings.Split(rest, string(os.PathSeparator))...)
+	}
 
-    return Result[PathInfo]{
-        Data: &PathInfo{
-            FullPath:  abs,
-            Parts:     parts,
-            Root:      volume,
-            Separator: string(os.PathSeparator),
-        },
-    }
+	return Result[PathInfo]{
+		Data: &PathInfo{
+			FullPath:  abs,
+			Parts:     parts,
+			Root:      volume,
+			Separator: string(os.PathSeparator),
+		},
+	}
 }
 
 // GetPathAtIndex returns the absolute path corresponding to a breadcrumb index
 func (f *FileManagerService) GetPathAtIndex(fullPath string, index int) Result[string] {
-    pathInfoResult := f.GetPathInfo(fullPath)
-    if pathInfoResult.Error != nil {
-        return Result[string]{Error: pathInfoResult.Error}
-    }
-    pathInfo := *pathInfoResult.Data
+	pathInfoResult := f.GetPathInfo(fullPath)
+	if pathInfoResult.Error != nil {
+		return Result[string]{Error: pathInfoResult.Error}
+	}
+	pathInfo := *pathInfoResult.Data
 
-    if index < 0 || index >= len(pathInfo.Parts) {
-        return Result[string]{Error: &AppError{
-            Code:    InvalidPathIndex,
-            Message: fmt.Sprintf("breadcrumb index %d out of bounds", index),
-        }}
-    }
+	if index < 0 || index >= len(pathInfo.Parts) {
+		return Result[string]{Error: &AppError{
+			Code:    InvalidPathIndex,
+			Message: fmt.Sprintf("breadcrumb index %d out of bounds", index),
+		}}
+	}
 
-    // Slice parts up to the clicked index
-    selectedParts := pathInfo.Parts[:index+1]
+	// Slice parts up to the clicked index
+	selectedParts := pathInfo.Parts[:index+1]
 
-    // Fix the root to always end with a separator
-    root := pathInfo.Root
-    if root != "" && !strings.HasSuffix(root, string(os.PathSeparator)) {
-        root += string(os.PathSeparator)
-    }
+	// Fix the root to always end with a separator
+	root := pathInfo.Root
+	if root != "" && !strings.HasSuffix(root, string(os.PathSeparator)) {
+		root += string(os.PathSeparator)
+	}
 
-    // If the first part is the root itself, skip it (avoid duplication)
-    restParts := selectedParts
-    if len(selectedParts) > 0 && selectedParts[0] == pathInfo.Root {
-        restParts = selectedParts[1:]
-    }
+	// If the first part is the root itself, skip it (avoid duplication)
+	restParts := selectedParts
+	if len(selectedParts) > 0 && selectedParts[0] == pathInfo.Root {
+		restParts = selectedParts[1:]
+	}
 
-    // Join root + rest
-    absPath := filepath.Join(append([]string{root}, restParts...)...)
+	// Join root + rest
+	absPath := filepath.Join(append([]string{root}, restParts...)...)
 
-    return Result[string]{Data: &absPath}
+	return Result[string]{Data: &absPath}
 }
-
-
-
 
 // GetOperatingSystem simply returns the OS as a string.
 // https://stackoverflow.com/questions/20728767/all-possible-goos-value
@@ -209,3 +205,24 @@ func (f *FileManagerService) GetOperatingSystem() Result[OperatingSystem] {
 	return Result[OperatingSystem]{Data: &os}
 }
 
+func (f *FileManagerService) GetInitialPath() Result[string] {
+	// 1. Try user home
+	home, err := os.UserHomeDir()
+	if err == nil && home != "" {
+		return canonicalPath(home)
+	}
+
+	// 2. OS-specific fallback
+	switch runtime.GOOS {
+	case "windows":
+		// Prefer system drive root
+		drive := os.Getenv("SystemDrive")
+		if drive == "" {
+			drive = "C:"
+		}
+		return canonicalPath(drive)
+	default:
+		// Unix-like root
+		return canonicalPath(string(os.PathSeparator))
+	}
+}
