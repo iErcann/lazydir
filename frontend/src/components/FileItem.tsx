@@ -16,7 +16,12 @@ interface FileItemProps {
   onFileOpen: (file: FileInfo) => void;
 }
 
-export function FileItem({ file, isSelected, onDirectoryOpen, onFileOpen }: FileItemProps) {
+export function FileItem({
+  file,
+  isSelected,
+  onDirectoryOpen,
+  onFileOpen,
+}: FileItemProps) {
   const formatSize = (bytes: number): string => {
     if (bytes === 0) return "";
     const k = 1024;
@@ -50,7 +55,7 @@ export function FileItem({ file, isSelected, onDirectoryOpen, onFileOpen }: File
   const onOpen = (file: FileInfo) => {
     if (file.isDir) {
       onDirectoryOpen(file);
-    } else { 
+    } else {
       onFileOpen(file);
     }
   };
@@ -63,13 +68,12 @@ export function FileItem({ file, isSelected, onDirectoryOpen, onFileOpen }: File
           ? "bg-blue-600 ring-2 ring-blue-500"
           : "hover:bg-[var(--bg-tertiary)]"
       }`}
+      title={file.name}
     >
       <Icon
-        className={`w-16 h-16 mb-2 ${
-          file.isDir ? "text-[var(--accent)]" : ""
-        }`}
+        className={`w-16 h-16 mb-2 ${file.isDir ? "text-[var(--accent)]" : ""}`}
       />
-      <span className="text-sm text-center text-[var(--text-primary)] w-full break-words">
+      <span className="text-sm text-center text-[var(--text-primary)] w-full break-words truncate">
         {file.name}
       </span>
       {!file.isDir && (
