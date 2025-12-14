@@ -29,20 +29,12 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
   createTab: (path = ".") => {
     const newTab: Tab = {
       id: `tab-${Date.now()}`,
-      name: "New Tab",
       panes: [
         {
           id: `pane-${Date.now()}`,
           path,
-          name: "Root",
           active: true,
         },
-        {
-          id: `pane-${Date.now() + 1}`,
-          path,
-          name: "Second Pane",
-          active: false,
-        }
       ],
     };
     set((state) => ({
@@ -119,7 +111,6 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
     const newPane: Pane = {
       id: `pane-${Date.now()}`,
       path,
-      name: "New Pane",
       active: true, // New pane becomes active
     };
 

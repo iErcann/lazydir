@@ -49,7 +49,6 @@ export function SplitView({ tab }: { tab: Tab }) {
     };
   }, [isDragging]);
 
-  console.log("Split rerendered.")
   // Two panes with draggable splitter
   return (
     <div 

@@ -3,6 +3,7 @@ import { FileManagerTab } from "./components/FileManagerTab";
 import { Sidebar } from "./components/SideBar";
 import { useTabsStore } from "./store/tabsStore";
 import { useFileSystemStore } from "./store/directoryStore";
+import { TabBar } from "./components/TabBar";
 
 function App() {
   const createTab = useTabsStore((state) => state.createTab);
@@ -32,7 +33,7 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* <TabBar /> Only render this when tabs.length > 1 */}
+          <TabBar /> {/*  Only render this when tabs.length > 1 */}
           <FileManagerTab tab={activeTab} />
         </div>
       </div>
