@@ -67,7 +67,10 @@ export function FileList({
         accessorKey: "name",
         header: "Name",
         cell: ({ getValue }) => (
-          <div className="truncate text-sm font-medium">
+          <div
+            className="truncate text-sm font-medium"
+            title={getValue() as string}
+          >
             {getValue() as string}
           </div>
         ),
@@ -83,6 +86,16 @@ export function FileList({
             </div>
           );
         },
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.modified;
+          const b = rowB.original.modified;
+
+          if (!a && !b) return 0;
+          if (!a) return 1;
+          if (!b) return -1;
+
+          return new Date(a).getTime() - new Date(b).getTime();
+        }
       },
       {
         accessorKey: "size",
@@ -95,6 +108,17 @@ export function FileList({
             {row.original.isDir ? "-" : formatSize(getValue() as number)}
           </div>
         ),
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original;
+          const b = rowB.original;
+
+          // Directories always go last (or first depending on sort order)
+          if (a.isDir && !b.isDir) return 1;
+          if (!a.isDir && b.isDir) return -1;
+
+          // Both are files, sort by size
+          return a.size - b.size;
+        },
       },
     ],
     []
@@ -119,7 +143,6 @@ export function FileList({
     estimateSize: () => 48,
     overscan: 5,
   });
-
   const onOpen = (file: FileInfo) => {
     if (file.isDir) {
       onDirectoryOpen(file);
@@ -127,7 +150,6 @@ export function FileList({
       onFileOpen(file);
     }
   };
-
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
       <div className="min-w-[600px]">
@@ -190,35 +212,23 @@ export function FileList({
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const row = rows[virtualRow.index];
             const file = row.original;
+            const isDir = file.isDir;
 
             return (
               <div
                 key={virtualRow.key}
-                className="absolute top-0 left-0 w-full"
+                className="absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)]"
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               >
                 <button
-                  onDoubleClick={() => {
-                    onOpen(file);
-                  }}
-                  className="w-full px-4 py-4 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 items-center text-left border-b"
-                  style={{
-                    borderColor: "var(--bg-tertiary)",
-                    color: "var(--text-primary)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      "var(--bg-secondary)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
+                  onDoubleClick={() => onOpen(file)}
+                  className="w-full px-4 py-4 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 items-center text-left min-w-0"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <div key={cell.id}>
+                    <div key={cell.id} className="min-w-0">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
