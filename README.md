@@ -1,4 +1,4 @@
-# Lazydir
+# lazydir
 
 A cross platform file manager you probably don't need.
 
