@@ -1,12 +1,45 @@
 @import "tailwindcss";
 
-@theme {
-  --bg-primary: #1e1e1e; /* Main background (file grid area) */
-  --bg-secondary: #303030; /* Secondary surfaces (topbar, headers) */
-  --bg-tertiary: #444444; /* Hover states, elevated elements */
-  --accent: #c75478; /* Selection, active states, focus */
-  /* ... */
+/* Default theme */
+:root {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #303030;
+  --bg-tertiary: #444444;
+  --accent: #c75478;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #bbbbbb;
 }
 
+/* Serious theme */
+.theme-serious {
+  --bg-primary: #1b1b2f;
+  --bg-secondary: #2a2a4d;
+  --bg-tertiary: #3c3c6c;
+  --accent: #9b59b6;
+  
+  --text-primary: #f0f0f0;
+  --text-secondary: #b0b0b0;
+}
 
- 
+/* Cozy theme */
+.theme-cozy {
+  --bg-primary: #1f1a16;
+  --bg-secondary: #2c251f;
+  --bg-tertiary: #3a3229;
+  --accent: #e67e22;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #d0c8b0;
+}
+
+/* Light theme */
+.theme-light {
+  --bg-primary: #f5f2fa;
+  --bg-secondary: #e9e4f5;
+  --bg-tertiary: #ded6f0;
+  --accent: #9b59b6;
+  
+  --text-primary: #2a1a3a;
+  --text-secondary: #6b557a;
+}

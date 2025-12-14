@@ -22,9 +22,9 @@ export function Sidebar({
   ];
 
   return (
-    <div className="w-48 bg-[var(--bg-secondary)] border-r border-gray-800 flex flex-col">
+    <div className="w-48 bg-[var(--bg-secondary)]   flex flex-col">
       <div className="p-3">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2">
+        <h2 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-2 mb-2">
           lazydir
         </h2>
         <div className="space-y-0.5">
@@ -35,7 +35,7 @@ export function Sidebar({
                 key={item.label}
                 onClick={() => {}}
                 className={
-                  "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors text-gray-300 hover:bg-[var(--bg-tertiary)]"
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                 }
               >
                 <Icon className="w-4 h-4 bg-" />

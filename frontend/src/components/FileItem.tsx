@@ -66,14 +66,14 @@ export function FileItem({ file, isSelected, onDirectoryOpen, onFileOpen }: File
     >
       <Icon
         className={`w-16 h-16 mb-2 ${
-          file.isDir ? "text-[var(--accent)]" : "text-gray-500"
+          file.isDir ? "text-[var(--accent)]" : ""
         }`}
       />
-      <span className="text-sm text-center text-gray-100 w-full break-words">
+      <span className="text-sm text-center text-[var(--text-primary)] w-full break-words">
         {file.name}
       </span>
       {!file.isDir && (
-        <span className="text-xs text-gray-500 mt-0.5">
+        <span className="text-xs text-[var(--text-secondary)] mt-0.5">
           {formatSize(file.size)}
         </span>
       )}

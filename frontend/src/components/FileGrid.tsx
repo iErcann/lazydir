@@ -54,7 +54,7 @@ export function FileGrid({
   );
 
   return (
-    <div className="flex-1 overflow-auto" ref={gridRef}>
+    <div className="flex-1 overflow-auto p-2" ref={gridRef}>
       <div
         className="relative"
         style={{

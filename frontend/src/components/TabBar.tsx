@@ -4,7 +4,7 @@ export function TabBar() {
   const activePane = useTabsStore((state) => state.getActivePane());
   const currentFolder = activePane?.path.split("/").pop();
   return (
-    <div className="h-10 bg-[var(--bg-primary)] flex items-center px-4 text-white">
+    <div className="h-10 bg-[var(--bg-primary)] flex items-center px-4 text-[var(--text-primary)]">
       <span> {currentFolder}</span>
     </div>
   );

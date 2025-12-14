@@ -87,7 +87,7 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
 
         {/* Loading state */}
         {!error && !contents && (
-          <div className="p-2 text-gray-500">Loading...</div>
+          <div className="p-2  text-[var(--text-secondary)]">Loading...</div>
         )}
 
         {/* Directory contents */}
@@ -99,7 +99,7 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
               onFileOpen={handleFileOpen}
             />
 
-            <div className="p-2 text-sm text-white tracking-wide bg-[var(--bg-secondary)] truncate">
+            <div className="p-2 text-sm text-[var(--text-secondary)] tracking-wide bg-[var(--bg-secondary)] truncate">
               {contents.files.filter((f) => f.isDir).length} folders |{" "}
               {contents.files.filter((f) => !f.isDir).length} files :{" "}
               {formatSize(calculateDirectorySize(contents))} (
