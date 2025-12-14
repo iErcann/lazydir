@@ -27,12 +27,24 @@ export function GetOperatingSystem() {
 }
 
 /**
- * @param {string} filePath
- * @returns {$CancellablePromise<$models.PathInfo>}
+ * GetPathAtIndex returns the absolute path corresponding to a breadcrumb index
+ * @param {string} fullPath
+ * @param {number} index
+ * @returns {$CancellablePromise<$models.Result<string>>}
  */
-export function GetPathInfo(filePath) {
-    return $Call.ByID(3749126181, filePath).then(/** @type {($result: any) => any} */(($result) => {
+export function GetPathAtIndex(fullPath, index) {
+    return $Call.ByID(1690715716, fullPath, index).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType1($result);
+    }));
+}
+
+/**
+ * @param {string} p
+ * @returns {$CancellablePromise<$models.Result<$models.PathInfo>>}
+ */
+export function GetPathInfo(p) {
+    return $Call.ByID(3749126181, p).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType3($result);
     }));
 }
 
@@ -43,7 +55,7 @@ export function GetPathInfo(filePath) {
  */
 export function ListDirectory(dirPath) {
     return $Call.ByID(1744058245, dirPath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType3($result);
+        return $$createType5($result);
     }));
 }
 
@@ -53,13 +65,14 @@ export function ListDirectory(dirPath) {
  */
 export function OpenFileWithDefaultApp(filePath) {
     return $Call.ByID(2060842792, filePath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType4($result);
+        return $$createType1($result);
     }));
 }
 
 // Private type creation functions
 const $$createType0 = $models.Result.createFrom($Create.Any);
-const $$createType1 = $models.PathInfo.createFrom;
-const $$createType2 = $models.DirectoryContents.createFrom;
+const $$createType1 = $models.Result.createFrom($Create.Any);
+const $$createType2 = $models.PathInfo.createFrom;
 const $$createType3 = $models.Result.createFrom($$createType2);
-const $$createType4 = $models.Result.createFrom($Create.Any);
+const $$createType4 = $models.DirectoryContents.createFrom;
+const $$createType5 = $models.Result.createFrom($$createType4);
