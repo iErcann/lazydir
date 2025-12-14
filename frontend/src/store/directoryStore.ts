@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import {
-  AppError,
   DirectoryContents,
   FileManagerService,
 } from "../../bindings/lazydir/internal";
@@ -12,8 +11,8 @@ interface FileSystemStore {
   // Actions
   loadDirectory: (path: string) => Promise<Result<DirectoryContents>>;
   getOperatingSystem: () => Promise<Result<OperatingSystem>>;
-  getPathInfo: (path: string) => Promise<PathInfo>; // Cross platform path info retrieval
-  
+  getPathInfo: (path: string) => Promise<Result<PathInfo>>; // Cross platform path info retrieval
+  getPathAtIndex: (path: string, index: number) => Promise<Result<string>>; // Get path at specific index
 }
 
 
@@ -35,6 +34,9 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
   },
 
   getPathInfo: async (path: string) => {
-    return await FileManagerService.GetPathInfo(path);
+     return await FileManagerService.GetPathInfo(path);
+  },
+  getPathAtIndex: async (path: string, index: number) => {
+    return await FileManagerService.GetPathAtIndex(path, index);
   }
 }));

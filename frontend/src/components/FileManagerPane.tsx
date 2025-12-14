@@ -1,4 +1,3 @@
-import { FileGrid } from "./FileGrid";
 import { FileList } from "./FileList";
 import type { Pane, Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
@@ -11,7 +10,6 @@ import { PathBar } from "./PathBar";
 export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
   const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
-  const activatePane = useTabsStore((state) => state.activatePane);
   const [error, setError] = useState<string | null>(null);
 
   // Load directory contents

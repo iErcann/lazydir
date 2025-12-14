@@ -37,12 +37,6 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           name: "Root",
           active: true,
         },
-        {
-          id: `pane-${Date.now() + 1}`,
-          path,
-          name: "Root 2",
-          active: false,
-        },
       ],
     };
     set((state) => ({
