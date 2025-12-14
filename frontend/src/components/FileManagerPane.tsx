@@ -47,9 +47,12 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
     updatePanePath(tab.id, pane.id, newPath);
   };
 
-  const handleFileOpen = (file: FileInfo) => {
+  const handleFileOpen = async (file: FileInfo) => {
     if (file.isDir) return;
-    OpenFileWithDefaultApp(file.path);
+    const opened = await OpenFileWithDefaultApp(file.path);
+    if (opened.error) {
+      setError(opened.error.message);
+    }
   };
 
   const handlePaneClick = (e: React.MouseEvent) => {

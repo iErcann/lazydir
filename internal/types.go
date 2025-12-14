@@ -34,9 +34,10 @@ type AppError struct {
 type ErrorCode string
 
 const (
-	ResolvePathError   ErrorCode = "ResolvePathError"
-	ReadDirectoryError ErrorCode = "ReadDirectoryError"
-	FileInfoError      ErrorCode = "FileInfoError"
+	ResolvePathError            ErrorCode = "ResolvePathError"
+	ReadDirectoryError          ErrorCode = "ReadDirectoryError"
+	FileInfoError               ErrorCode = "FileInfoError"
+	FileOpenWithDefaultAppError ErrorCode = "FileOpenWithDefaultAppError"
 )
 
 // AppError implements error.
@@ -56,3 +57,11 @@ type Result[T any] struct {
 	Data  *T        `json:"data,omitempty"`
 	Error *AppError `json:"error,omitempty"`
 }
+
+type OperatingSystem string
+
+const (
+	OSWindows OperatingSystem = "windows"
+	OSMac     OperatingSystem = "mac"
+	OSLinux   OperatingSystem = "linux"
+)

@@ -12,5 +12,6 @@ export {
     DirectoryContents,
     ErrorCode,
     FileInfo,
+    OperatingSystem,
     Result
 } from "./models.js";

@@ -121,6 +121,7 @@ export const ErrorCode = {
     ResolvePathError: "ResolvePathError",
     ReadDirectoryError: "ReadDirectoryError",
     FileInfoError: "FileInfoError",
+    FileOpenWithDefaultAppError: "FileOpenWithDefaultAppError",
 };
 
 /**
@@ -195,6 +196,21 @@ export class FileInfo {
         return new FileInfo(/** @type {Partial<FileInfo>} */($$parsedSource));
     }
 }
+
+/**
+ * @readonly
+ * @enum {string}
+ */
+export const OperatingSystem = {
+    /**
+     * The Go zero value for the underlying type of the enum.
+     */
+    $zero: "",
+
+    OSWindows: "windows",
+    OSMac: "mac",
+    OSLinux: "linux",
+};
 
 /**
  * omitempty = omit this field if it's empty

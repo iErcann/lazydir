@@ -67,20 +67,33 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 	}
 }
 
-// OpenFileWithDefaultApp opens a file with the default application.
-func (f *FileManagerService) OpenFileWithDefaultApp(filePath string) (string, error) {
+func (f *FileManagerService) OpenFileWithDefaultApp(filePath string) Result[string] {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
 		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", filePath)
 	case "darwin":
 		cmd = exec.Command("open", filePath)
-	default: // "linux", "freebsd", "openbsd", "netbsd"
+	default: // Linux, FreeBSD, etc.
 		cmd = exec.Command("xdg-open", filePath)
 	}
-	err := cmd.Start()
-	if err != nil {
-		return "", err
+
+	if err := cmd.Start(); err != nil {
+		return Result[string]{
+			Error: &AppError{
+				Code:    FileOpenWithDefaultAppError,
+				Message: fmt.Sprintf("failed to open file %s: %v", filePath, err),
+			},
+		}
 	}
-	return "Opened " + filePath, nil
+
+	msg := fmt.Sprintf("Opened %s", filePath)
+	return Result[string]{Data: &msg}
+}
+
+// GetOperatingSystem simply returns the OS as a string.
+// https://stackoverflow.com/questions/20728767/all-possible-goos-value
+func (f *FileManagerService) GetOperatingSystem() Result[OperatingSystem] {
+	os := OperatingSystem(runtime.GOOS)
+	return Result[OperatingSystem]{Data: &os}
 }
