@@ -3,15 +3,20 @@ import { FileManagerTab } from "./components/FileManagerTab";
 import { Sidebar } from "./components/SideBar";
 import { useTabsStore } from "./store/tabsStore";
 import { TabBar } from "./components/TabBar";
+import { useFileSystemStore } from "./store/directoryStore";
 
 function App() {
   const createTab = useTabsStore((state) => state.createTab);
   const activeTab = useTabsStore((state) => state.getActiveTab());
-  // const tabs = useTabsStore((state) => state.tabs);
-  // Create initial tab once
+  const getOperatingSystem = useFileSystemStore((state) => state.getOperatingSystem);
+
   useEffect(() => {
-    if (!activeTab) createTab("/");
-  }, [activeTab, createTab]);
+    // Fetch OS and create initial tab once
+    getOperatingSystem(); 
+    if (!activeTab) {
+      createTab("/");
+    }
+  }, [getOperatingSystem, createTab, activeTab]);
 
   if (!activeTab) return null;
 
