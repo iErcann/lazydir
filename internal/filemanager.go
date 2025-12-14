@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // FileManagerService is a service for managing files
@@ -18,6 +19,7 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 	}
 
 	absPath, err := filepath.Abs(dirPath)
+
 	if err != nil {
 		return Result[DirectoryContents]{Error: &AppError{Code: ResolvePathError, Message: fmt.Sprintf("resolve path error: %v", err), InnerError: err}}
 	}
@@ -39,9 +41,13 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 			return Result[DirectoryContents]{Error: &AppError{Code: FileInfoError, Message: fmt.Sprintf("get info for %q: %v", entry.Name(), err), InnerError: err}}
 		}
 
+		// Clean path for cross-platform consistency
+		path := filepath.Join(absPath, entry.Name())
+		path = filepath.Clean(path)
+
 		files = append(files, FileInfo{
 			Name:      entry.Name(),
-			Path:      filepath.Join(absPath, entry.Name()),
+			Path:      path,
 			Size:      info.Size(),
 			IsDir:     entry.IsDir(),
 			Mode:      info.Mode().String(),
@@ -89,6 +95,33 @@ func (f *FileManagerService) OpenFileWithDefaultApp(filePath string) Result[stri
 
 	msg := fmt.Sprintf("Opened %s", filePath)
 	return Result[string]{Data: &msg}
+}
+
+func (f *FileManagerService) GetPathInfo(filePath string) PathInfo {
+	abs := filepath.Clean(filePath)
+	parts := []string{}
+
+	// Split using filepath separator
+	for _, p := range strings.Split(abs, string(os.PathSeparator)) {
+		if p != "" {
+			parts = append(parts, p)
+		}
+	}
+
+	root := string(os.PathSeparator)
+	if runtime.GOOS == "windows" {
+		// preserve drive letter
+		if len(parts) > 0 {
+			root = parts[0] + "\\"
+		}
+	}
+
+	return PathInfo{
+		FullPath:  abs,
+		Parts:     parts,
+		Root:      root,
+		Separator: string(os.PathSeparator),
+	}
 }
 
 // GetOperatingSystem simply returns the OS as a string.

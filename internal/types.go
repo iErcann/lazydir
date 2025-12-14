@@ -8,12 +8,19 @@ import (
 // FileInfo represents a file/directory for JSON serialization
 type FileInfo struct {
 	Name      string    `json:"name"`
-	Path      string    `json:"path"`
+	Path      string    `json:"path"` // normalized absolute path
 	Size      int64     `json:"size"`
 	IsDir     bool      `json:"isDir"`
 	Mode      string    `json:"mode"`
 	Modified  time.Time `json:"modified"`
 	Extension string    `json:"extension,omitempty"`
+}
+
+type PathInfo struct {
+	FullPath  string   `json:"fullPath"`  // normalized absolute path
+	Parts     []string `json:"parts"`     // split segments for breadcrumb
+	Root      string   `json:"root"`      // e.g., "C:\" on Windows, "/" on Linux
+	Separator string   `json:"separator"` // OS-specific path separator
 }
 
 // DirectoryContents for listing directory

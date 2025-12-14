@@ -27,13 +27,23 @@ export function GetOperatingSystem() {
 }
 
 /**
+ * @param {string} filePath
+ * @returns {$CancellablePromise<$models.PathInfo>}
+ */
+export function GetPathInfo(filePath) {
+    return $Call.ByID(3749126181, filePath).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType1($result);
+    }));
+}
+
+/**
  * ListDirectory lists the contents of a directory.
  * @param {string} dirPath
  * @returns {$CancellablePromise<$models.Result<$models.DirectoryContents>>}
  */
 export function ListDirectory(dirPath) {
     return $Call.ByID(1744058245, dirPath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType2($result);
+        return $$createType3($result);
     }));
 }
 
@@ -43,12 +53,13 @@ export function ListDirectory(dirPath) {
  */
 export function OpenFileWithDefaultApp(filePath) {
     return $Call.ByID(2060842792, filePath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType3($result);
+        return $$createType4($result);
     }));
 }
 
 // Private type creation functions
 const $$createType0 = $models.Result.createFrom($Create.Any);
-const $$createType1 = $models.DirectoryContents.createFrom;
-const $$createType2 = $models.Result.createFrom($$createType1);
-const $$createType3 = $models.Result.createFrom($Create.Any);
+const $$createType1 = $models.PathInfo.createFrom;
+const $$createType2 = $models.DirectoryContents.createFrom;
+const $$createType3 = $models.Result.createFrom($$createType2);
+const $$createType4 = $models.Result.createFrom($Create.Any);

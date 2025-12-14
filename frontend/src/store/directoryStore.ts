@@ -4,7 +4,7 @@ import {
   DirectoryContents,
   FileManagerService,
 } from "../../bindings/lazydir/internal";
-import { OperatingSystem, Result } from "../../bindings/lazydir/internal/models";
+import { OperatingSystem, Result, PathInfo } from "../../bindings/lazydir/internal/models";
 
 interface FileSystemStore {
   operatingSystem: OperatingSystem;
@@ -12,6 +12,8 @@ interface FileSystemStore {
   // Actions
   loadDirectory: (path: string) => Promise<Result<DirectoryContents>>;
   getOperatingSystem: () => Promise<Result<OperatingSystem>>;
+  getPathInfo: (path: string) => Promise<PathInfo>; // Cross platform path info retrieval
+  
 }
 
 
@@ -31,4 +33,8 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
     }
     return result;
   },
+
+  getPathInfo: async (path: string) => {
+    return await FileManagerService.GetPathInfo(path);
+  }
 }));

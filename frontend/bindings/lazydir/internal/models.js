@@ -142,6 +142,7 @@ export class FileInfo {
         }
         if (!("path" in $$source)) {
             /**
+             * normalized absolute path
              * @member
              * @type {string}
              */
@@ -212,6 +213,63 @@ export const OperatingSystem = {
     OSLinux: "linux",
 };
 
+export class PathInfo {
+    /**
+     * Creates a new PathInfo instance.
+     * @param {Partial<PathInfo>} [$$source = {}] - The source object to create the PathInfo.
+     */
+    constructor($$source = {}) {
+        if (!("fullPath" in $$source)) {
+            /**
+             * normalized absolute path
+             * @member
+             * @type {string}
+             */
+            this["fullPath"] = "";
+        }
+        if (!("parts" in $$source)) {
+            /**
+             * split segments for breadcrumb
+             * @member
+             * @type {string[]}
+             */
+            this["parts"] = [];
+        }
+        if (!("root" in $$source)) {
+            /**
+             * e.g., "C:\" on Windows, "/" on Linux
+             * @member
+             * @type {string}
+             */
+            this["root"] = "";
+        }
+        if (!("separator" in $$source)) {
+            /**
+             * OS-specific path separator
+             * @member
+             * @type {string}
+             */
+            this["separator"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new PathInfo instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {PathInfo}
+     */
+    static createFrom($$source = {}) {
+        const $$createField1_0 = $$createType2;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("parts" in $$parsedSource) {
+            $$parsedSource["parts"] = $$createField1_0($$parsedSource["parts"]);
+        }
+        return new PathInfo(/** @type {Partial<PathInfo>} */($$parsedSource));
+    }
+}
+
 /**
  * omitempty = omit this field if it's empty
  * @template T
@@ -249,8 +307,8 @@ export class Result {
      * @returns {($$source?: any) => Result<T>}
      */
     static createFrom($$createParamT) {
-        const $$createField0_0 = $$createType2($$createParamT);
-        const $$createField1_0 = $$createType4;
+        const $$createField0_0 = $$createType3($$createParamT);
+        const $$createField1_0 = $$createType5;
         return ($$source = {}) => {
             let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
             if ("data" in $$parsedSource) {
@@ -267,6 +325,7 @@ export class Result {
 // Private type creation functions
 const $$createType0 = FileInfo.createFrom;
 const $$createType1 = $Create.Array($$createType0);
-const $$createType2 = /** @type {(...args: any[]) => any} */(($$createParamT) => $Create.Nullable($$createParamT));
-const $$createType3 = AppError.createFrom;
-const $$createType4 = $Create.Nullable($$createType3);
+const $$createType2 = $Create.Array($Create.Any);
+const $$createType3 = /** @type {(...args: any[]) => any} */(($$createParamT) => $Create.Nullable($$createParamT));
+const $$createType4 = AppError.createFrom;
+const $$createType5 = $Create.Nullable($$createType4);

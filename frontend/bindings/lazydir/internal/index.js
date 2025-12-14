@@ -13,5 +13,6 @@ export {
     ErrorCode,
     FileInfo,
     OperatingSystem,
+    PathInfo,
     Result
 } from "./models.js";

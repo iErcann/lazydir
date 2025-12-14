@@ -45,6 +45,7 @@ export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
 
   const handlePathChange = (newPath: string) => {
     updatePanePath(tab.id, pane.id, newPath);
+    console.log("Path changed to:", newPath);
   };
 
   const handleFileOpen = async (file: FileInfo) => {
