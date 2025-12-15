@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 import { useTabsStore } from "../store/tabsStore";
 import { Pane, Tab } from "../types";
+import { formatSize } from "../utils/utils";
 
 interface FileListProps {
   contents: DirectoryContents;
@@ -40,14 +41,6 @@ export function FileList({
   const setSelectedFilePaths = useTabsStore(
     (state) => state.setSelectedFilePaths
   );
-
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return "-";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-  };
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
