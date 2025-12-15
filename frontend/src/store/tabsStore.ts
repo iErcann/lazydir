@@ -23,11 +23,11 @@ interface TabsStore {
   closePane: (tabId: string, paneId: string) => void;
   updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
 
-  updatePathSelectedFiles: (
+  setSelectedFilePaths: (
     tabId: string,
     paneId: string,
-    selectedFiles: Set<string>,
-  ) => void;
+    selectedFilePaths: Set<string>,
+  ) => void; 
   // Getters
   getActiveTab: () => Tab | null;
   getActivePane: () => Pane | null;
@@ -46,13 +46,13 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           id: generateUUID(),
           path,
           active: true,
-          selectedFilesPath: new Set<string>(),
+          selectedFilePaths: new Set<string>(),
         },
                 {
           id: generateUUID(),
           path,
           active: true,
-          selectedFilesPath: new Set<string>(),
+          selectedFilePaths: new Set<string>(),
         },
       ],
     };
@@ -129,9 +129,10 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
 
   createPane: (tabId: string, path = ".") => {
     const newPane: Pane = {
-      id: `pane-${Date.now()}`,
+      id: generateUUID(),
       path,
       active: true, // New pane becomes active
+      selectedFilePaths: new Set<string>(),
     };
 
     set((state) => ({
@@ -204,7 +205,7 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
     return tab.panes.find((p) => p.id === paneId) || null;
   },
 
-  updatePathSelectedFiles: (tabId: string, paneId: string, selectedFiles: Set<string>) => {
+  setSelectedFilePaths: (tabId: string, paneId: string, selectedFiles: Set<string>) => {
     set((state) => ({
       tabs: state.tabs.map((tab) => {
         if (tab.id !== tabId) return tab;
@@ -212,7 +213,7 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           ...tab,
           panes: tab.panes.map((pane) => {
             if (pane.id !== paneId) return pane;
-            return { ...pane, selectedFilesPath: new Set(selectedFiles) };
+            return { ...pane, selectedFilePaths: new Set(selectedFiles) };
           }),
         };
       }),

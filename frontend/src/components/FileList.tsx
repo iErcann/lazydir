@@ -33,12 +33,12 @@ export function FileList({
     { id: "name", desc: false },
   ]);
 
-  const selectedFilesPath = useTabsStore(
-    (state) => state.getPane(tab.id, pane.id)?.selectedFilesPath
+  const selectedFilePaths = useTabsStore(
+    (state) => state.getPane(tab.id, pane.id)?.selectedFilePaths
   );
 
-  const updateSelectedFilesPath = useTabsStore(
-    (state) => state.updatePathSelectedFiles
+  const setSelectedFilePaths = useTabsStore(
+    (state) => state.setSelectedFilePaths
   );
 
   const formatSize = (bytes: number) => {
@@ -262,16 +262,16 @@ export function FileList({
                 <button
                   onDoubleClick={() => onOpen(file)}
                   onClick={() => {
-                    const newSelected: Set<string> = new Set(selectedFilesPath);
+                    const newSelected: Set<string> = new Set(selectedFilePaths);
                     if (newSelected.has(file.path)) {
                       newSelected.delete(file.path);
                     } else {
                       newSelected.add(file.path);
                     }
-                    updateSelectedFilesPath(tab.id, pane.id, newSelected);
+                    setSelectedFilePaths(tab.id, pane.id, newSelected);
                   }}
                   className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0 ${
-                    selectedFilesPath.has(file.path)
+                    selectedFilePaths?.has(file.path)
                       ? "bg-[var(--bg-tertiary)]"
                       : ""
                   }`}

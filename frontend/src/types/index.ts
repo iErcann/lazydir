@@ -10,7 +10,7 @@ export interface Pane {
   active: boolean;
 
   // Selected files
-  selectedFilesPath?: Set<string>; // array of file paths
+  selectedFilePaths?: Set<string>; // array of file paths
 }
 
 export interface Tab {
