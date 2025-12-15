@@ -2,11 +2,13 @@ import { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { FileItem } from "./FileItem";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Pane } from "../types";
 
 interface FileGridProps {
   contents: DirectoryContents;
   onDirectoryOpen: (file: FileInfo) => void;
   onFileOpen: (file: FileInfo) => void;
+  pane: Pane;
 }
 export function FileGrid({
   contents,

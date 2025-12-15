@@ -104,6 +104,9 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
               contents={contents}
               onDirectoryOpen={handleDirectoryOpen}
               onFileOpen={handleFileOpen}
+              pane={pane}
+              tab={tab}
+              key={pane.id}
             />
 
             <div className="p-2 text-sm text-[var(--text-secondary)] tracking-wide bg-[var(--bg-primary)] truncate">

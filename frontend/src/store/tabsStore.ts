@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import type { Pane, Tab } from "../types";
 
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 interface TabsStore {
   // State
   tabs: Tab[];
@@ -16,6 +23,11 @@ interface TabsStore {
   closePane: (tabId: string, paneId: string) => void;
   updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
 
+  updatePathSelectedFiles: (
+    tabId: string,
+    paneId: string,
+    selectedFiles: Set<string>,
+  ) => void;
   // Getters
   getActiveTab: () => Tab | null;
   getActivePane: () => Pane | null;
@@ -28,12 +40,19 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
 
   createTab: (path = ".") => {
     const newTab: Tab = {
-      id: `tab-${Date.now()}`,
+      id: generateUUID(),
       panes: [
         {
-          id: `pane-${Date.now()}`,
+          id: generateUUID(),
           path,
           active: true,
+          selectedFilesPath: new Set<string>(),
+        },
+                {
+          id: generateUUID(),
+          path,
+          active: true,
+          selectedFilesPath: new Set<string>(),
         },
       ],
     };
@@ -183,5 +202,20 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
     const tab = tabs.find((t) => t.id === tabId);
     if (!tab) return null;
     return tab.panes.find((p) => p.id === paneId) || null;
+  },
+
+  updatePathSelectedFiles: (tabId: string, paneId: string, selectedFiles: Set<string>) => {
+    set((state) => ({
+      tabs: state.tabs.map((tab) => {
+        if (tab.id !== tabId) return tab;
+        return {
+          ...tab,
+          panes: tab.panes.map((pane) => {
+            if (pane.id !== paneId) return pane;
+            return { ...pane, selectedFilesPath: new Set(selectedFiles) };
+          }),
+        };
+      }),
+    }));
   },
 }));

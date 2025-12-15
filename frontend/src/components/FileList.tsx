@@ -11,9 +11,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { useTabsStore } from "../store/tabsStore";
+import { Pane, Tab } from "../types";
 
 interface FileListProps {
   contents: DirectoryContents;
+  pane: Pane;
+  tab: Tab;
   onDirectoryOpen: (file: FileInfo) => void;
   onFileOpen: (file: FileInfo) => void;
 }
@@ -21,11 +25,21 @@ export function FileList({
   contents,
   onDirectoryOpen,
   onFileOpen,
+  pane,
+  tab,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [sorting, setSorting] = useState<SortingState>([
     { id: "name", desc: false },
   ]);
+
+  const selectedFilesPath = useTabsStore(
+    (state) => state.getPane(tab.id, pane.id)?.selectedFilesPath
+  );
+
+  const updateSelectedFilesPath = useTabsStore(
+    (state) => state.updatePathSelectedFiles
+  );
 
   const formatSize = (bytes: number) => {
     if (bytes === 0) return "-";
@@ -239,7 +253,7 @@ export function FileList({
             return (
               <div
                 key={virtualRow.key}
-                className="absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)]"
+                className={`absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)]`}
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
@@ -247,7 +261,20 @@ export function FileList({
               >
                 <button
                   onDoubleClick={() => onOpen(file)}
-                  className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0`}
+                  onClick={() => {
+                    const newSelected: Set<string> = new Set(selectedFilesPath);
+                    if (newSelected.has(file.path)) {
+                      newSelected.delete(file.path);
+                    } else {
+                      newSelected.add(file.path);
+                    }
+                    updateSelectedFilesPath(tab.id, pane.id, newSelected);
+                  }}
+                  className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0 ${
+                    selectedFilesPath.has(file.path)
+                      ? "bg-[var(--bg-tertiary)]"
+                      : ""
+                  }`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <div key={cell.id} className="min-w-0 text-left">
