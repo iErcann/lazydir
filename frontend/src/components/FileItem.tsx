@@ -8,6 +8,7 @@ import {
   File,
 } from "lucide-react";
 import { FileInfo } from "../../bindings/lazydir/internal";
+import { formatSize } from "../utils/utils";
 
 interface FileItemProps {
   file: FileInfo;
