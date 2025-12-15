@@ -23,7 +23,9 @@ export function FileList({
   onFileOpen,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "name", desc: false },
+  ]);
 
   const formatSize = (bytes: number) => {
     if (bytes === 0) return "-";
@@ -72,6 +74,32 @@ export function FileList({
             {getValue() as string}
           </div>
         ),
+        sortDescFirst: true,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original;
+          const b = rowB.original;
+
+          const getPriority = (item: FileInfo) => {
+            const isDot = item.name.startsWith(".");
+
+            if (item.isDir) {
+              return isDot ? 2 : 1; // dirs: normal → dot
+            } else {
+              return isDot ? 4 : 3; // files: normal → dot
+            }
+          };
+
+          const priorityA = getPriority(a);
+          const priorityB = getPriority(b);
+
+          // 1️⃣ Sort by type / dot priority
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+
+          // 2️⃣ Same group → alphabetical
+          return a.name.localeCompare(b.name);
+        },
       },
       {
         accessorKey: "size",
