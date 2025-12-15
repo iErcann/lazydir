@@ -3,15 +3,16 @@ import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { FileItem } from "./FileItem";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
+interface FileGridProps {
+  contents: DirectoryContents;
+  onDirectoryOpen: (file: FileInfo) => void;
+  onFileOpen: (file: FileInfo) => void;
+}
 export function FileGrid({
   contents,
   onDirectoryOpen,
   onFileOpen,
-}: {
-  contents: DirectoryContents;
-  onDirectoryOpen: (file: FileInfo) => void;
-  onFileOpen: (file: FileInfo) => void;
-}) {
+}: FileGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [cols, setCols] = useState(8);
 
@@ -33,10 +34,10 @@ export function FileGrid({
   }, []);
 
   // Compute number of rows based on columns
-  const rows = useMemo(() => Math.ceil(contents.files.length / cols), [
-    contents.files.length,
-    cols,
-  ]);
+  const rows = useMemo(
+    () => Math.ceil(contents.files.length / cols),
+    [contents.files.length, cols]
+  );
 
   const rowVirtualizer = useVirtualizer({
     count: rows,
@@ -90,5 +91,3 @@ export function FileGrid({
     </div>
   );
 }
-
-

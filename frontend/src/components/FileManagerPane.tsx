@@ -7,7 +7,11 @@ import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 import { PathBar } from "./PathBar";
 
-export function FileManagerPane({ tab, pane }: { tab: Tab; pane: Pane }) {
+interface FileManagerPaneProps {
+  tab: Tab;
+  pane: Pane;
+}
+export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const [error, setError] = useState<string | null>(null);

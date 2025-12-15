@@ -2,17 +2,13 @@ import { ChevronRight, HardDrive } from "lucide-react";
 import { Pane } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
-import {
-  PathInfo,
-} from "../../bindings/lazydir/internal/models";
+import { PathInfo } from "../../bindings/lazydir/internal/models";
 
-export function PathBar({
-  pane,
-  onPathChange,
-}: {
+interface PathBarProps {
   pane: Pane;
   onPathChange: (newPath: string) => void;
-}) {
+}
+export function PathBar({ pane, onPathChange }: PathBarProps) {
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
   const [pathInfo, setPathInfo] = useState<PathInfo>();
@@ -40,7 +36,7 @@ export function PathBar({
 
   return (
     <div className="flex items-center gap-2 px-4 py-2">
-{/*       <button
+      {/*       <button
         className="p-1.5 rounded-lg"
         onClick={() => onPathChange(pathInfo?.root ?? "")}
       >
@@ -56,11 +52,9 @@ export function PathBar({
             >
               {part}
             </button>
-            {
-              i === pathInfo.parts.length - 1 ? null : (
-                <ChevronRight className="w-4 h-4 text-[var(--text-primary)]" />
-              )
-            }
+            {i === pathInfo.parts.length - 1 ? null : (
+              <ChevronRight className="w-4 h-4 text-[var(--text-primary)]" />
+            )}
           </div>
         );
       })}

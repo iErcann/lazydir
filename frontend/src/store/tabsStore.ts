@@ -40,7 +40,7 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
     set((state) => ({
       tabs: [...state.tabs, newTab],
       activeTabId: newTab.id,
-    }));  
+    }));
     return newTab;
   },
 
@@ -91,6 +91,7 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
   },
 
   closeTab: (tabId: string) => {
+    if (get().tabs.length === 1) return; // Prevent closing the last tab
     set((state) => {
       const updatedTabs = state.tabs.filter((tab) => tab.id !== tabId);
       const newActiveTabId =

@@ -6,6 +6,8 @@ export function TabBar() {
   const activeTabId = useTabsStore((state) => state.activeTabId);
   const createTab = useTabsStore((state) => state.createTab);
 
+  if (!activeTabId) return null;
+
   return (
     <div className="h-10 bg-[var(--bg-primary)] flex items-center px-2 text-[var(--text-primary)]">
       {/* Tabs container */}

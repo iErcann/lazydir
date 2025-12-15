@@ -1,8 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
-import type { Pane, Tab } from "../types";
+import { useState, useRef, useEffect } from "react";
+import type { Tab } from "../types";
 import { FileManagerPane } from "./FileManagerPane";
 
-export function SplitView({ tab }: { tab: Tab }) {
+export interface SplitViewProps {
+  tab: Tab;
+}
+export function SplitView({ tab }: SplitViewProps) {
   const [splitPercentage, setSplitPercentage] = useState(50); // 50% by default
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -14,7 +17,7 @@ export function SplitView({ tab }: { tab: Tab }) {
 
   const handleDragMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-     setIsDragging(true);
+    setIsDragging(true);
   };
 
   useEffect(() => {
@@ -26,40 +29,37 @@ export function SplitView({ tab }: { tab: Tab }) {
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
       const mouseX = e.clientX - containerRect.left;
-      
+
       // Calculate percentage (clamp between 10% and 90%)
       const percentage = (mouseX / containerRect.width) * 100;
       const clampedPercentage = Math.max(10, Math.min(90, percentage));
-      
+
       setSplitPercentage(clampedPercentage);
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       // Create a window resize event to notify other components
-      window.dispatchEvent(new Event('resize')); // i could also put this in the "handleMouseMove" but could make too much CPU usage 
+      window.dispatchEvent(new Event("resize")); // i could also put this in the "handleMouseMove" but could make too much CPU usage
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isDragging]);
 
   // Two panes with draggable splitter
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={`flex h-full ${isDragging ? 'select-none' : ''}`}
+      className={`flex h-full ${isDragging ? "select-none" : ""}`}
     >
       {/* Left Pane */}
-      <div 
-        style={{ width: `${splitPercentage}%` }}
-        className="overflow-hidden"
-      >
+      <div style={{ width: `${splitPercentage}%` }} className="overflow-hidden">
         <FileManagerPane tab={tab} pane={tab.panes[0]} />
       </div>
 
@@ -69,12 +69,12 @@ export function SplitView({ tab }: { tab: Tab }) {
         className={`
           w-1 bg-[var(--bg-tertiary)] cursor-col-resize 
           hover:bg-[var(--bg-secondary)] transition-colors
-          ${isDragging ? 'bg-[var(--bg-accent)]' : ''}
+          ${isDragging ? "bg-[var(--bg-accent)]" : ""}
         `}
       />
 
       {/* Right Pane */}
-      <div 
+      <div
         style={{ width: `${100 - splitPercentage}%` }}
         className="overflow-hidden"
       >

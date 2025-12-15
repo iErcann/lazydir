@@ -12,15 +12,16 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 
+interface FileListProps {
+  contents: DirectoryContents;
+  onDirectoryOpen: (file: FileInfo) => void;
+  onFileOpen: (file: FileInfo) => void;
+}
 export function FileList({
   contents,
   onDirectoryOpen,
   onFileOpen,
-}: {
-  contents: DirectoryContents;
-  onDirectoryOpen: (file: FileInfo) => void;
-  onFileOpen: (file: FileInfo) => void;
-}) {
+}: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -51,12 +52,9 @@ export function FileList({
         cell: ({ row }) => (
           <div className="w-8 flex items-center justify-center">
             {row.original.isDir ? (
-              <Folder className="w-5 h-5" style={{ color: "var(--accent)" }} />
+              <Folder className="w-5 h-5 text-[var(--accent)]" />
             ) : (
-              <File
-                className="w-5 h-5"
-                style={{ color: "var(--text-secondary)" }}
-              />
+              <File className="w-5 h-5 text-[var(--text-secondary)]" />
             )}
           </div>
         ),
@@ -76,35 +74,10 @@ export function FileList({
         ),
       },
       {
-        accessorKey: "modified",
-        header: "Modified",
-        cell: ({ getValue }) => {
-          const value = getValue() as string | undefined;
-          return (
-            <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {value ? formatDate(value) : "-"}
-            </div>
-          );
-        },
-        sortingFn: (rowA, rowB) => {
-          const a = rowA.original.modified;
-          const b = rowB.original.modified;
-
-          if (!a && !b) return 0;
-          if (!a) return 1;
-          if (!b) return -1;
-
-          return new Date(a).getTime() - new Date(b).getTime();
-        }
-      },
-      {
         accessorKey: "size",
         header: "Size",
         cell: ({ row, getValue }) => (
-          <div
-            className="text-sm text-right"
-            style={{ color: "var(--text-secondary)" }}
-          >
+          <div className="text-sm text-[var(--text-secondary)]">
             {row.original.isDir ? "-" : formatSize(getValue() as number)}
           </div>
         ),
@@ -120,6 +93,28 @@ export function FileList({
           return a.size - b.size;
         },
       },
+      {
+        accessorKey: "modified",
+        header: "Modified",
+        cell: ({ getValue }) => {
+          const value = getValue() as string | undefined;
+          return (
+            <div className="text-sm text-[var(--text-secondary)]">
+              {value ? formatDate(value) : "-"}
+            </div>
+          );
+        },
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.modified;
+          const b = rowB.original.modified;
+
+          if (!a && !b) return 0;
+          if (!a) return 1;
+          if (!b) return -1;
+
+          return new Date(a).getTime() - new Date(b).getTime();
+        },
+      },
     ],
     []
   );
@@ -133,6 +128,7 @@ export function FileList({
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    enableColumnResizing: true,
   });
 
   const { rows } = table.getRowModel();
@@ -150,17 +146,16 @@ export function FileList({
       onFileOpen(file);
     }
   };
+
+  const gridCols =
+    "grid-cols-[auto_minmax(200px,2fr)_minmax(120px,1fr)_minmax(80px,1fr)]";
+
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
       <div className="min-w-[600px]">
         {/* Header */}
         <div
-          className="sticky top-0 px-4 py-2 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 text-sm font-medium "
-          style={{
-            backgroundColor: "var(--bg-primary)",
-            color: "var(--text-secondary)",
-            zIndex: 1,
-          }}
+          className={`sticky top-0 px-4 py-2 grid ${gridCols} gap-4 text-sm font-medium bg-[var(--bg-primary)] bg-opacity-100 z-10`}
         >
           {table.getHeaderGroups().map((headerGroup) => (
             <>
@@ -224,10 +219,10 @@ export function FileList({
               >
                 <button
                   onDoubleClick={() => onOpen(file)}
-                  className="w-full px-4 py-4 grid grid-cols-[auto_2fr_1fr_1fr] gap-4 items-center text-left min-w-0"
+                  className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0`}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <div key={cell.id} className="min-w-0">
+                    <div key={cell.id} className="min-w-0 text-left">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
