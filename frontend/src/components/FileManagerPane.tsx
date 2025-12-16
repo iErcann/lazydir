@@ -6,6 +6,7 @@ import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 import { PathBar } from "./PathBar";
+import { formatSize } from "../utils/utils";
 
 interface FileManagerPaneProps {
   tab: Tab;
@@ -69,15 +70,6 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     return contents.files.reduce((total, file) => total + file.size, 0);
   };
 
-  // Size in bytes to human readable
-  const formatSize = (size: number) => {
-    if (size === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(size) / Math.log(k));
-    return `${(size / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-  };
-
   console.log("Rendering FileManagerPane for path:", pane.path);
 
   return (
@@ -104,6 +96,8 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
               contents={contents}
               onDirectoryOpen={handleDirectoryOpen}
               onFileOpen={handleFileOpen}
+              pane={pane}
+              tab={tab}
             />
 
             <div className="p-2 text-sm text-[var(--text-secondary)] tracking-wide bg-[var(--bg-primary)] truncate">

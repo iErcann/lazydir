@@ -11,9 +11,14 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { useTabsStore } from "../store/tabsStore";
+import { Pane, Tab } from "../types";
+import { formatSize } from "../utils/utils";
 
 interface FileListProps {
   contents: DirectoryContents;
+  pane: Pane;
+  tab: Tab;
   onDirectoryOpen: (file: FileInfo) => void;
   onFileOpen: (file: FileInfo) => void;
 }
@@ -21,17 +26,21 @@ export function FileList({
   contents,
   onDirectoryOpen,
   onFileOpen,
+  pane,
+  tab,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([ // TODO: use the store pan instead. this will make us lose sorting on pane switch 
+    { id: "name", desc: false },
+  ]);
 
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return "-";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-  };
+  const selectedFilePaths = useTabsStore(
+    (state) => state.getPane(tab.id, pane.id)?.selectedFilePaths
+  );
+
+  const setSelectedFilePaths = useTabsStore(
+    (state) => state.setSelectedFilePaths
+  );
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -72,6 +81,32 @@ export function FileList({
             {getValue() as string}
           </div>
         ),
+        sortDescFirst: true,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original;
+          const b = rowB.original;
+
+          const getPriority = (item: FileInfo) => {
+            const isDot = item.name.startsWith(".");
+
+            if (item.isDir) {
+              return isDot ? 2 : 1; // dirs: normal → dot
+            } else {
+              return isDot ? 4 : 3; // files: normal → dot
+            }
+          };
+
+          const priorityA = getPriority(a);
+          const priorityB = getPriority(b);
+
+          // 1️⃣ Sort by type / dot priority
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+
+          // 2️⃣ Same group → alphabetical
+          return a.name.localeCompare(b.name);
+        },
       },
       {
         accessorKey: "size",
@@ -211,7 +246,7 @@ export function FileList({
             return (
               <div
                 key={virtualRow.key}
-                className="absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)]"
+                className={`absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)]`}
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
@@ -219,7 +254,20 @@ export function FileList({
               >
                 <button
                   onDoubleClick={() => onOpen(file)}
-                  className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0`}
+                  onClick={() => {
+                    const newSelected: Set<string> = new Set(selectedFilePaths);
+                    if (newSelected.has(file.path)) {
+                      newSelected.delete(file.path);
+                    } else {
+                      newSelected.add(file.path);
+                    }
+                    setSelectedFilePaths(tab.id, pane.id, newSelected);
+                  }}
+                  className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0 ${
+                    selectedFilePaths?.has(file.path)
+                      ? "bg-[var(--bg-tertiary)]"
+                      : ""
+                  }`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <div key={cell.id} className="min-w-0 text-left">
