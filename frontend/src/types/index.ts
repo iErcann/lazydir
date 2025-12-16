@@ -6,11 +6,11 @@ export interface Pane {
 
   // View settings
   viewMode?: "grid" | "list";
-  sortBy?: "name" | "size" | "date"; // TODO: use this to now lose sorting on pane switch
+  sortBy?: "name" | "size" | "date"; // TODO: use this to not lose sorting on pane switch
   active: boolean;
 
   // Selected files
-  selectedFilePaths?: Set<string>; // array of file paths
+  selectedFilePaths: Set<string>; // array of file paths
 }
 
 export interface Tab {

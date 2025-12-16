@@ -30,7 +30,7 @@ export function FileList({
   tab,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [sorting, setSorting] = useState<SortingState>([
+  const [sorting, setSorting] = useState<SortingState>([ // TODO: use the store pan instead. this will make us lose sorting on pane switch 
     { id: "name", desc: false },
   ]);
 
