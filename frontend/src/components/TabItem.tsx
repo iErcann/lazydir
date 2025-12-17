@@ -13,9 +13,14 @@ export function TabItem({ tab, isActive }: TabItemProps) {
 
   // Compute folder name once
   const folderName = useMemo(() => {
-    const firstPanePath = tab.panes[0]?.path ?? "";
-    const parts = firstPanePath.split(/[/\\]+/).filter(Boolean);
-    return parts.at(-1) || firstPanePath || "Untitled";
+    if (tab.panes.length === 0) {
+      return "Untitled";
+    }
+    
+    const parts = (tab.panes[0].path ?? "").split(/[/\\]+/).filter(Boolean);
+    const firstName = parts.at(-1) || tab.panes[0].path || "Untitled";
+    
+    return tab.panes.length > 1 ? `${firstName} (${tab.panes.length} panes)` : firstName;
   }, [tab.panes]);
 
   const handleClick = () => activateTab(tab.id);
@@ -39,7 +44,7 @@ export function TabItem({ tab, isActive }: TabItemProps) {
         ${
           isActive
             ? "border-[var(--accent)] font-semibold"
-            : "border-transparent text-[var(--text-secondary)]"
+            : "border-transparent text-[var(--text-secondary)] text-sm"
         }`}
       onClick={handleClick}
       onMouseDown={handleMiddleClick}

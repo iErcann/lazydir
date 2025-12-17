@@ -47,13 +47,7 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           path,
           active: true,
           selectedFilePaths: new Set<string>(),
-        },
-                {
-          id: generateUUID(),
-          path,
-          active: true,
-          selectedFilePaths: new Set<string>(),
-        },
+        } 
       ],
     };
     set((state) => ({

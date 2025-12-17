@@ -10,6 +10,7 @@ function App() {
   const activeTab = useTabsStore((state) => state.getActiveTab());
   const getOperatingSystem = useFileSystemStore((state) => state.getOperatingSystem);
   const getInitialPath = useFileSystemStore((state) => state.getInitialPath);
+  const tabs = useTabsStore((state) => state.tabs);
   
   useEffect(() => {
     // Fetch OS and create initial tab once
@@ -33,7 +34,12 @@ function App() {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <TabBar /> {/*  Only render this when tabs.length > 1 */}
+
+          {
+            tabs.length > 1 && (
+              <TabBar /> 
+            )
+          }
           <FileManagerTab tab={activeTab} />
         </div>
       </div>

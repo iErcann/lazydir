@@ -183,14 +183,14 @@ export function FileList({
   };
 
   const gridCols =
-    "grid-cols-[auto_minmax(200px,2fr)_minmax(120px,1fr)_minmax(80px,1fr)]";
+  "grid-cols-[32px_minmax(240px,1fr)_90px_160px]";
 
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
-      <div className="min-w-[600px]">
+<div className="min-w-[600px] px-6 py-2">
         {/* Header */}
         <div
-          className={`sticky top-0 px-4 py-2 grid ${gridCols} gap-4 text-sm font-medium bg-[var(--bg-primary)] bg-opacity-100 z-10`}
+          className={`sticky top-0 px-1 py-2 grid ${gridCols} gap-4 text-sm font-medium bg-[var(--bg-primary)] bg-opacity-100 z-10 w-full`}
         >
           {table.getHeaderGroups().map((headerGroup) => (
             <>
@@ -246,7 +246,7 @@ export function FileList({
             return (
               <div
                 key={virtualRow.key}
-                className={`absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)]`}
+                className={`absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)] rounded-md`}
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
@@ -263,7 +263,7 @@ export function FileList({
                     }
                     setSelectedFilePaths(tab.id, pane.id, newSelected);
                   }}
-                  className={`w-full px-4 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0 ${
+                  className={`w-full px-1 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0 w-full rounded-b-md ${
                     selectedFilePaths?.has(file.path)
                       ? "bg-[var(--bg-tertiary)]"
                       : ""

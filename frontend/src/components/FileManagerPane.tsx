@@ -79,8 +79,10 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
 
         {/* Error message */}
         {error && (
-          <div className="bg-red-100 text-red-800 p-2 rounded">
+          <div className="p-4">
+          <div className="bg-[var(--accent)] text-[var(--text-primary)] p-2 rounded">
             Error: {error}
+          </div>
           </div>
         )}
 

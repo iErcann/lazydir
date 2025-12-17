@@ -20,8 +20,8 @@ export function TabBar() {
       {/* + New Tab Button */}
       <button
         className="ml-2 w-8 h-8 flex-shrink-0 flex items-center justify-center rounded
-                   text-[var(--text-secondary)] hover:text-[var(--text-primary)]
-                   hover:bg-[var(--bg-secondary)] transition"
+                    text-[var(--text-secondary)] hover:text-[var(--text-primary)]
+                    hover:bg-[var(--bg-tertiary)] transition"
         onClick={() => {
           const activeTab = tabs.find((tab) => tab.id === activeTabId);
           createTab(activeTab?.panes[0]?.path);
