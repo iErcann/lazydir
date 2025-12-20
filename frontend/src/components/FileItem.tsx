@@ -59,18 +59,18 @@ export function FileItem({
       className={`flex flex-col items-center p-3 rounded-lg select-none  ${
         isSelected
           ? "bg-blue-600 ring-2 ring-blue-500"
-          : "hover:bg-[var(--bg-tertiary)]"
+          : "hover:bg-(--bg-tertiary)"
       }`}
       title={file.name}
     >
       <Icon
-        className={`w-16 h-16 mb-2 ${file.isDir ? "text-[var(--accent)]" : ""}`}
+        className={`w-16 h-16 mb-2 ${file.isDir ? "text-(--accent)" : ""}`}
       />
-      <span className="text-sm text-center text-[var(--text-primary)] w-full break-words truncate">
+      <span className="text-sm text-center text-(--text-primary) w-full break-words truncate">
         {file.name}
       </span>
       {!file.isDir && (
-        <span className="text-xs text-[var(--text-secondary)] mt-0.5">
+        <span className="text-xs text-(--text-secondary) mt-0.5">
           {formatSize(file.size)}
         </span>
       )}
