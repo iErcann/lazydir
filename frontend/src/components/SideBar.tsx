@@ -22,7 +22,7 @@ export function Sidebar({
   ];
 
   return (
-    <div className="w-48 bg-[var(--bg-secondary)]   flex flex-col">
+    <div className="w-48 bg-[var(--bg-secondary)] flex flex-col hidden sm:flex">
       <div className="p-3">
         <h2 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-2 mb-2">
           lazydir

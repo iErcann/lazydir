@@ -30,7 +30,8 @@ export function FileList({
   tab,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [sorting, setSorting] = useState<SortingState>([ // TODO: use the store pan instead. this will make us lose sorting on pane switch 
+  const [sorting, setSorting] = useState<SortingState>([
+    // TODO: use the store pan instead. this will make us lose sorting on pane switch
     { id: "name", desc: false },
   ]);
 
@@ -182,12 +183,11 @@ export function FileList({
     }
   };
 
-  const gridCols =
-  "grid-cols-[32px_minmax(240px,1fr)_90px_160px]";
+  const gridCols = "grid-cols-[32px_minmax(240px,1fr)_90px_160px]";
 
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
-<div className="min-w-[600px] px-6 py-2">
+      <div className="min-w-[600px] px-6 py-2">
         {/* Header */}
         <div
           className={`sticky top-0 px-1 py-2 grid ${gridCols} gap-4 text-sm font-medium bg-[var(--bg-primary)] bg-opacity-100 z-10 w-full`}
@@ -197,11 +197,14 @@ export function FileList({
               {headerGroup.headers.map((header) => (
                 <div
                   key={header.id}
-                  className={
-                    header.column.getCanSort()
-                      ? "cursor-pointer select-none"
-                      : ""
-                  }
+                  className={`
+                    text-[var(--text-secondary)]
+                    ${
+                      header.column.getCanSort()
+                        ? "cursor-pointer select-none"
+                        : ""
+                    }
+                      `}
                   onClick={header.column.getToggleSortingHandler()}
                   title={
                     header.column.getCanSort()

@@ -4,6 +4,7 @@ import { Sidebar } from "./components/SideBar";
 import { useTabsStore } from "./store/tabsStore";
 import { useFileSystemStore } from "./store/directoryStore";
 import { TabBar } from "./components/TabBar";
+import { useKeyboardShortcut } from "./hooks/usekeyboardShortcut";
 
 function App() {
   const createTab = useTabsStore((state) => state.createTab);
@@ -28,6 +29,17 @@ function App() {
 
   if (!activeTab) return null;
 
+
+  useKeyboardShortcut({
+    key: "t",
+    ctrl: true,
+    preventDefault: true,
+    handler: async () => {
+      const result = await getInitialPath();
+      createTab(result.data ?? ".");
+    },
+  });
+  
   return (
     <div className=" flex flex-col h-screen w-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
       {/* Main content area below TabBar */}

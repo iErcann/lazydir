@@ -7,6 +7,7 @@ import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 import { PathBar } from "./PathBar";
 import { formatSize } from "../utils/utils";
+import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
 
 interface FileManagerPaneProps {
   tab: Tab;
@@ -75,20 +76,36 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
       <div className="flex-1 flex flex-col">
-        <PathBar pane={pane} onPathChange={handlePathChange} />
+        <div className="flex items-center gap-1 px-2 py-1 bg-[var(--bg-primary)]  ">
+          {/* <button className="p-1.5 rounded hover:bg-[var(--bg-secondary)] disabled:opacity-40">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+
+          <button className="p-1.5 rounded hover:bg-[var(--bg-secondary)] disabled:opacity-40">
+            <ArrowRight className="w-4 h-4" />
+          </button>
+
+          <button className="p-1.5 rounded hover:bg-[var(--bg-secondary)]">
+            <ArrowUp className="w-4 h-4" />
+          </button> */}
+
+          <div className="flex-1 flex flex-col">
+            <PathBar pane={pane} onPathChange={handlePathChange} />
+          </div>
+        </div>
 
         {/* Error message */}
         {error && (
           <div className="p-4">
-          <div className="bg-[var(--accent)] text-[var(--text-primary)] p-2 rounded">
-            Error: {error}
-          </div>
+            <div className="bg-[var(--accent)] text-[var(--text-primary)] p-2 rounded">
+              Error: {error}
+            </div>
           </div>
         )}
 
         {/* Loading state */}
         {!error && !contents && (
-          <div className="p-2  text-[var(--text-secondary)]">Loading...</div>
+          <div className="p-2  text-[var(--text-secondary)]"> </div>
         )}
 
         {/* Directory contents */}
