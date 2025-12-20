@@ -9,7 +9,7 @@ export function TabBar() {
   if (!activeTabId) return null;
 
   return (
-    <div className="h-10 bg-[var(--bg-primary)] flex items-center px-2 text-[var(--text-primary)]">
+    <div className="h-10 bg-(--bg-primary) flex items-center px-2 text-(--text-primary)">
       {/* Tabs container */}
       <div className="flex flex-1 h-full overflow-hidden">
         {tabs.map((tab) => (
@@ -19,9 +19,9 @@ export function TabBar() {
 
       {/* + New Tab Button */}
       <button
-        className="ml-2 w-8 h-8 flex-shrink-0 flex items-center justify-center rounded
-                    text-[var(--text-secondary)] hover:text-[var(--text-primary)]
-                    hover:bg-[var(--bg-tertiary)] transition"
+        className="ml-2 w-8 h-8 shrink-0 flex items-center justify-center rounded
+                    text-(--text-secondary) hover:text-(--text-primary)
+                    hover:bg-(--bg-tertiary) transition"
         onClick={() => {
           const activeTab = tabs.find((tab) => tab.id === activeTabId);
           createTab(activeTab?.panes[0]?.path);

@@ -67,9 +67,9 @@ export function SplitView({ tab }: SplitViewProps) {
       <div
         onMouseDown={handleDragMouseDown}
         className={`
-          w-1 bg-[var(--bg-tertiary)] cursor-col-resize 
-          hover:bg-[var(--bg-secondary)] transition-colors
-          ${isDragging ? "bg-[var(--bg-accent)]" : ""}
+          w-1 bg-(--bg-tertiary) cursor-col-resize 
+          hover:bg-(--bg-secondary) transition-colors
+          ${isDragging ? "bg-(--bg-accent)" : ""}
         `}
       />
 

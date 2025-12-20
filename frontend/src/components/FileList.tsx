@@ -62,9 +62,9 @@ export function FileList({
         cell: ({ row }) => (
           <div className="w-8 flex items-center justify-center">
             {row.original.isDir ? (
-              <Folder className="w-5 h-5 text-[var(--accent)]" />
+              <Folder className="w-5 h-5 text-(--accent)" />
             ) : (
-              <File className="w-5 h-5 text-[var(--text-secondary)]" />
+              <File className="w-5 h-5 text-(--text-secondary)" />
             )}
           </div>
         ),
@@ -113,7 +113,7 @@ export function FileList({
         accessorKey: "size",
         header: "Size",
         cell: ({ row, getValue }) => (
-          <div className="text-sm text-[var(--text-secondary)]">
+          <div className="text-sm text-(--text-secondary)">
             {row.original.isDir ? "-" : formatSize(getValue() as number)}
           </div>
         ),
@@ -135,7 +135,7 @@ export function FileList({
         cell: ({ getValue }) => {
           const value = getValue() as string | undefined;
           return (
-            <div className="text-sm text-[var(--text-secondary)]">
+            <div className="text-sm text-(--text-secondary)">
               {value ? formatDate(value) : "-"}
             </div>
           );
@@ -187,10 +187,10 @@ export function FileList({
 
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
-      <div className="min-w-[600px] px-6 py-2">
+      <div className="min-w-[600px]">
         {/* Header */}
         <div
-          className={`sticky top-0 px-1 py-2 grid ${gridCols} gap-4 text-sm font-medium bg-[var(--bg-primary)] bg-opacity-100 z-10 w-full`}
+          className={`sticky top-0 py-2 grid ${gridCols} text-sm font-medium bg-opacity-100 z-10 w-full hover:bg-(--bg-secondary) select-none`}
         >
           {table.getHeaderGroups().map((headerGroup) => (
             <>
@@ -198,7 +198,7 @@ export function FileList({
                 <div
                   key={header.id}
                   className={`
-                    text-[var(--text-secondary)]
+                    text-(--text-secondary)
                     ${
                       header.column.getCanSort()
                         ? "cursor-pointer select-none"
@@ -249,7 +249,7 @@ export function FileList({
             return (
               <div
                 key={virtualRow.key}
-                className={`absolute top-0 left-0 w-full hover:bg-[var(--bg-secondary)] rounded-md`}
+                className={`absolute top-0 left-0 w-full hover:bg-(--bg-secondary) rounded-md select-none`}
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
@@ -266,14 +266,14 @@ export function FileList({
                     }
                     setSelectedFilePaths(tab.id, pane.id, newSelected);
                   }}
-                  className={`w-full px-1 py-4 grid ${gridCols} gap-4 items-center text-left min-w-0 w-full rounded-b-md ${
+                  className={`w-full  py-4 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md  ${
                     selectedFilePaths?.has(file.path)
-                      ? "bg-[var(--bg-tertiary)]"
+                      ? "bg-(--bg-tertiary)"
                       : ""
                   }`}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <div key={cell.id} className="min-w-0 text-left">
+                    <div key={cell.id} className="min-w-0 text-left select-none">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

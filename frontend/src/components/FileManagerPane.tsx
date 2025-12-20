@@ -76,7 +76,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
       <div className="flex-1 flex flex-col">
-        <div className="flex items-center gap-1 px-2 py-1 bg-[var(--bg-primary)]  ">
+        <div className="flex items-center gap-1 px-2 py-1 bg-(--bg-primary)  ">
           {/* <button className="p-1.5 rounded hover:bg-[var(--bg-secondary)] disabled:opacity-40">
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -97,7 +97,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
         {/* Error message */}
         {error && (
           <div className="p-4">
-            <div className="bg-[var(--accent)] text-[var(--text-primary)] p-2 rounded">
+            <div className="bg-(--accent) text-(--text-primary) p-2 rounded">
               Error: {error}
             </div>
           </div>
@@ -105,12 +105,12 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
 
         {/* Loading state */}
         {!error && !contents && (
-          <div className="p-2  text-[var(--text-secondary)]"> </div>
+          <div className="p-2  text-(--text-secondary)"> </div>
         )}
 
         {/* Directory contents */}
         {contents && (
-          <>
+          <div className="flex-1 flex flex-col overflow-hidden px-4">
             <FileList
               contents={contents}
               onDirectoryOpen={handleDirectoryOpen}
@@ -119,13 +119,13 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
               tab={tab}
             />
 
-            <div className="p-2 text-sm text-[var(--text-secondary)] tracking-wide bg-[var(--bg-primary)] truncate">
+            <div className="p-2 text-sm text-(--text-secondary) tracking-wide bg-(--bg-primary) truncate">
               {contents.files.filter((f) => f.isDir).length} folders |{" "}
               {contents.files.filter((f) => !f.isDir).length} files :{" "}
               {formatSize(calculateDirectorySize(contents))} (
               {calculateDirectorySize(contents).toLocaleString()} bytes)
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -70,8 +70,8 @@ export function TabItem({ tab, isActive }: TabItemProps) {
         border-b-2 pb-1 transition
         ${
           isActive
-            ? "border-[var(--accent)] font-semibold"
-            : "border-transparent text-[var(--text-secondary)] text-sm"
+            ? "border-(--accent) font-semibold"
+            : "border-transparent text-(--text-secondary) text-sm"
         }`}
       onClick={handleClick}
       onMouseDown={handleMiddleClick}
@@ -88,7 +88,7 @@ export function TabItem({ tab, isActive }: TabItemProps) {
       */}
       <button
         className="absolute right-1 top-1 w-8 h-8 flex items-center justify-center
-                   text-[var(--text-secondary)] hover:text-[var(--text-primary)]
+                   text-(--text-secondary) hover:text-(--text-primary)
                    rounded transition
                    opacity-0 pointer-events-none
                    group-hover:opacity-100 group-hover:pointer-events-auto"
