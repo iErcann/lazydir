@@ -21,13 +21,29 @@ Lazydir is a file manager built with Go, Wails and React. It offers a clean, tab
 
 ## Installation
 
-Packages are available for various Linux distributions. You can find the latest builds on the project's releases page.
+Packages are available for Linux distributions, Windows & MacOS. You can find the latest builds on the project's releases page.
 
-- **Windows**: Download the `.exe` installer.
-- **macOS**: Download the `.dmg` installer.
-- **Debian/Ubuntu**: Download the `.deb` package.
-- **Fedora/CentOS/RHEL**: Download the `.rpm` package.
-- **Arch Linux**: Download the `.pkg.tar.zst` package.
+- **Windows**:
+
+  - Download the **installer**: `lazydir-amd64-installer.exe`
+  - Or download the **portable binary**: `lazydir.exe`
+
+- **macOS**:
+
+  - Download the **app bundle archive**: `lazydir.app.zip`
+    _(no `.dmg` is provided)_
+
+- **Debian / Ubuntu**:
+
+  - Download the `.deb` package: `lazydir.deb`
+
+- **Fedora / CentOS / RHEL**:
+
+  - Download the `.rpm` package: `lazydir.rpm`
+
+- **Arch Linux**:
+
+  - Download the `.pkg.tar.zst` package: `lazydir.pkg.tar.zst`
 
 ## Building from Source
 
