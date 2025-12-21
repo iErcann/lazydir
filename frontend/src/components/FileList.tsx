@@ -192,7 +192,7 @@ export function FileList({
       <div className="min-w-[600px]">
         {/* Header */}
         <div
-          className={`sticky top-0 py-2 grid ${gridCols} text-sm font-medium bg-opacity-100 z-10 w-full `}
+          className={`sticky top-0 py-2 grid ${gridCols} text-sm font-medium bg-opacity-0 z-10 w-full bg-(--bg-primary) border-b border-white/5 px-2`}
         >
           {table.getHeaderGroups().map((headerGroup) => (
             <>

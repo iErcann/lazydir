@@ -9,7 +9,7 @@ import (
 type FileInfo struct {
 	Name      string    `json:"name"`
 	Path      string    `json:"path"` // normalized absolute path
-	Size      int64     `json:"size"`
+	Size      int64     `json:"size"` // size in bytes
 	IsDir     bool      `json:"isDir"`
 	Mode      string    `json:"mode"`
 	Modified  time.Time `json:"modified"`
@@ -25,11 +25,12 @@ type PathInfo struct {
 
 // DirectoryContents for listing directory
 type DirectoryContents struct {
-	Path       string     `json:"path"`
-	Files      []FileInfo `json:"files"`
-	Total      int        `json:"total"`
-	Dirs       int        `json:"dirs"`
-	FilesCount int        `json:"filesCount"`
+	Path  string     `json:"path"`
+	Files []FileInfo `json:"files"`
+
+	DirCount        int   `json:"dirCount"`        // Direct children only
+	FileCount       int   `json:"fileCount"`       // Direct children only
+	DirectSizeBytes int64 `json:"directSizeBytes"` // Direct files size in bytes
 }
 
 type AppError struct {

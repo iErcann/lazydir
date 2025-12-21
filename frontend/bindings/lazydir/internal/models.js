@@ -68,26 +68,29 @@ export class DirectoryContents {
              */
             this["files"] = [];
         }
-        if (!("total" in $$source)) {
+        if (!("dirCount" in $$source)) {
             /**
+             * Direct children only
              * @member
              * @type {number}
              */
-            this["total"] = 0;
+            this["dirCount"] = 0;
         }
-        if (!("dirs" in $$source)) {
+        if (!("fileCount" in $$source)) {
             /**
+             * Direct children only
              * @member
              * @type {number}
              */
-            this["dirs"] = 0;
+            this["fileCount"] = 0;
         }
-        if (!("filesCount" in $$source)) {
+        if (!("directSizeBytes" in $$source)) {
             /**
+             * Direct files size in bytes
              * @member
              * @type {number}
              */
-            this["filesCount"] = 0;
+            this["directSizeBytes"] = 0;
         }
 
         Object.assign(this, $$source);
@@ -151,6 +154,7 @@ export class FileInfo {
         }
         if (!("size" in $$source)) {
             /**
+             * size in bytes
              * @member
              * @type {number}
              */

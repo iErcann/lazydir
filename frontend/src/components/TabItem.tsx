@@ -18,7 +18,7 @@ export function TabItem({ tab, isActive }: TabItemProps) {
    * - Falls back to "Untitled" if no path exists
    * - Appends pane count if the tab has multiple panes
    */
-  const folderName = useMemo(() => {
+  const tabName = useMemo(() => {
     if (tab.panes.length === 0) {
       return "Untitled";
     }
@@ -75,10 +75,10 @@ export function TabItem({ tab, isActive }: TabItemProps) {
         }`}
       onClick={handleClick}
       onMouseDown={handleMiddleClick}
-      title={folderName}
+      title={tabName}
     >
       {/* Tab title (truncated if too long) */}
-      <span className="truncate">{folderName}</span>
+      <span className="truncate">{tabName}</span>
 
       {/*
         Close button:

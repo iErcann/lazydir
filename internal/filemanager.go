@@ -25,9 +25,10 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 	}
 
 	var (
-		files     []FileInfo
-		dirCount  int
-		fileCount int
+		files           []FileInfo
+		dirCount        int
+		fileCount       int
+		directSizeBytes int64 // important for big files
 	)
 
 	for _, entry := range entries {
@@ -54,16 +55,17 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 			dirCount++
 		} else {
 			fileCount++
+			directSizeBytes += info.Size()
 		}
 	}
 
 	return Result[DirectoryContents]{
 		Data: &DirectoryContents{
-			Path:       absPath,
-			Files:      files,
-			Total:      len(files),
-			Dirs:       dirCount,
-			FilesCount: fileCount,
+			Path:            absPath,
+			Files:           files,
+			DirCount:        dirCount,
+			FileCount:       fileCount,
+			DirectSizeBytes: directSizeBytes,
 		},
 	}
 }

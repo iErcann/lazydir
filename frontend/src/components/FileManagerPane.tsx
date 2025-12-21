@@ -19,6 +19,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const [error, setError] = useState<string | null>(null);
 
+  console.log("Rendering FileManagerPane for path:", pane.path);
   // Load directory contents
   // Contains the files, putten here to avoid rerendering everything if inside zustand
   const [contents, setContents] = useState<DirectoryContents | null>(null);
@@ -120,11 +121,11 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
               tab={tab}
             />
 
-            <div className="p-2 text-sm text-(--text-secondary) tracking-wide bg-(--bg-primary) truncate">
-              {contents.files.filter((f) => f.isDir).length} folders |{" "}
-              {contents.files.filter((f) => !f.isDir).length} files :{" "}
-              {formatSize(calculateDirectorySize(contents))} (
-              {calculateDirectorySize(contents).toLocaleString()} bytes)
+            <div className="p-2 text-sm text-(--text-secondary)">
+              {/* always use folders for the front users, but dir in the code. */}
+              {contents.dirCount} folders | {contents.fileCount} files :{" "}
+              {formatSize(contents.directSizeBytes)} (
+              {contents.directSizeBytes.toLocaleString()} bytes)
             </div>
           </div>
         )}
