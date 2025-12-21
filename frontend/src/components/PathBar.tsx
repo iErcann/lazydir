@@ -68,7 +68,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
 
   return (
     <div
-      className="mx-auto flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-secondary) backdrop-blur border border-white/5 min-w-1/2 mt-2 cursor-text"
+      className="mx-auto flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-secondary) backdrop-blur border border-white/5 min-w-1/2 mt-0.5 cursor-text"
       onClick={handleBarClick}
     >
       {editing ? (

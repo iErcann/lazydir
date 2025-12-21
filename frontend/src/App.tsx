@@ -41,7 +41,7 @@ function App() {
   // }); breaks rule of hooks?
   
   return (
-    <div className=" flex flex-col h-screen w-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
+    <div className="flex flex-col h-screen w-screen bg-(--bg-primary) text-[var(--text-primary)] overflow-hidden">
       {/* Main content area below TabBar */}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

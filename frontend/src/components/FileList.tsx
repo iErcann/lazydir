@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useTabsStore } from "../store/tabsStore";
 import { Pane, Tab } from "../types";
 import { formatSize } from "../utils/utils";
+import { getIconForFile, getIconForFolder } from "@react-symbols/icons/utils";
 
 interface FileListProps {
   contents: DirectoryContents;
@@ -57,29 +58,30 @@ export function FileList({
   const columns = useMemo<ColumnDef<FileInfo>[]>(
     () => [
       {
-        id: "icon",
-        header: "",
-        cell: ({ row }) => (
-          <div className="w-8 flex items-center justify-center">
-            {row.original.isDir ? (
-              <Folder className="w-5 h-5 text-(--accent)" />
-            ) : (
-              <File className="w-5 h-5 text-(--text-secondary)" />
-            )}
-          </div>
-        ),
-        enableSorting: false,
-        size: 32,
-      },
-      {
         accessorKey: "name",
         header: "Name",
-        cell: ({ getValue }) => (
-          <div
-            className="truncate text-sm font-medium"
-            title={getValue() as string}
-          >
-            {getValue() as string}
+        cell: ({ getValue, row }) => (
+          <div className="flex items-center gap-2 min-w-0 px-2">
+            <div className="w-6 h-6 flex items-center justify-center  ">
+              {row.original.isDir ? (
+                <div className="w-6 h-6 text-(--accent)">
+                  <Folder className="w-6 h-6 text-(--accent)" />
+                </div>
+              ) : (
+                <div className="w-6 h-6 text-(--text-secondary)">
+                  {getIconForFile({
+                    fileName: `${getValue() as string}`,
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div
+              className="truncate text-sm font-medium min-w-0"
+              title={getValue() as string}
+            >
+              {getValue() as string}
+            </div>
           </div>
         ),
         sortDescFirst: true,
@@ -172,7 +174,7 @@ export function FileList({
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => listRef.current,
-    estimateSize: () => 48,
+    estimateSize: () => 32,
     overscan: 5,
   });
   const onOpen = (file: FileInfo) => {
@@ -183,14 +185,14 @@ export function FileList({
     }
   };
 
-  const gridCols = "grid-cols-[32px_minmax(240px,1fr)_90px_160px]";
+  const gridCols = "grid-cols-[minmax(240px,1fr)_90px_260px]";
 
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
       <div className="min-w-[600px]">
         {/* Header */}
         <div
-          className={`sticky top-0 py-2 grid ${gridCols} text-sm font-medium bg-opacity-100 z-10 w-full hover:bg-(--bg-secondary) select-none`}
+          className={`sticky top-0 py-2 grid ${gridCols} text-sm font-medium bg-opacity-100 z-10 w-full `}
         >
           {table.getHeaderGroups().map((headerGroup) => (
             <>
@@ -198,13 +200,13 @@ export function FileList({
                 <div
                   key={header.id}
                   className={`
-                    text-(--text-secondary)
-                    ${
-                      header.column.getCanSort()
-                        ? "cursor-pointer select-none"
-                        : ""
-                    }
-                      `}
+                  text-(--text-secondary) hover:text-(--text-primary)
+                  ${
+                    header.column.getCanSort()
+                      ? "cursor-pointer select-none"
+                      : ""
+                  }
+                  `}
                   onClick={header.column.getToggleSortingHandler()}
                   title={
                     header.column.getCanSort()
@@ -266,14 +268,17 @@ export function FileList({
                     }
                     setSelectedFilePaths(tab.id, pane.id, newSelected);
                   }}
-                  className={`w-full  py-4 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md  ${
+                  className={`w-full py-2 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md  ${
                     selectedFilePaths?.has(file.path)
                       ? "bg-(--bg-tertiary)"
                       : ""
                   }`}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <div key={cell.id} className="min-w-0 text-left select-none">
+                    <div
+                      key={cell.id}
+                      className="min-w-0 text-left select-none"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
