@@ -1,41 +1,70 @@
 # lazydir
 
-A cross platform file manager you probably don't need.
+A cross platform file manager you _probably_ don't need.
 
-My toy project.
+Lazydir is a modern file manager built with Go and Wails. It offers a clean, tabbed, split-screen interface to make managing your files a breeze.
 
-![
-lazydir.png
-](lazydir.png)
+![Lazydir Screenshot](branding/lazydir.png)
 
 ## Features
 
-- Split screen file management
-- Tabs
-- Support for custom themes
-- Cross platform (Linux, Windows, MacOS)
+- **Split-Screen View**: Manage files and directories side-by-side with dual panes for maximum productivity.
+- **Tabbed Interface**: Keep multiple directories open in tabs and switch between them effortlessly.
+- **Cross-Platform**: A single, consistent experience on Linux, Windows, and macOS.
+- **Custom Themes**: Personalize the look and feel to match your style.
 
-![SplitScreen](splitscreen.png)
+![FileGrid](branding/filegrid.png)
 
-## Dev
+## Installation
 
-Download and install [Wails v3 alpha](https://v3alpha.wails.io/).
+Packages are available for various Linux distributions. You can find the latest builds on the project's releases page.
 
-Install [taskfile](https://taskfile.dev/docs/installation).
+- **Windows**: Download the `.exe` installer.
+- **macOS**: Download the `.dmg` installer.
+- **Debian/Ubuntu**: Download the `.deb` package.
+- **Fedora/CentOS/RHEL**: Download the `.rpm` package.
+- **Arch Linux**: Download the `.pkg.tar.zst` package.
 
-Run `task dev` to start the development server.
+## Building from Source
 
-Run `task build` to build the
-application.
+### Prerequisites
 
-Run `task package` to package the application for distribution.
+1.  **Go**: Install the Go programming language.
+2.  **Wails v3**: Install the Wails v3 alpha by following the [official guide](https://v3alpha.wails.io/).
+3.  **Task**: Install Task by following its [installation instructions](https://taskfile.dev/docs/installation).
+4.  **Linux Dependencies**: If you are on Debian/Ubuntu, install the required libraries:
+    ```bash
+    sudo apt install build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.0-dev
+    ```
 
-on linux, you might need :
+### Development Commands
 
-`sudo apt install build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.0-dev`
+- **Run in development mode**:
+  ```bash
+  task dev
+  ```
+- **Build the application**:
+  ```bash
+  task build
+  ```
+- **Package for distribution**:
+  ```bash
+  task package
+  ```
+- **Update embedded assets**:
+  The frontend assets are embedded in the Go binary. To update them, modify the assets in `frontend/dist` and run:
+  ```bash
+  task common:update:assets
+  ```
 
-## Updating embedded assets
+## 📜 License
 
-lazydir/build/config.yml
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-Run `task common:update:assets` to update the embedded assets.
+## Theme showcase
+
+Its all CSS.
+
+![Light Theme](branding/light.png)
+
+![Dracula Theme](branding/dracula.png)
