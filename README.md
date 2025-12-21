@@ -6,7 +6,7 @@ A cross platform file manager you _probably_ don't need.
 
 Lazydir is a file manager built with Go, Wails and React. It offers a clean, tabbed, split-screen interface to make managing your files a breeze.
 
-![Lazydir Screenshot](branding/lazydir.png)
+![Lazydir Screenshot](branding/lazydirmac.png)
 
 ## Features
 
