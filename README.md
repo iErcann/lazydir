@@ -33,3 +33,9 @@ Run `task package` to package the application for distribution.
 on linux, you might need :
 
 `sudo apt install build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.0-dev`
+
+## Updating embedded assets
+
+lazydir/build/config.yml
+
+Run `task common:update:assets` to update the embedded assets.

@@ -1,13 +1,13 @@
 [Desktop Entry]
 Version=1.0
-Name=My Product
-Comment=A testw3 application
+Name=lazydir
+Comment=Lazy cross-platform file manager - lazydir
 # The Exec line includes %u to pass the URL to the application
-Exec=/usr/local/bin/testw3 %u
+Exec=/usr/local/bin/lazydir %u
 Terminal=false
 Type=Application
-Icon=testw3
+Icon=lazydir
 Categories=Utility;
-StartupWMClass=testw3
+StartupWMClass=lazydir
 
  

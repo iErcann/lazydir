@@ -2,10 +2,10 @@
 set -e
 
 # Build configuration
-APP_NAME="testw3"
-BUNDLE_ID="com.example.testw3"
-VERSION="0.1.0"
-BUILD_NUMBER="0.1.0"
+APP_NAME="lazydir"
+BUNDLE_ID="com.lazydir.lazydir"
+VERSION="0.0.1"
+BUILD_NUMBER="0.0.1"
 BUILD_DIR="build/ios"
 TARGET="simulator"
 

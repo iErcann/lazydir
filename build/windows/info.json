@@ -1,15 +1,15 @@
 {
 	"fixed": {
-		"file_version": "0.1.0"
+		"file_version": "0.0.1"
 	},
 	"info": {
 		"0000": {
-			"ProductVersion": "0.1.0",
-			"CompanyName": "My Company",
-			"FileDescription": "A testw3 application",
-			"LegalCopyright": "© 2025, My Company",
-			"ProductName": "My Product",
-			"Comments": "This is a comment"
+			"ProductVersion": "0.0.1",
+			"CompanyName": "lazydir",
+			"FileDescription": "Lazy cross-platform file manager - lazydir",
+			"LegalCopyright": "(c) 2025, lazydir",
+			"ProductName": "lazydir",
+			"Comments": "Lazy cross-platform file manager"
 		}
 	}
 }

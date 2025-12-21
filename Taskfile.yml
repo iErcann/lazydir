@@ -24,6 +24,14 @@ tasks:
     cmds:
       - task: "{{OS}}:package"
 
+  package-all:
+    summary: Packages production builds for all platforms
+    cmds:
+      - task: windows:package
+      - task: darwin:package
+      - task: linux:package
+      - task: ios:package
+      - task: android:package
   run:
     summary: Runs the application
     cmds:
