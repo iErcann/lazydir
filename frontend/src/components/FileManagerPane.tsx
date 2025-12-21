@@ -8,6 +8,7 @@ import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemana
 import { PathBar } from "./PathBar";
 import { formatSize } from "../utils/utils";
 import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
+import { FileGrid } from "./FileGrid";
 
 interface FileManagerPaneProps {
   tab: Tab;
@@ -71,7 +72,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     return contents.files.reduce((total, file) => total + file.size, 0);
   };
 
-  console.log("Rendering FileManagerPane for path:", pane.path);
+  // console.log("Rendering FileManagerPane for path:", pane.path);
 
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
@@ -97,7 +98,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
         {/* Error message */}
         {error && (
           <div className="p-4">
-            <div className="bg-(--accent) text-(--text-primary) p-2 rounded">
+            <div className="bg-(--bg-tertiary) text-(--text-primary) p-4 rounded-md">
               Error: {error}
             </div>
           </div>

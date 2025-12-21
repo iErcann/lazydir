@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { FileInfo } from "../../bindings/lazydir/internal";
 import { formatSize } from "../utils/utils";
+import { getIconForFile } from "@react-symbols/icons/utils";
 
 interface FileItemProps {
   file: FileInfo;
@@ -23,25 +24,6 @@ export function FileItem({
   onDirectoryOpen,
   onFileOpen,
 }: FileItemProps) {
-  const getFileIcon = (file: FileInfo) => {
-    if (file.isDir) return Folder;
-
-    // TODO: move this to the backend.
-    const ext = file.extension?.toLowerCase();
-    if ([".jpg", ".jpeg", ".png", ".gif", ".svg"].includes(ext || ""))
-      return Image;
-    if ([".mp4", ".mov", ".avi", ".mkv"].includes(ext || "")) return Film;
-    if ([".mp3", ".wav", ".flac", ".m4a"].includes(ext || "")) return Music;
-    if ([".zip", ".rar", ".7z", ".tar", ".gz"].includes(ext || ""))
-      return Archive;
-    if ([".txt", ".md", ".doc", ".docx", ".pdf"].includes(ext || ""))
-      return FileText;
-
-    return File;
-  };
-
-  const Icon = getFileIcon(file);
-
   const onSelect = (file: FileInfo) => {
     console.log("Select file or directory:", file.path);
   };
@@ -63,9 +45,17 @@ export function FileItem({
       }`}
       title={file.name}
     >
-      <Icon
-        className={`w-16 h-16 mb-2 ${file.isDir ? "text-(--accent)" : ""}`}
-      />
+      {file.isDir ? (
+        <div className="text-(--accent) mb-2 ">
+          <Folder className="w-16 h-16 fill-(--accent)"  />
+        </div>
+      ) : (
+        getIconForFile({
+          fileName: `${file.name}`,
+          className: "w-16 h-16 text-(--accent) mb-2 ",
+        })
+      )}
+
       <span className="text-sm text-center text-(--text-primary) w-full break-words truncate">
         {file.name}
       </span>

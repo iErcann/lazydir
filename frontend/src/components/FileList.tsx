@@ -65,10 +65,10 @@ export function FileList({
             <div className="w-6 h-6 flex items-center justify-center  ">
               {row.original.isDir ? (
                 <div className="w-6 h-6 text-(--accent)">
-                  <Folder className="w-6 h-6 text-(--accent)" />
+                  <Folder className="w-6 h-6 fill-(--accent)" />
                 </div>
               ) : (
-                <div className="w-6 h-6 text-(--text-secondary)">
+                <div className="w-6 h-6">
                   {getIconForFile({
                     fileName: `${getValue() as string}`,
                   })}
