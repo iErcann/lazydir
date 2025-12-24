@@ -1,10 +1,12 @@
 # lazydir
 
-### WIP
+### WIP not finished at all
 
 A cross platform file manager you _probably_ don't need.
 
-Lazydir is a file manager built with Go, Wails and React. It offers a clean, tabbed, split-screen interface to make managing your files a breeze.
+Lazydir is a file manager built with Go, Wails and React.
+
+(i like [thunar](https://gitlab.xfce.org/xfce/thunar))
 
 ![Lazydir Screenshot](branding/lazydirmac.png)
 
@@ -28,10 +30,10 @@ Packages are available for Linux distributions, Windows & MacOS. You can find th
   - Download the **installer**: `lazydir-amd64-installer.exe`
   - Or download the **portable binary**: `lazydir.exe`
 
-- **macOS**:
+<!-- - **macOS**:
 
   - Download the **app bundle archive**: `lazydir.app.zip`
-    _(no `.dmg` is provided)_
+    _(no `.dmg` is provided)_ -->
 
 - **Debian / Ubuntu**:
 
@@ -88,3 +90,36 @@ Its all CSS.
 ![Light Theme](branding/light.png)
 
 ![Dracula Theme](branding/dracula.png)
+
+## TODO
+
+## TODO
+
+- [ ] **HIGH**: SideBar with default folders cross-platform, basic.
+- [ ] **HIGH**: Keep it fast even though it's React (lazy loading, virtualized list, Go backend for first operations).
+- [ ] **HIGH**: Move state to the Tab/Pane level to maintain context after switching.
+- [ ] **MEDIUM**: Navigation buttons (Up, Left, Right) with history tracking.
+- [ ] **MEDIUM**: Support for Mouse4 (Back) and Mouse5 (Forward) buttons.
+- [ ] **HIGH**: Context Menu on right-click.
+- [ ] **HIGH**: File Operations:
+  - [ ] **HIGH**: Copy-Paste.
+  - [ ] **LOW**: Cut-Paste.
+  - [ ] **HIGH**: Delete.
+  - [ ] **MEDIUM**: Rename.
+  - [ ] **HIGH**: New Folder.
+  - [ ] **HIGH**: New File.
+  - [ ] **MEDIUM**: Drag and Drop (complex):
+    - [ ] Drag from lazydir to lazydir.
+    - [ ] Drag from one lazydir pane to another pane.
+    - [ ] Drag between tabs in lazydir.
+    - [ ] Drag from OS to lazydir.
+    - [ ] Drag from lazydir to OS.
+- [ ] **HIGH**: Multi-Select files (SHIFT + Click, CTRL + Click).
+- [ ] **LOW**: File Previews (at least for images).
+- [ ] **LOW**: Press a key to jump to files starting with that letter (like Thunar).
+- [ ] **LOW**: CTRL+A to select all files in the current directory.
+- [ ] **LOW**: CTRL+L to focus the address bar.
+- [ ] **LOW**: Terminal integration (open terminal here) - platform-specific.
+- [ ] **LOW**: File Search in the current directory.
+- [ ] **MEDIUM**: Tab support.
+- [ ] **MEDIUM**: Split Screen support.
