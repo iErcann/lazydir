@@ -97,7 +97,7 @@ Its all CSS.
 
 ## TODO
 
-- [ ] **HIGH**: SideBar with default folders cross-platform, basic.
+- [x] **HIGH**: SideBar with default folders cross-platform, basic.
 - [ ] **HIGH**: Keep it fast even though it's React (lazy loading, virtualized list, Go backend for first operations).
 - [ ] **HIGH**: Move state to the Tab/Pane level to maintain context after switching.
 - [ ] **MEDIUM**: Navigation buttons (Up, Left, Right) with history tracking.

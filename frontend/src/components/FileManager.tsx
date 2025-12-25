@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useFileSystemStore } from "../store/directoryStore";
 import { Sidebar } from "./SideBar";
+import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
 
 export function FileManager() {
   const createTab = useTabsStore((state) => state.createTab);
@@ -39,15 +40,15 @@ export function FileManager() {
   }, [activeTab, initialPath, createTab]);
 
 
-    // useKeyboardShortcut({
-  //   key: "t",
-  //   ctrl: true,
-  //   preventDefault: true,
-  //   handler: async () => {
-  //     const result = await getInitialPath();
-  //     createTab(result.data ?? ".");
-  //   },
-  // }); breaks rule of hooks?
+  useKeyboardShortcut({
+    key: "t",
+    ctrl: true,
+    preventDefault: true,
+    handler: async () => {
+      const result = await getInitialPath();
+      createTab(result.data ?? ".");
+    },
+  }); 
 
   
   // Show loading state
