@@ -1,20 +1,20 @@
 import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 import type { Pane, Tab } from "../types";
 import { SortingState } from "@tanstack/react-table";
 
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
 interface TabsStore {
-  // State
   tabs: Tab[];
   activeTabId: string | null;
 
-  // Actions
   createTab: (path?: string) => Tab;
   closeTab: (tabId: string) => void;
   activateTab: (tabId: string) => void;
@@ -27,220 +27,193 @@ interface TabsStore {
   setSelectedFilePaths: (
     tabId: string,
     paneId: string,
-    selectedFilePaths: Set<string>,
-  ) => void; 
-
+    selectedFilePaths: Set<string>
+  ) => void;
   setPaneSorting: (
     tabId: string,
     paneId: string,
-    sorting: SortingState,
+    sorting: SortingState
   ) => void;
 
-  // Getters
+  // Getters (unchanged - they don't mutate)
   getActiveTab: () => Tab | null;
   getActivePane: () => Pane | null;
   getPane: (tabId: string, paneId: string) => Pane | null;
 }
 
-export const useTabsStore = create<TabsStore>((set, get) => ({
-  tabs: [],
-  activeTabId: null,
+export const useTabsStore = create<TabsStore>()(
+  immer((set, get) => ({
+    tabs: [],
+    activeTabId: null,
 
-  createTab: (path = ".") => {
-    const newTab: Tab = {
-      id: generateUUID(),
-      panes: [
-        {
-          id: generateUUID(),
-          path,
-          active: true,
-          selectedFilePaths: new Set<string>(),
-          sorting: [{ id: "name", desc: false }],
-        },
-        // {
-        //   id: generateUUID(),
-        //   path,
-        //   active: true,
-        //   selectedFilePaths: new Set<string>(),
-        // },
-      ],
-    };
-    set((state) => ({
-      tabs: [...state.tabs, newTab],
-      activeTabId: newTab.id,
-    }));
-    return newTab;
-  },
+    createTab: (path = ".") => {
+      const newTab: Tab = {
+        id: generateUUID(),
+        panes: [
+          {
+            id: generateUUID(),
+            path,
+            active: true,
+            viewMode: "list", // ← added default (optional but recommended)
+            sorting: [{ id: "name", desc: false }],
+            selectedFilePaths: new Set<string>(),
+          },
+        ],
+      };
 
-  activateTab: (tabId: string) => {
-    set((state) => ({
-      activeTabId: tabId,
-      // When activating a tab, make sure only one pane in that tab is active
-      tabs: state.tabs.map((tab) => {
-        if (tab.id !== tabId) return tab;
-        // Find the currently active pane in this tab
-        const hasActivePane = tab.panes.some((pane) => pane.active);
-        // If no pane is active, activate the first one
+      set((state) => {
+        state.tabs.push(newTab);
+        state.activeTabId = newTab.id;
+      });
+
+      return newTab;
+    },
+
+    activateTab: (tabId: string) => {
+      set((state) => {
+        state.activeTabId = tabId;
+
+        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        if (!tab) return;
+
+        const hasActivePane = tab.panes.some((p: Pane) => p.active);
         if (!hasActivePane && tab.panes.length > 0) {
-          return {
-            ...tab,
-            panes: tab.panes.map((pane, index) => ({
-              ...pane,
-              active: index === 0,
-            })),
-          };
+          tab.panes.forEach((p: Pane, i: number) => {
+            p.active = i === 0;
+          });
         }
-        return tab;
-      }),
-    }));
-  },
+      });
+    },
 
-  activatePane: (tabId: string, paneId: string) => {
-    set((state) => {
-      const tab = state.tabs.find((t) => t.id === tabId);
-      if (!tab) return state;
+    activatePane: (tabId: string, paneId: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        if (!tab) return;
 
-      const paneAlreadyActive = tab.panes.find((p) => p.id === paneId)?.active;
-      if (paneAlreadyActive) return state; // no change → no rerender
+        const targetPane = tab.panes.find((p: Pane) => p.id === paneId);
+        if (!targetPane || targetPane.active) return;
 
-      return {
-        tabs: state.tabs.map((tab) => {
-          if (tab.id !== tabId) return tab;
-          return {
-            ...tab,
-            panes: tab.panes.map((pane) => ({
-              ...pane,
-              active: pane.id === paneId,
-            })),
-          };
-        }),
-      };
-    });
-  },
+        // Deactivate all, activate target
+        tab.panes.forEach((p: Pane) => {
+          p.active = p.id === paneId;
+        });
+      });
+    },
 
-  closeTab: (tabId: string) => {
-    if (get().tabs.length === 1) return; // Prevent closing the last tab
-    set((state) => {
-      const updatedTabs = state.tabs.filter((tab) => tab.id !== tabId);
-      const newActiveTabId =
-        state.activeTabId === tabId && updatedTabs.length > 0
-          ? updatedTabs[0].id
-          : state.activeTabId === tabId
-          ? null
-          : state.activeTabId;
+    closeTab: (tabId: string) => {
+      set((state) => {
+        if (state.tabs.length <= 1) return;
 
-      return {
-        tabs: updatedTabs,
-        activeTabId: newActiveTabId,
-      };
-    });
-  },
+        const index = state.tabs.findIndex((t: Tab) => t.id === tabId);
+        if (index === -1) return;
 
-  createPane: (tabId: string, path = ".") => {
-    const newPane: Pane = {
-      id: generateUUID(),
-      path,
-      active: true, // New pane becomes active
-      selectedFilePaths: new Set<string>(),
-    };
+        state.tabs.splice(index, 1);
 
-    set((state) => ({
-      tabs: state.tabs.map((tab) => {
-        if (tab.id !== tabId) return tab;
-        return {
-          ...tab,
-          // Deactivate all other panes, activate the new one
-          panes: tab.panes
-            .map((pane) => ({ ...pane, active: false }))
-            .concat(newPane),
-        };
-      }),
-    }));
-    return newPane;
-  },
-
-  updatePanePath: (tabId: string, paneId: string, newPath: string) => {
-    set((state) => ({
-      tabs: state.tabs.map((tab) => {
-        if (tab.id !== tabId) return tab;
-        return {
-          ...tab,
-          panes: tab.panes.map((pane) => {
-            if (pane.id !== paneId) return pane;
-            return { ...pane, path: newPath };
-          }),
-        };
-      }),
-    }));
-  },
-
-  closePane: (tabId: string, paneId: string) => {
-    set((state) => ({
-      tabs: state.tabs.map((tab) => {
-        if (tab.id !== tabId) return tab;
-        const updatedPanes = tab.panes.filter((p) => p.id !== paneId);
-
-        // If we closed the active pane and there are other panes,
-        // activate the first remaining pane
-        const closedPane = tab.panes.find((p) => p.id === paneId);
-        if (closedPane?.active && updatedPanes.length > 0) {
-          updatedPanes[0].active = true;
+        if (state.activeTabId === tabId) {
+          state.activeTabId = state.tabs[0]?.id ?? null;
         }
+      });
+    },
 
-        return {
-          ...tab,
-          panes: updatedPanes,
-        };
-      }),
-    }));
-  },
+    createPane: (tabId: string, path = ".") => {
+      const newPane: Pane = {
+        id: generateUUID(),
+        path,
+        active: true,
+        viewMode: "list", // ← default
+        sorting: [{ id: "name", desc: false }],
+        selectedFilePaths: new Set<string>(),
+      };
 
-  getActiveTab: () => {
-    const { tabs, activeTabId } = get();
-    return tabs.find((t) => t.id === activeTabId) || null;
-  },
+      set((state) => {
+        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        if (!tab) return;
 
-  getActivePane: () => {
-    const { tabs, activeTabId } = get();
-    const tab = tabs.find((t) => t.id === activeTabId);
-    if (!tab) return null;
-    return tab.panes.find((p) => p.active) || null;
-  },
+        // Deactivate others, add new active pane
+        tab.panes.forEach((p: Pane) => {
+          p.active = false;
+        });
+        tab.panes.push(newPane);
+      });
 
-  getPane: (tabId: string, paneId: string) => {
-    const { tabs } = get();
-    const tab = tabs.find((t) => t.id === tabId);
-    if (!tab) return null;
-    return tab.panes.find((p) => p.id === paneId) || null;
-  },
+      return newPane;
+    },
 
-  setSelectedFilePaths: (tabId: string, paneId: string, selectedFiles: Set<string>) => {
-    set((state) => ({
-      tabs: state.tabs.map((tab) => {
-        if (tab.id !== tabId) return tab;
-        return {
-          ...tab,
-          panes: tab.panes.map((pane) => {
-            if (pane.id !== paneId) return pane;
-            return { ...pane, selectedFilePaths: new Set(selectedFiles) };
-          }),
-        };
-      }),
-    }));
-  },
+    updatePanePath: (tabId: string, paneId: string, newPath: string) => {
+      set((state) => {
+        // Do lookup on draft state – not on get()
+        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        if (!tab) return;
 
-  setPaneSorting: (tabId: string, paneId: string, sorting: SortingState) => {
-    set((state) => ({
-      tabs: state.tabs.map((tab) => {
-        if (tab.id !== tabId) return tab;
-        return {
-          ...tab,
-          panes: tab.panes.map((pane) => {
-            if (pane.id !== paneId) return pane;
-            return { ...pane, sorting };
-          }),
-        };
-      }),
-    }));
-  },
-}));
+        const pane = tab.panes.find((p: Pane) => p.id === paneId);
+        if (pane) {
+          pane.path = newPath; // ← now safe: mutating draft
+        }
+      });
+    },
+
+    closePane: (tabId: string, paneId: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        if (!tab) return;
+
+        const index = tab.panes.findIndex((p: Pane) => p.id === paneId);
+        if (index === -1) return;
+
+        const wasActive = tab.panes[index].active;
+
+        tab.panes.splice(index, 1);
+
+        // If we closed the active pane → activate first remaining one
+        if (wasActive && tab.panes.length > 0) {
+          tab.panes[0].active = true;
+        }
+      });
+    },
+
+    setSelectedFilePaths: (
+      tabId: string,
+      paneId: string,
+      selectedFilePaths: Set<string>
+    ) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        // + Doc for set: https://zustand.docs.pmnd.rs/guides/maps-and-sets-usage#reading-a-set
+        pane.selectedFilePaths = new Set(selectedFilePaths);
+      });
+    },
+
+    setPaneSorting: (tabId: string, paneId: string, sorting: SortingState) => {
+      set((state) => {
+        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        if (!tab) return;
+        const pane = tab.panes.find((p: Pane) => p.id === paneId);
+        if (!pane) return;
+
+        // Immer does not allow you to replace entire nested properties like Set or arrays/objects with completely new references unless you do it in a special way.
+        pane.sorting = [...sorting];
+      });
+    },
+
+    // Getters
+    getActiveTab: () => {
+      const { tabs, activeTabId } = get();
+      return tabs.find((t: Tab) => t.id === activeTabId) ?? null;
+    },
+
+    getActivePane: () => {
+      const tab = get().getActiveTab();
+      return tab?.panes.find((p: Pane) => p.active) ?? null;
+    },
+
+    getPane: (tabId: string, paneId: string) => {
+      const { tabs } = get();
+      const tab = tabs.find((t: Tab) => t.id === tabId);
+      return tab?.panes.find((p: Pane) => p.id === paneId) ?? null;
+    },
+  }))
+);
