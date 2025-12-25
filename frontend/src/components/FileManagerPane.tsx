@@ -1,5 +1,5 @@
 import { FileList } from "./FileList";
-import type { Pane, Tab } from "../types";
+import { ViewMode, type Pane, type Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
 import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
@@ -10,6 +10,7 @@ import { formatSize } from "../utils/utils";
 import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
 import { FileGrid } from "./FileGrid";
 import { useQuery } from "@tanstack/react-query";
+import { List, Grid } from "lucide-react"; // add to your imports
 
 interface FileManagerPaneProps {
   tab: Tab;
@@ -24,7 +25,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   const navigateForward = useTabsStore((state) => state.paneNavigateForward);
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
-
+  const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
   const {
     data: contents,
     isLoading,
@@ -116,6 +117,28 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
           <div className="flex-1 ml-1">
             <PathBar pane={pane} onPathChange={handlePathChange} />
           </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-1 ml-2">
+            <button
+              className={`
+                p-1 rounded hover:bg-(--bg-secondary) transition
+                ${pane.viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""}
+              `}
+              onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.LIST)}
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              className={`
+                p-1 rounded hover:bg-(--bg-secondary) transition
+                ${pane.viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""}
+              `}
+              onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.GRID)}
+            >
+              <Grid className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Error message */}
@@ -135,14 +158,23 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
         {/* Directory contents */}
         {!(fileOpenError || error) && contents && (
           <div className="flex-1 flex flex-col overflow-hidden px-2">
-            <FileList
-              contents={contents}
-              onDirectoryOpen={handleDirectoryOpen}
-              onFileOpen={handleFileOpen}
-              pane={pane}
-              tab={tab}
-            />
-
+            {pane.viewMode === ViewMode.GRID ? (
+              <FileGrid
+                contents={contents}
+                onDirectoryOpen={handleDirectoryOpen}
+                onFileOpen={handleFileOpen}
+                pane={pane}
+                tab={tab}
+              />
+            ) : (
+              <FileList
+                contents={contents}
+                onDirectoryOpen={handleDirectoryOpen}
+                onFileOpen={handleFileOpen}
+                pane={pane}
+                tab={tab}
+              />
+            )}
             <div className="p-1 text-xs text-(--text-secondary)">
               {contents.dirCount} folders | {contents.fileCount} files :{" "}
               {formatSize(contents.directSizeBytes)} (

@@ -99,8 +99,8 @@ Its all CSS.
 
 - [x] **HIGH**: SideBar with default folders cross-platform, basic.
 - [ ] **HIGH**: Keep it fast even though it's React (lazy loading, virtualized list, Go backend for first operations).
-- [ ] **HIGH**: Move state to the Tab/Pane level to maintain context after switching.
-- [ ] **MEDIUM**: Navigation buttons (Up, Left, Right) with history tracking.
+- [x] **HIGH**: Move state to the Tab/Pane level to maintain context after switching.
+- [x] **MEDIUM**: Navigation buttons (Up, Left, Right) with history tracking.
 - [ ] **MEDIUM**: Support for Mouse4 (Back) and Mouse5 (Forward) buttons.
 - [ ] **HIGH**: Context Menu on right-click.
 - [ ] **HIGH**: File Operations:
@@ -118,6 +118,7 @@ Its all CSS.
     - [ ] Drag from lazydir to OS.
 - [ ] **HIGH**: Multi-Select files (SHIFT + Click, CTRL + Click).
 - [ ] **LOW**: File Previews (at least for images).
+- [x] **HIGH** Switch between List View and Grid View.
 - [ ] **LOW**: Press a key to jump to files starting with that letter (like Thunar).
 - [ ] **LOW**: CTRL+A to select all files in the current directory.
 - [ ] **LOW**: CTRL+L to focus the address bar.

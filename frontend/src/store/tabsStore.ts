@@ -44,6 +44,8 @@ interface TabsStore {
     sorting: SortingState
   ) => void;
 
+  setPaneViewMode: (tabId: string, paneId: string, viewMode: ViewMode) => void;
+
   // Getters (unchanged - they don't mutate)
   getActiveTab: () => Tab | null;
   getActivePane: () => ActivePaneResult | null;
@@ -135,6 +137,8 @@ export const useTabsStore = create<TabsStore>()(
         viewMode: ViewMode.LIST,
         sorting: [{ id: "name", desc: false }],
         selectedFilePaths: new Set<string>(),
+        history: [path],
+        historyIndex: 0,
       };
 
       set((state) => {
@@ -237,6 +241,18 @@ export const useTabsStore = create<TabsStore>()(
 
         // Immer does not allow you to replace entire nested properties like Set or arrays/objects with completely new references unless you do it in a special way.
         pane.sorting = [...sorting];
+      });
+    },
+
+    setPaneViewMode: (tabId: string, paneId: string, viewMode: ViewMode) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        pane.viewMode = viewMode;
       });
     },
 
