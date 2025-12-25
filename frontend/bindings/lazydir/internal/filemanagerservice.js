@@ -58,13 +58,23 @@ export function GetPathInfo(p) {
 }
 
 /**
+ * Sidebar Shortcuts
+ * @returns {$CancellablePromise<$models.Result<$models.Shortcut[]>>}
+ */
+export function GetShortcuts() {
+    return $Call.ByID(3114594017).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType6($result);
+    }));
+}
+
+/**
  * ListDirectory lists the contents of a directory.
  * @param {string} dirPath
  * @returns {$CancellablePromise<$models.Result<$models.DirectoryContents>>}
  */
 export function ListDirectory(dirPath) {
     return $Call.ByID(1744058245, dirPath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType5($result);
+        return $$createType8($result);
     }));
 }
 
@@ -83,5 +93,8 @@ const $$createType0 = $models.Result.createFrom($Create.Any);
 const $$createType1 = $models.Result.createFrom($Create.Any);
 const $$createType2 = $models.PathInfo.createFrom;
 const $$createType3 = $models.Result.createFrom($$createType2);
-const $$createType4 = $models.DirectoryContents.createFrom;
-const $$createType5 = $models.Result.createFrom($$createType4);
+const $$createType4 = $models.Shortcut.createFrom;
+const $$createType5 = $Create.Array($$createType4);
+const $$createType6 = $models.Result.createFrom($$createType5);
+const $$createType7 = $models.DirectoryContents.createFrom;
+const $$createType8 = $models.Result.createFrom($$createType7);

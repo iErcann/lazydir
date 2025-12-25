@@ -7,6 +7,7 @@ import {
   OperatingSystem,
   Result,
   PathInfo,
+  Shortcut,
 } from "../../bindings/lazydir/internal/models";
 
 interface FileSystemStore {
@@ -18,6 +19,7 @@ interface FileSystemStore {
   getPathInfo: (path: string) => Promise<Result<PathInfo>>; // Cross platform path info retrieval
   getPathAtIndex: (path: string, index: number) => Promise<Result<string>>; // Get path at specific index
   getInitialPath: () => Promise<Result<string>>; // Get initial path based on OS
+  getShortcuts: () => Promise<Result<Shortcut[]>>; // Get sidebar shortcuts
 }
 
 export const useFileSystemStore = create<FileSystemStore>((set) => ({
@@ -47,4 +49,7 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
   getInitialPath: async () => {
     return await FileManagerService.GetInitialPath();
   },
+  getShortcuts: async () => {
+    return await FileManagerService.GetShortcuts();
+  }
 }));

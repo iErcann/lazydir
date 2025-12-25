@@ -19,7 +19,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const [fileOpenError, setFileOpenError] = useState<string | null>(null);
-
+  const activatePane = useTabsStore((state) => state.activatePane);
   const {
     data: contents,
     isLoading,
@@ -27,7 +27,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     isFetching,  
   } = useQuery({
     queryKey: ["directory", pane.path],
-    
+
     queryFn: () => loadDirectory(pane.path),
 
     select: (result) => {
@@ -57,7 +57,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
 
   const handlePaneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    //activatePane(tab.id, pane.id);
+    activatePane(tab.id, pane.id);
   };
 
 

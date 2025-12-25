@@ -26,7 +26,9 @@ export function FileManager() {
     queryKey: ["initialPath"],
     queryFn: getInitialPath,
     staleTime: Infinity,
-    select: (res) => res.data ?? ".", // fallback to "."
+    select: (res) => { 
+      if (res.error) throw res.error;
+      return res.data ?? "."; }, // fallback to "."
   });
 
   // Create first tab when initialPath is ready

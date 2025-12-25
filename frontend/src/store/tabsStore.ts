@@ -11,6 +11,11 @@ function generateUUID() {
   });
 }
 
+export interface ActivePaneResult {
+  tab: Tab;
+  pane: Pane;
+}
+
 interface TabsStore {
   tabs: Tab[];
   activeTabId: string | null;
@@ -37,7 +42,7 @@ interface TabsStore {
 
   // Getters (unchanged - they don't mutate)
   getActiveTab: () => Tab | null;
-  getActivePane: () => Pane | null;
+  getActivePane: () => ActivePaneResult | null;
   getPane: (tabId: string, paneId: string) => Pane | null;
 }
 
@@ -47,17 +52,19 @@ export const useTabsStore = create<TabsStore>()(
     activeTabId: null,
 
     createTab: (path = ".") => {
+      const defaultPane: Pane = {
+        id: generateUUID(),
+        path,
+        active: true,
+        viewMode: ViewMode.LIST,
+        sorting: [{ id: "name", desc: false }],
+        selectedFilePaths: new Set<string>(),
+      };
       const newTab: Tab = {
         id: generateUUID(),
+        activePaneId: defaultPane.id,
         panes: [
-          {
-            id: generateUUID(),
-            path,
-            active: true,
-            viewMode: ViewMode.LIST,  
-            sorting: [{ id: "name", desc: false }],
-            selectedFilePaths: new Set<string>(),
-          },
+          defaultPane,
         ],
       };
 
@@ -73,30 +80,25 @@ export const useTabsStore = create<TabsStore>()(
       set((state) => {
         state.activeTabId = tabId;
 
-        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        const tab = state.tabs.find((t) => t.id === tabId);
         if (!tab) return;
 
-        const hasActivePane = tab.panes.some((p: Pane) => p.active);
-        if (!hasActivePane && tab.panes.length > 0) {
-          tab.panes.forEach((p: Pane, i: number) => {
-            p.active = i === 0;
-          });
+        // Ensure there is an active pane
+        if (!tab.activePaneId && tab.panes.length > 0) {
+          tab.activePaneId = tab.panes[0].id;
         }
       });
     },
 
     activatePane: (tabId: string, paneId: string) => {
       set((state) => {
-        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        const tab = state.tabs.find((t) => t.id === tabId);
         if (!tab) return;
 
-        const targetPane = tab.panes.find((p: Pane) => p.id === paneId);
-        if (!targetPane || targetPane.active) return;
+        const paneExists = tab.panes.some((p) => p.id === paneId);
+        if (!paneExists) return;
 
-        // Deactivate all, activate target
-        tab.panes.forEach((p: Pane) => {
-          p.active = p.id === paneId;
-        });
+        tab.activePaneId = paneId;
       });
     },
 
@@ -119,21 +121,18 @@ export const useTabsStore = create<TabsStore>()(
       const newPane: Pane = {
         id: generateUUID(),
         path,
-        active: true,
-        viewMode: ViewMode.LIST, // ← default
+        active: false, // no longer used
+        viewMode: ViewMode.LIST,
         sorting: [{ id: "name", desc: false }],
         selectedFilePaths: new Set<string>(),
       };
 
       set((state) => {
-        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        const tab = state.tabs.find((t) => t.id === tabId);
         if (!tab) return;
 
-        // Deactivate others, add new active pane
-        tab.panes.forEach((p: Pane) => {
-          p.active = false;
-        });
         tab.panes.push(newPane);
+        tab.activePaneId = newPane.id; // activate the new pane
       });
 
       return newPane;
@@ -151,22 +150,19 @@ export const useTabsStore = create<TabsStore>()(
         }
       });
     },
-
     closePane: (tabId: string, paneId: string) => {
       set((state) => {
-        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        const tab = state.tabs.find((t) => t.id === tabId);
         if (!tab) return;
 
-        const index = tab.panes.findIndex((p: Pane) => p.id === paneId);
+        const index = tab.panes.findIndex((p) => p.id === paneId);
         if (index === -1) return;
-
-        const wasActive = tab.panes[index].active;
 
         tab.panes.splice(index, 1);
 
-        // If we closed the active pane → activate first remaining one
-        if (wasActive && tab.panes.length > 0) {
-          tab.panes[0].active = true;
+        // Update activePaneId if needed
+        if (tab.activePaneId === paneId) {
+          tab.activePaneId = tab.panes[0]?.id ?? undefined;
         }
       });
     },
@@ -205,9 +201,15 @@ export const useTabsStore = create<TabsStore>()(
       return tabs.find((t: Tab) => t.id === activeTabId) ?? null;
     },
 
+    // Getter for active pane
     getActivePane: () => {
       const tab = get().getActiveTab();
-      return tab?.panes.find((p: Pane) => p.active) ?? null;
+      if (!tab) return null;
+
+      const pane = tab.panes.find((p) => p.id === tab.activePaneId);
+      if (!pane) return null;
+
+      return { tab, pane };
     },
 
     getPane: (tabId: string, paneId: string) => {

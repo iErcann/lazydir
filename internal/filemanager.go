@@ -228,3 +228,46 @@ func (f *FileManagerService) GetInitialPath() Result[string] {
 		return canonicalPath(string(os.PathSeparator))
 	}
 }
+
+// Sidebar Shortcuts
+func (f *FileManagerService) GetShortcuts() Result[[]Shortcut] {
+	shortcuts := []Shortcut{
+		{
+			Name: "Home",
+			Path: "/home/ncr",
+			Logo: ShortcutLogoHome,
+		},
+		{
+			Name: "Desktop",
+			Path: "/home/ncr/Desktop",
+			Logo: ShortcutLogoDesktop,
+		},
+		{
+			Name: "Documents",
+			Path: "/home/ncr/Documents",
+			Logo: ShortcutLogoDocs,
+		},
+		{
+			Name: "Downloads",
+			Path: "/home/ncr/Downloads",
+			Logo: ShortcutLogoDownloads,
+		},
+		{
+			Name: "Music",
+			Path: "/home/ncr/Music",
+			Logo: ShortcutLogoMusic,
+		},
+		{
+			Name: "Pictures",
+			Path: "/home/ncr/Pictures",
+			Logo: ShortcutLogoPics,
+		},
+		{
+			Name: "Videos",
+			Path: "/home/ncr/Videos",
+			Logo: ShortcutLogoVideos,
+		},
+	}
+
+	return Result[[]Shortcut]{Data: &shortcuts}
+}

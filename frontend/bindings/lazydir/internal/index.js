@@ -14,5 +14,7 @@ export {
     FileInfo,
     OperatingSystem,
     PathInfo,
-    Result
+    Result,
+    Shortcut,
+    ShortcutLogo
 } from "./models.js";

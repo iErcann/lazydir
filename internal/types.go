@@ -74,3 +74,24 @@ const (
 	OSMac     OperatingSystem = "mac"
 	OSLinux   OperatingSystem = "linux"
 )
+
+type ShortcutLogo string
+
+const (
+	ShortcutLogoDefault   ShortcutLogo = "default"
+	ShortcutLogoFolder    ShortcutLogo = "folder"
+	ShortcutLogoDrive     ShortcutLogo = "drive"
+	ShortcutLogoHome      ShortcutLogo = "home"
+	ShortcutLogoDocs      ShortcutLogo = "documents"
+	ShortcutLogoMusic     ShortcutLogo = "music"
+	ShortcutLogoPics      ShortcutLogo = "pictures"
+	ShortcutLogoVideos    ShortcutLogo = "videos"
+	ShortcutLogoDesktop   ShortcutLogo = "desktop"
+	ShortcutLogoDownloads ShortcutLogo = "downloads"
+)
+
+type Shortcut struct {
+	Name string       `json:"name"`
+	Path string       `json:"path"`
+	Logo ShortcutLogo `json:"logo"`
+}

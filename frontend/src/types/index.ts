@@ -24,4 +24,5 @@ export interface Tab {
   id: string;
   panes: Pane[];
   splitPercentage?: number; // For 2-pane splits
+  activePaneId?: string; // ← track the active pane directly
 }

@@ -327,6 +327,70 @@ export class Result {
     }
 }
 
+export class Shortcut {
+    /**
+     * Creates a new Shortcut instance.
+     * @param {Partial<Shortcut>} [$$source = {}] - The source object to create the Shortcut.
+     */
+    constructor($$source = {}) {
+        if (!("name" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["name"] = "";
+        }
+        if (!("path" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["path"] = "";
+        }
+        if (!("logo" in $$source)) {
+            /**
+             * @member
+             * @type {ShortcutLogo}
+             */
+            this["logo"] = ShortcutLogo.$zero;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new Shortcut instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {Shortcut}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new Shortcut(/** @type {Partial<Shortcut>} */($$parsedSource));
+    }
+}
+
+/**
+ * @readonly
+ * @enum {string}
+ */
+export const ShortcutLogo = {
+    /**
+     * The Go zero value for the underlying type of the enum.
+     */
+    $zero: "",
+
+    ShortcutLogoDefault: "default",
+    ShortcutLogoFolder: "folder",
+    ShortcutLogoDrive: "drive",
+    ShortcutLogoHome: "home",
+    ShortcutLogoDocs: "documents",
+    ShortcutLogoMusic: "music",
+    ShortcutLogoPics: "pictures",
+    ShortcutLogoVideos: "videos",
+    ShortcutLogoDesktop: "desktop",
+    ShortcutLogoDownloads: "downloads",
+};
+
 // Private type creation functions
 const $$createType0 = FileInfo.createFrom;
 const $$createType1 = $Create.Array($$createType0);

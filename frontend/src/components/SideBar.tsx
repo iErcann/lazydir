@@ -1,25 +1,44 @@
 import { useState } from "react";
 import { Home, Image, Video, Trash2, Folder, HardDrive } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useFileSystemStore } from "../store/directoryStore";
+import { useTabsStore } from "../store/tabsStore";
 
  
-
-interface SidebarProps {
-  activeLocation: string;
-  onLocationSelect: (location: string) => void;
-}
-
 // Sidebar Component
-export function Sidebar({
-  onLocationSelect = (loc) => console.log("Navigate to:", loc),
-}: Partial<SidebarProps>) {
-  // Standard locations
-  const sidebarItems = [
-    { icon: HardDrive, label: "Computer", path: "/" },
-    { icon: Home, label: "Home", path: "/home/ncr" },
-    { icon: Folder, label: "Documents", path: "/home/ncr/Documents" },
-    { icon: Folder, label: "Downloads", path: "/home/ncr/Downloads" },
-    { icon: Image, label: "Pictures", path: "/home/ncr/Pictures" },
-  ];
+export function Sidebar() {
+  const getShortcuts = useFileSystemStore((state) => state.getShortcuts);
+  const updatePanePath = useTabsStore((state) => state.updatePanePath);
+  const getActivePane = useTabsStore((state) => state.getActivePane);
+  
+  const {
+    data: shortcuts,
+    error,
+  } = useQuery({
+    queryKey: ["sidebarShortcuts"],
+    
+    queryFn: () => getShortcuts(),
+
+    select: (result) => {
+      if (result.error) throw result.error;
+      return result.data;
+    },
+  });
+
+  if (error) {
+    return (
+      <div className="w-48 bg-(--bg-secondary) flex flex-col hidden sm:flex p-3">
+        <div className="text-red-500 text-sm">Error loading shortcuts: {error.message}</div>
+      </div>
+    );
+  }
+
+  const onShortcutClick = (path: string) => {
+    const activePane = getActivePane();
+    if (activePane) {
+      updatePanePath(activePane.tab.id, activePane.pane.id, path);
+    }
+  }
 
   return (
     <div className="w-48 bg-(--bg-secondary) flex flex-col hidden sm:flex">
@@ -28,18 +47,18 @@ export function Sidebar({
           lazydir
         </h2>
         <div className="space-y-0.5">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
+          {shortcuts?.map((shortcut) => {
             return (
               <button
-                key={item.label}
-                onClick={() => {}}
+                key={shortcut.name}
+                onClick={() => {
+                  onShortcutClick(shortcut.path);
+                }}
                 className={
                   "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-(--text-primary) hover:bg-(--bg-tertiary)"
                 }
               >
-                <Icon className="w-4 h-4 bg-" />
-                <span>{item.label}</span>
+                <span>{shortcut.name}</span>
               </button>
             );
           })}
