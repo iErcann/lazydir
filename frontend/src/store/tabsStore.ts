@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Pane, Tab } from "../types";
+import { SortingState } from "@tanstack/react-table";
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -28,6 +29,13 @@ interface TabsStore {
     paneId: string,
     selectedFilePaths: Set<string>,
   ) => void; 
+
+  setPaneSorting: (
+    tabId: string,
+    paneId: string,
+    sorting: SortingState,
+  ) => void;
+
   // Getters
   getActiveTab: () => Tab | null;
   getActivePane: () => Pane | null;
@@ -47,6 +55,7 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           path,
           active: true,
           selectedFilePaths: new Set<string>(),
+          sorting: [{ id: "name", desc: false }],
         },
         // {
         //   id: generateUUID(),
@@ -214,6 +223,21 @@ export const useTabsStore = create<TabsStore>((set, get) => ({
           panes: tab.panes.map((pane) => {
             if (pane.id !== paneId) return pane;
             return { ...pane, selectedFilePaths: new Set(selectedFiles) };
+          }),
+        };
+      }),
+    }));
+  },
+
+  setPaneSorting: (tabId: string, paneId: string, sorting: SortingState) => {
+    set((state) => ({
+      tabs: state.tabs.map((tab) => {
+        if (tab.id !== tabId) return tab;
+        return {
+          ...tab,
+          panes: tab.panes.map((pane) => {
+            if (pane.id !== paneId) return pane;
+            return { ...pane, sorting };
           }),
         };
       }),

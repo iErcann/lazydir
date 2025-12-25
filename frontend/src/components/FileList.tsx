@@ -10,7 +10,6 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
 import { useTabsStore } from "../store/tabsStore";
 import { Pane, Tab } from "../types";
 import { formatSize } from "../utils/utils";
@@ -31,10 +30,6 @@ export function FileList({
   tab,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [sorting, setSorting] = useState<SortingState>([
-    // TODO: use the store pan instead. this will make us lose sorting on pane switch
-    { id: "name", desc: false },
-  ]);
 
   const selectedFilePaths = useTabsStore(
     (state) => state.getPane(tab.id, pane.id)?.selectedFilePaths
@@ -161,9 +156,26 @@ export function FileList({
     data: contents.files,
     columns,
     state: {
-      sorting,
+      sorting: pane.sorting,
     },
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      // `updater` can be EITHER:
+      // 1) A SortingState value (e.g. [{ id: "name", desc: false }])
+      // 2) A function that receives the previous SortingState and returns a new one
+      //    (e.g. old => [{ id: "name", desc: true }])
+
+      const nextSorting =
+        // If TanStack gives us a function, call it with the current sorting
+        typeof updater === "function"
+          ? updater(pane.sorting)
+          : // Otherwise, it's already the new sorting value
+            updater;
+
+      // Persist the resolved sorting state into our global tabs store
+      // so this pane stays in sync with the table
+      useTabsStore.getState().setPaneSorting(tab.id, pane.id, nextSorting);
+    },
+
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableColumnResizing: true,

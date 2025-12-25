@@ -1,3 +1,5 @@
+import { SortingState } from "@tanstack/react-table";
+
 export interface Pane {
   id: string;
 
@@ -6,11 +8,12 @@ export interface Pane {
 
   // View settings
   viewMode?: "grid" | "list";
-  sortBy?: "name" | "size" | "date"; // TODO: use this to not lose sorting on pane switch
+  sorting: SortingState;
   active: boolean;
 
   // Selected files
   selectedFilePaths: Set<string>; // array of file paths
+
 }
 
 export interface Tab {
