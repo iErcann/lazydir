@@ -1,7 +1,7 @@
 import { FileList } from "./FileList";
 import type { Pane, Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
@@ -15,7 +15,8 @@ interface FileManagerPaneProps {
   tab: Tab;
   pane: Pane;
 }
-export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
+
+const FileManagerPaneComponent = ({ tab, pane }: FileManagerPaneProps) => {
   const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const [fileOpenError, setFileOpenError] = useState<string | null>(null);
@@ -41,34 +42,46 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     },
   });
 
-  const handleDirectoryOpen = (file: FileInfo) => {
-    if (!file.isDir) return;
-    handlePathChange(file.path);
-  };
+  const handlePathChange = useCallback(
+    (newPath: string) => {
+      updatePanePath(tab.id, pane.id, newPath);
+      console.log("Path changed to:", newPath);
+    },
+    [tab.id, pane.id, updatePanePath]
+  );
 
-  const handlePathChange = (newPath: string) => {
-    updatePanePath(tab.id, pane.id, newPath);
-    console.log("Path changed to:", newPath);
-  };
+  const handleDirectoryOpen = useCallback(
+    (file: FileInfo) => {
+      if (!file.isDir) return;
+      handlePathChange(file.path);
+    },
+    [handlePathChange]
+  );
 
-  const handleFileOpen = async (file: FileInfo) => {
+  const handleFileOpen = useCallback(async (file: FileInfo) => {
     if (file.isDir) return;
 
     const opened = await OpenFileWithDefaultApp(file.path);
     if (opened.error) {
       setFileOpenError(opened.error.message);
     }
-  };
+  }, []);
 
-  const handlePaneClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    activatePane(tab.id, pane.id);
-  };
+  const handlePaneClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      activatePane(tab.id, pane.id);
+    },
+    [activatePane, tab.id, pane.id]
+  );
 
-  const canGoBack = pane.historyIndex > 0;
-  const canGoForward = pane.historyIndex < pane.history.length - 1;
+  const canGoBack = useMemo(() => pane.historyIndex > 0, [pane.historyIndex]);
+  const canGoForward = useMemo(
+    () => pane.historyIndex < pane.history.length - 1,
+    [pane.historyIndex, pane.history.length]
+  );
 
-  const handleNavigateUp = () => {
+  const handleNavigateUp = useCallback(() => {
     getPathInfo(pane.path).then((result) => {
       if (result.error || !result.data) return;
       const pathInfo = result.data;
@@ -81,7 +94,15 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
         handlePathChange(parentPath);
       });
     });
-  };
+  }, [pane.path, getPathInfo, getPathAtIndex, handlePathChange]);
+
+  const handleNavigateBack = useCallback(() => {
+    navigateBack(tab.id, pane.id);
+  }, [navigateBack, tab.id, pane.id]);
+
+  const handleNavigateForward = useCallback(() => {
+    navigateForward(tab.id, pane.id);
+  }, [navigateForward, tab.id, pane.id]);
 
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
@@ -92,7 +113,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
           <button
             className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
             disabled={!canGoBack}
-            onClick={() => navigateBack(tab.id, pane.id)}
+            onClick={handleNavigateBack}
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -100,7 +121,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
           <button
             className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
             disabled={!canGoForward}
-            onClick={() => navigateForward(tab.id, pane.id)}
+            onClick={handleNavigateForward}
           >
             <ArrowRight className="w-4 h-4" />
           </button>
@@ -153,4 +174,6 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
       </div>
     </div>
   );
-}
+};
+
+export const FileManagerPane = memo(FileManagerPaneComponent);

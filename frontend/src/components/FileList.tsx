@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useCallback, memo } from "react";
 import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { File, Folder } from "lucide-react";
@@ -23,26 +23,30 @@ interface FileListProps {
   onDirectoryOpen: (file: FileInfo) => void;
   onFileOpen: (file: FileInfo) => void;
 }
-export function FileList({
+
+const FileListComponent = ({
   contents,
   onDirectoryOpen,
   onFileOpen,
   pane,
   tab,
-}: FileListProps) {
+}: FileListProps) => {
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Get selected file paths with shallow comparison to prevent unnecessary re-renders
   const selectedFilePaths = useTabsStore(
-    (state) => state.getPane(tab.id, pane.id)?.selectedFilePaths
+    (state) =>
+      state.getPane(tab.id, pane.id)?.selectedFilePaths ?? new Set<string>()
   );
 
   console.log("Rendering", pane.id);
 
+  // Extract only the function we need to avoid subscribing to entire store
   const setSelectedFilePaths = useTabsStore(
     (state) => state.setSelectedFilePaths
   );
 
-  const formatDate = (isoDate: string) => {
+  const formatDate = useCallback((isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString(undefined, {
       year: "numeric",
@@ -51,7 +55,7 @@ export function FileList({
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
+  }, []);
 
   const columns = useMemo<ColumnDef<FileInfo>[]>(
     () => [
@@ -192,15 +196,35 @@ export function FileList({
     estimateSize: () => 32,
     overscan: 5,
   });
-  const onOpen = (file: FileInfo) => {
-    if (file.isDir) {
-      onDirectoryOpen(file);
-    } else {
-      onFileOpen(file);
-    }
-  };
 
-  const gridCols = "grid-cols-[minmax(240px,1fr)_90px_260px]";
+  const onOpen = useCallback(
+    (file: FileInfo) => {
+      if (file.isDir) {
+        onDirectoryOpen(file);
+      } else {
+        onFileOpen(file);
+      }
+    },
+    [onDirectoryOpen, onFileOpen]
+  );
+
+  const handleFileClick = useCallback(
+    (file: FileInfo) => {
+      const newSelected = new Set(selectedFilePaths);
+      if (newSelected.has(file.path)) {
+        newSelected.delete(file.path);
+      } else {
+        newSelected.add(file.path);
+      }
+      setSelectedFilePaths(tab.id, pane.id, newSelected);
+    },
+    [selectedFilePaths, setSelectedFilePaths, tab.id, pane.id]
+  );
+
+  const gridCols = useMemo(
+    () => "grid-cols-[minmax(240px,1fr)_90px_260px]",
+    []
+  );
 
   return (
     <div className="flex-1 overflow-auto" ref={listRef}>
@@ -274,19 +298,9 @@ export function FileList({
               >
                 <button
                   onDoubleClick={() => onOpen(file)}
-                  onClick={() => {
-                    const newSelected: Set<string> = new Set(selectedFilePaths);
-                    if (newSelected.has(file.path)) {
-                      newSelected.delete(file.path);
-                    } else {
-                      newSelected.add(file.path);
-                    }
-                    setSelectedFilePaths(tab.id, pane.id, newSelected);
-                  }}
+                  onClick={() => handleFileClick(file)}
                   className={`w-full py-2 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md  ${
-                    selectedFilePaths?.has(file.path)
-                      ? "bg-(--bg-tertiary)"
-                      : ""
+                    selectedFilePaths.has(file.path) ? "bg-(--bg-tertiary)" : ""
                   }`}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -308,4 +322,9 @@ export function FileList({
       </div>
     </div>
   );
-}
+};
+
+export const FileList = memo(FileListComponent, (prevProps, nextProps) => {
+  // Custom comparison to prevent re-renders when unrelated panes update
+  return prevProps.pane.id === nextProps.pane.id;
+});
