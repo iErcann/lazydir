@@ -289,7 +289,7 @@ export function FileList({
                   {row.getVisibleCells().map((cell) => (
                     <div
                       key={cell.id}
-                      className="min-w-0 text-left select-none"
+                      className="min-w-0 text-left select-none text-(--text-primary)"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

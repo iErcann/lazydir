@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/adrg/xdg"
 )
 
 // FileManagerService is a service for managing files
@@ -231,43 +233,48 @@ func (f *FileManagerService) GetInitialPath() Result[string] {
 
 // Sidebar Shortcuts
 func (f *FileManagerService) GetShortcuts() Result[[]Shortcut] {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return Result[[]Shortcut]{
+			Error: &AppError{
+				Code:       ResolvePathError,
+				Message:    fmt.Sprintf("failed to get user home directory: %v", err),
+				InnerError: err,
+			},
+		}
+	}
+
+	// Prepare shortcuts with best-effort cross-platform paths
 	shortcuts := []Shortcut{
 		{
 			Name: "Home",
-			Path: "/home/ncr",
+			Path: home,
 			Logo: ShortcutLogoHome,
 		},
-		{
-			Name: "Desktop",
-			Path: "/home/ncr/Desktop",
-			Logo: ShortcutLogoDesktop,
-		},
-		{
-			Name: "Documents",
-			Path: "/home/ncr/Documents",
-			Logo: ShortcutLogoDocs,
-		},
-		{
-			Name: "Downloads",
-			Path: "/home/ncr/Downloads",
-			Logo: ShortcutLogoDownloads,
-		},
-		{
-			Name: "Music",
-			Path: "/home/ncr/Music",
-			Logo: ShortcutLogoMusic,
-		},
-		{
-			Name: "Pictures",
-			Path: "/home/ncr/Pictures",
-			Logo: ShortcutLogoPics,
-		},
-		{
-			Name: "Videos",
-			Path: "/home/ncr/Videos",
-			Logo: ShortcutLogoVideos,
-		},
 	}
+
+	// Helper to add only if path exists and is useful
+	addIfExists := func(name string, path string, logo ShortcutLogo) {
+		if path == "" {
+			return
+		}
+		// Optional: check existence
+		if _, err := os.Stat(path); err == nil {
+			shortcuts = append(shortcuts, Shortcut{
+				Name: name,
+				Path: path,
+				Logo: logo,
+			})
+		}
+	}
+	// THX : https://github.com/adrg/xdg?tab=readme-ov-file#xdg-base-directory
+	// XDG library gives us good defaults on all major platforms
+	addIfExists("Desktop", xdg.UserDirs.Desktop, ShortcutLogoDesktop)
+	addIfExists("Downloads", xdg.UserDirs.Download, ShortcutLogoDownloads)
+	addIfExists("Documents", xdg.UserDirs.Documents, ShortcutLogoDocs)
+	addIfExists("Music", xdg.UserDirs.Music, ShortcutLogoMusic)
+	addIfExists("Pictures", xdg.UserDirs.Pictures, ShortcutLogoPics)
+	addIfExists("Videos", xdg.UserDirs.Videos, ShortcutLogoVideos)
 
 	return Result[[]Shortcut]{Data: &shortcuts}
 }
