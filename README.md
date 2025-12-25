@@ -1,8 +1,12 @@
-# lazydir
+<p align="center">
+  <img width="150" height="150" src="build/appicon.png" alt="lazydir">
+  <h1 align="center">lazydir</h1>
+  <p align="center">
+    A cross platform file manager you <em>probably</em> don't need.
+  </p>
+</p>
 
 ### WIP not finished at all
-
-A cross platform file manager you _probably_ don't need.
 
 Lazydir is a file manager built with Go, Wails and React.
 
@@ -90,8 +94,6 @@ Its all CSS.
 ![Light Theme](branding/light.png)
 
 ![Dracula Theme](branding/dracula.png)
-
-## TODO
 
 ## TODO
 
