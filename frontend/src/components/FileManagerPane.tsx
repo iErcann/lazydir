@@ -9,6 +9,7 @@ import { PathBar } from "./PathBar";
 import { formatSize } from "../utils/utils";
 import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
 import { FileGrid } from "./FileGrid";
+import { useQuery } from "@tanstack/react-query";
 
 interface FileManagerPaneProps {
   tab: Tab;
@@ -17,34 +18,24 @@ interface FileManagerPaneProps {
 export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
-  const [error, setError] = useState<string | null>(null);
+  const [fileOpenError, setFileOpenError] = useState<string | null>(null);
 
-  console.log("Rendering FileManagerPane for path:", pane.path);
-  // Load directory contents
-  // Contains the files, putten here to avoid rerendering everything if inside zustand
-  const [contents, setContents] = useState<DirectoryContents | null>(null);
+  const {
+    data: contents,
+    isLoading,
+    error,
+    isFetching,  
+  } = useQuery({
+    queryKey: ["directory", pane.path],
 
-  useEffect(() => {
-    const fetchDirectory = async () => {
-      // Reset state before loading
-      setError(null);
-      setContents(null);
+    queryFn: () => loadDirectory(pane.path),
 
-      try {
-        const result = await loadDirectory(pane.path);
-        if (result.error) {
-          setError(result.error.message);
-        } else if (result.data) {
-          setContents(result.data);
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      }
-    };
-
-    fetchDirectory();
-  }, [pane.path, loadDirectory]);
-
+    select: (result) => {
+      if (result.error) throw result.error;
+      return result.data;
+    },
+  });
+  
   const handleDirectoryOpen = (file: FileInfo) => {
     if (!file.isDir) return;
     handlePathChange(file.path);
@@ -57,9 +48,10 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
 
   const handleFileOpen = async (file: FileInfo) => {
     if (file.isDir) return;
+    
     const opened = await OpenFileWithDefaultApp(file.path);
     if (opened.error) {
-      setError(opened.error.message);
+      setFileOpenError(opened.error.message);
     }
   };
 
@@ -68,12 +60,6 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     //activatePane(tab.id, pane.id);
   };
 
-  // Size in bytes
-  const calculateDirectorySize = (contents: DirectoryContents) => {
-    return contents.files.reduce((total, file) => total + file.size, 0);
-  };
-
-  // console.log("Rendering FileManagerPane for path:", pane.path);
 
   return (
     <div className="flex h-full" onClick={handlePaneClick}>
@@ -97,21 +83,21 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
         </div>
 
         {/* Error message */}
-        {error && (
+        {(fileOpenError || error) && (
           <div className="p-4">
             <div className="bg-(--bg-tertiary) text-(--text-primary) p-4 rounded-md">
-              Error: {error}
+              Error: {fileOpenError || error?.message}
             </div>
           </div>
         )}
 
         {/* Loading state */}
-        {!error && !contents && (
+        {(isLoading || isFetching) && (
           <div className="p-2  text-(--text-secondary)"> </div>
         )}
 
         {/* Directory contents */}
-        {contents && (
+        {!(fileOpenError || error) && contents && (
           <div className="flex-1 flex flex-col overflow-hidden px-4">
             <FileList
               contents={contents}

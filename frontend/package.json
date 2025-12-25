@@ -13,6 +13,7 @@
   "dependencies": {
     "@react-symbols/icons": "^1.3.0",
     "@tailwindcss/vite": "^4.1.17",
+    "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.13",
     "@wailsio/runtime": "latest",

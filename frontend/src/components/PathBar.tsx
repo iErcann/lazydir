@@ -1,7 +1,8 @@
 import { Pane } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { PathInfo } from "../../bindings/lazydir/internal/models";
+import { useQuery } from "@tanstack/react-query";
 
 interface PathBarProps {
   pane: Pane;
@@ -11,21 +12,18 @@ interface PathBarProps {
 export function PathBar({ pane, onPathChange }: PathBarProps) {
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
-  const [pathInfo, setPathInfo] = useState<PathInfo>();
   const [editing, setEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(pane.path);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch path info whenever the pane path changes
-  useEffect(() => {
-    const fetchPathInfo = async () => {
-      const pathInfo = await getPathInfo(pane.path);
-      if (!pathInfo.data) return;
-      setPathInfo(pathInfo.data);
-    };
-    fetchPathInfo();
-    setInputValue(pane.path); // keep input in sync
-  }, [pane.path, getPathInfo]);
+  // Query PathInfo with select
+  const { data: pathInfo, refetch: refetchPathInfo } = useQuery({
+    queryKey: ["pathInfo", pane.path],
+    queryFn: () => getPathInfo(pane.path),
+    select: (result) => {
+      if (!result.data) throw new Error("No path info");
+      return result.data as PathInfo;
+    },
+  });
 
   // Get the path corresponding to a specific part index
   const fetchPathAtIndex = async (index: number) => {
@@ -38,31 +36,21 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
     return result.data ?? "";
   };
 
-  // Focus input when editing starts
-  useEffect(() => {
-    if (editing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [editing]);
-
-  // Handle Enter / Escape
+  // Handle Enter / Escape keys
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      onPathChange(inputValue);
+      onPathChange(e.currentTarget.value);
       setEditing(false);
+      refetchPathInfo();
     } else if (e.key === "Escape") {
-      setInputValue(pane.path);
       setEditing(false);
     }
   };
 
   // Click on bar (not buttons) activates editing
   const handleBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Prevent editing if a button inside was clicked
     const target = e.target as HTMLElement;
     if (target.tagName === "BUTTON") return;
-
     setEditing(true);
   };
 
@@ -72,19 +60,20 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
       onClick={handleBarClick}
     >
       {editing ? (
-        // Input mode
+        // Input mode - key prop resets state when pane.path changes
         <input
+          key={pane.path}
           ref={inputRef}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          defaultValue={pane.path}
           onBlur={() => setEditing(false)}
           onKeyDown={handleKeyDown}
+          autoFocus
           className="flex-1 px-2 py-1 rounded-md bg-(--bg-secondary) text-(--text-primary) border border-white/10 outline-none"
         />
       ) : (
         // Normal path buttons
         pathInfo?.parts.map((part: string, i: number) => {
-          const isActive = i === pathInfo.parts.length - 1; // Last part is active
+          const isActive = i === pathInfo.parts.length - 1;
           return (
             <div key={i} className="flex items-center gap-1">
               <button
