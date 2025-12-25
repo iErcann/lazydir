@@ -18,6 +18,9 @@ export interface Pane {
   // Selected files
   selectedFilePaths: Set<string>; // array of file paths
 
+  // Navigation history
+  history: string[];        // all visited paths
+  historyIndex: number;     // points to the current path in history
 }
 
 export interface Tab {

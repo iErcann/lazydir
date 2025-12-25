@@ -29,6 +29,10 @@ interface TabsStore {
   closePane: (tabId: string, paneId: string) => void;
   updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
 
+  // History navigation
+  paneNavigateBack: (tabId: string, paneId: string) => void;
+  paneNavigateForward: (tabId: string, paneId: string) => void;
+
   setSelectedFilePaths: (
     tabId: string,
     paneId: string,
@@ -59,12 +63,18 @@ export const useTabsStore = create<TabsStore>()(
         viewMode: ViewMode.LIST,
         sorting: [{ id: "name", desc: false }],
         selectedFilePaths: new Set<string>(),
+        history: [path],
+        historyIndex: 0,
       };
       const newTab: Tab = {
         id: generateUUID(),
         activePaneId: defaultPane.id,
         panes: [
           defaultPane,
+          {
+            ...defaultPane,
+            id: generateUUID(),
+          },
         ],
       };
 
@@ -140,16 +150,51 @@ export const useTabsStore = create<TabsStore>()(
 
     updatePanePath: (tabId: string, paneId: string, newPath: string) => {
       set((state) => {
-        // Do lookup on draft state – not on get()
-        const tab = state.tabs.find((t: Tab) => t.id === tabId);
+        const tab = state.tabs.find((t) => t.id === tabId);
         if (!tab) return;
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
 
-        const pane = tab.panes.find((p: Pane) => p.id === paneId);
-        if (pane) {
-          pane.path = newPath; // ← now safe: mutating draft
+        // If navigating to a new path, drop forward history
+        pane.history = pane.history.slice(0, pane.historyIndex + 1);
+
+        // Avoid duplicate consecutive entries
+        if (pane.history[pane.historyIndex] !== newPath) {
+          pane.history.push(newPath);
+          pane.historyIndex = pane.history.length - 1;
+          pane.path = newPath;
         }
       });
     },
+
+    paneNavigateBack: (tabId: string, paneId: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        if (pane.historyIndex > 0) {
+          pane.historyIndex--;
+          pane.path = pane.history[pane.historyIndex];
+        }
+      });
+    },
+
+    paneNavigateForward: (tabId: string, paneId: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        if (pane.historyIndex < pane.history.length - 1) {
+          pane.historyIndex++;
+          pane.path = pane.history[pane.historyIndex];
+        }
+      });
+    },
+
     closePane: (tabId: string, paneId: string) => {
       set((state) => {
         const tab = state.tabs.find((t) => t.id === tabId);

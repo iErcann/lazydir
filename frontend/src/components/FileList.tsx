@@ -14,6 +14,7 @@ import { useTabsStore } from "../store/tabsStore";
 import { Pane, Tab } from "../types";
 import { formatSize } from "../utils/utils";
 import { getIconForFile, getIconForFolder } from "@react-symbols/icons/utils";
+import React from "react";
 
 interface FileListProps {
   contents: DirectoryContents;
@@ -34,6 +35,8 @@ export function FileList({
   const selectedFilePaths = useTabsStore(
     (state) => state.getPane(tab.id, pane.id)?.selectedFilePaths
   );
+
+  console.log("Rendering", pane.id);
 
   const setSelectedFilePaths = useTabsStore(
     (state) => state.setSelectedFilePaths
@@ -207,7 +210,7 @@ export function FileList({
           className={`sticky top-0 py-2 grid ${gridCols} text-sm font-medium bg-opacity-0 z-10 w-full bg-(--bg-primary) border-b border-white/5 px-2`}
         >
           {table.getHeaderGroups().map((headerGroup) => (
-            <>
+            <React.Fragment key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <div
                   key={header.id}
@@ -244,7 +247,7 @@ export function FileList({
                   }
                 </div>
               ))}
-            </>
+            </React.Fragment>
           ))}
         </div>
 
