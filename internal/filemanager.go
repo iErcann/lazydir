@@ -170,7 +170,7 @@ func (f *FileManagerService) GetPathAtIndex(fullPath string, index int) Result[s
 	if pathInfoResult.Error != nil {
 		return Result[string]{Error: pathInfoResult.Error}
 	}
-	pathInfo := *pathInfoResult.Data
+	pathInfo := pathInfoResult.Data
 
 	if index < 0 || index >= len(pathInfo.Parts) {
 		return Result[string]{Error: &AppError{
