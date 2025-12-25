@@ -326,5 +326,14 @@ const FileListComponent = ({
 
 export const FileList = memo(FileListComponent, (prevProps, nextProps) => {
   // Custom comparison to prevent re-renders when unrelated panes update
-  return prevProps.pane.id === nextProps.pane.id;
+  // Return true if props are equal (skip re-render), false if different (do re-render)
+  return (
+    prevProps.pane.id === nextProps.pane.id &&
+    prevProps.pane.path === nextProps.pane.path &&
+    prevProps.pane.sorting === nextProps.pane.sorting &&
+    prevProps.tab.id === nextProps.tab.id &&
+    prevProps.contents === nextProps.contents &&
+    prevProps.onDirectoryOpen === nextProps.onDirectoryOpen &&
+    prevProps.onFileOpen === nextProps.onFileOpen
+  );
 });
