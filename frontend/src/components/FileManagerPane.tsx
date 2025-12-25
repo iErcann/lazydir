@@ -27,7 +27,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     isFetching,  
   } = useQuery({
     queryKey: ["directory", pane.path],
-
+    
     queryFn: () => loadDirectory(pane.path),
 
     select: (result) => {

@@ -120,7 +120,7 @@ export const useTabsStore = create<TabsStore>()(
         id: generateUUID(),
         path,
         active: true,
-        viewMode: "list", // ← default
+        viewMode: ViewMode.LIST, // ← default
         sorting: [{ id: "name", desc: false }],
         selectedFilePaths: new Set<string>(),
       };

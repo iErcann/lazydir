@@ -263,7 +263,7 @@ export function FileList({
             return (
               <div
                 key={virtualRow.key}
-                className={`absolute top-0 left-0 w-full   rounded-md select-none`}
+                className={`absolute top-0 left-0 w-full rounded-md select-none`}
                 style={{
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
