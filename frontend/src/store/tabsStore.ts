@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { Pane, Tab } from "../types";
+import { ViewMode, type Pane, type Tab } from "../types";
 import { SortingState } from "@tanstack/react-table";
 
 function generateUUID() {
@@ -54,7 +54,7 @@ export const useTabsStore = create<TabsStore>()(
             id: generateUUID(),
             path,
             active: true,
-            viewMode: "list", // ← added default (optional but recommended)
+            viewMode: ViewMode.LIST,  
             sorting: [{ id: "name", desc: false }],
             selectedFilePaths: new Set<string>(),
           },

@@ -1,5 +1,9 @@
 import { SortingState } from "@tanstack/react-table";
 
+export enum ViewMode {
+  GRID = "grid",
+  LIST = "list",
+}
 export interface Pane {
   id: string;
 
@@ -7,7 +11,7 @@ export interface Pane {
   path: string;
 
   // View settings
-  viewMode?: "grid" | "list";
+  viewMode: ViewMode;
   sorting: SortingState;
   active: boolean;
 
