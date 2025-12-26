@@ -214,7 +214,7 @@ export const OperatingSystem = {
     $zero: "",
 
     OSWindows: "windows",
-    OSMac: "mac",
+    OSMac: "darwin",
     OSLinux: "linux",
 };
 

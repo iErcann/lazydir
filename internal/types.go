@@ -71,7 +71,7 @@ type OperatingSystem string
 
 const (
 	OSWindows OperatingSystem = "windows"
-	OSMac     OperatingSystem = "mac"
+	OSMac     OperatingSystem = "darwin"
 	OSLinux   OperatingSystem = "linux"
 )
 
