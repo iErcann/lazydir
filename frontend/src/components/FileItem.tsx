@@ -38,7 +38,7 @@ export function FileItem({
     <div
       onClick={() => onSelect(file)}
       onDoubleClick={() => onOpen(file)}
-      className={`flex flex-col items-center p-3 rounded-lg select-none  ${
+      className={`flex flex-col items-center rounded-lg select-none  ${
         isSelected
           ? "bg-blue-600 ring-2 ring-blue-500"
           : "hover:bg-(--bg-tertiary)"
@@ -47,7 +47,7 @@ export function FileItem({
     >
       {file.isDir ? (
         <div className="text-(--accent) mb-2 ">
-          <Folder className="w-16 h-16 fill-(--accent)"  />
+          <Folder className="w-16 h-16 fill-(--accent)" />
         </div>
       ) : (
         getIconForFile({
@@ -56,14 +56,9 @@ export function FileItem({
         })
       )}
 
-      <span className="text-sm text-center text-(--text-primary) w-full break-words truncate">
+      <span className="text-xs text-center text-(--text-primary) w-full break-words line-clamp-2 ">
         {file.name}
       </span>
-      {!file.isDir && (
-        <span className="text-xs text-(--text-secondary) mt-0.5">
-          {formatSize(file.size)}
-        </span>
-      )}
     </div>
   );
 }
