@@ -274,13 +274,24 @@ export function FileList({
               >
                 <button
                   onDoubleClick={() => onOpen(file)}
-                  onClick={() => {
+                  onClick={(e) => {
                     const newSelected: Set<string> = new Set(selectedFilePaths);
-                    if (newSelected.has(file.path)) {
-                      newSelected.delete(file.path);
+
+                    const isMultiSelect = e.ctrlKey || e.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
+
+                    if (isMultiSelect) {
+                      // Toggle selection if Ctrl/Cmd is pressed
+                      if (newSelected.has(file.path)) {
+                        newSelected.delete(file.path);
+                      } else {
+                        newSelected.add(file.path);
+                      }
                     } else {
+                      // Single select: clear all others and select only this file
+                      newSelected.clear();
                       newSelected.add(file.path);
                     }
+
                     setSelectedFilePaths(tab.id, pane.id, newSelected);
                   }}
                   className={`w-full py-2 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md  ${
