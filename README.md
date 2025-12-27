@@ -104,8 +104,8 @@ Its all CSS.
 - [ ] **MEDIUM**: Support for Mouse4 (Back) and Mouse5 (Forward) buttons.
 - [ ] **HIGH**: Context Menu on right-click.
 - [ ] **HIGH**: File Operations:
-  - [ ] **HIGH**: Copy-Paste.
-  - [ ] **LOW**: Cut-Paste.
+  - [x] **HIGH**: Copy-Paste.
+  - [x] **LOW**: Cut-Paste.
   - [ ] **HIGH**: Delete.
   - [ ] **MEDIUM**: Rename.
   - [ ] **HIGH**: New Folder.
@@ -125,4 +125,5 @@ Its all CSS.
 - [ ] **LOW**: Terminal integration (open terminal here) - platform-specific.
 - [ ] **LOW**: File Search in the current directory.
 - [x] **MEDIUM**: Tab support.
-- [ ] **MEDIUM**: Split Screen support.
+- [x] **MEDIUM**: Split Screen support.
+- [ ] **MEDIUM** SYMLINK support in copy/move operations.

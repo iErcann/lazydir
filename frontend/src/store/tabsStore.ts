@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { ViewMode, type Pane, type Tab } from "../types";
 import { SortingState } from "@tanstack/react-table";
+import { FileInfo } from "../../bindings/lazydir/internal";
 
 function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -20,6 +21,11 @@ interface TabsStore {
   tabs: Tab[];
   activeTabId: string | null;
 
+  clipboard: {
+    filePaths: string[];
+    cutMode: boolean; // if its a cut, then we move files, else we copy
+  };
+  copyFiles: (filePaths: string[], cutMode?: boolean) => void;
   createTab: (path?: string) => Tab;
   closeTab: (tabId: string) => void;
   activateTab: (tabId: string) => void;
@@ -56,6 +62,14 @@ export const useTabsStore = create<TabsStore>()(
   immer((set, get) => ({
     tabs: [],
     activeTabId: null,
+    clipboard: { filePaths: [], cutMode: false },
+
+    copyFiles: (files, cutMode = false) => {
+      set((state) => {
+        state.clipboard.filePaths = files;
+        state.clipboard.cutMode = cutMode;
+      });
+    },
 
     createTab: (path = ".") => {
       const defaultPane: Pane = {
@@ -71,9 +85,7 @@ export const useTabsStore = create<TabsStore>()(
       const newTab: Tab = {
         id: generateUUID(),
         activePaneId: defaultPane.id,
-        panes: [
-          defaultPane,
-        ],
+        panes: [defaultPane],
       };
 
       set((state) => {

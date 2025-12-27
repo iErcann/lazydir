@@ -13,13 +13,17 @@ import {
 interface FileSystemStore {
   operatingSystem: OperatingSystem;
   setOperatingSystem: (os: OperatingSystem) => void;
-  // Actions
   loadDirectory: (path: string) => Promise<Result<DirectoryContents>>;
   getOperatingSystem: () => Promise<Result<OperatingSystem>>;
   getPathInfo: (path: string) => Promise<Result<PathInfo>>; // Cross platform path info retrieval
   getPathAtIndex: (path: string, index: number) => Promise<Result<string>>; // Get path at specific index
   getInitialPath: () => Promise<Result<string>>; // Get initial path based on OS
   getShortcuts: () => Promise<Result<Shortcut[]>>; // Get sidebar shortcuts
+  pasteFiles: (
+    files: string[],
+    destinationPath: string,
+    cutMode: boolean
+  ) => Promise<Result<string>>; // Paste files to destination
 }
 
 export const useFileSystemStore = create<FileSystemStore>((set) => ({
@@ -51,5 +55,13 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
   },
   getShortcuts: async () => {
     return await FileManagerService.GetShortcuts();
-  }
+  },
+
+  pasteFiles: async (
+    files: string[],
+    destinationPath: string,
+    cutMode: boolean
+  ) => {
+    return await FileManagerService.PasteFiles(destinationPath, files, cutMode);
+  },
 }));

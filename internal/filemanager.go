@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -277,4 +278,175 @@ func (f *FileManagerService) GetShortcuts() Result[[]Shortcut] {
 	addIfExists("Videos", xdg.UserDirs.Videos, ShortcutLogoVideos)
 
 	return Result[[]Shortcut]{Data: &shortcuts}
+}
+
+func (f *FileManagerService) PasteFiles(targetDir string, files []string, cutMode bool) Result[string] {
+	if cutMode {
+		return f.MoveFiles(targetDir, files)
+	}
+	return f.CopyFiles(targetDir, files)
+}
+
+func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[string] {
+	targetResult := canonicalPath(targetDir)
+	if targetResult.Error != nil {
+		return Result[string]{Error: targetResult.Error}
+	}
+	target := *targetResult.Data
+
+	for _, source := range files {
+		sourceResult := canonicalPath(source)
+		if sourceResult.Error != nil {
+			return Result[string]{Error: sourceResult.Error}
+		}
+		sourcePath := *sourceResult.Data
+		dest := filepath.Join(target, filepath.Base(sourcePath))
+
+		info, err := os.Stat(sourcePath)
+		if err != nil {
+			return Result[string]{Error: &AppError{
+				Code:       FileCopyError,
+				Message:    fmt.Sprintf("cannot access %s: %v", sourcePath, err),
+				InnerError: err,
+			}}
+		}
+
+		if info.IsDir() {
+			if err := copyDir(sourcePath, dest); err != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileCopyError,
+					Message:    fmt.Sprintf("failed to copy directory %s: %v", sourcePath, err),
+					InnerError: err,
+				}}
+			}
+		} else {
+			if err := copyFile(sourcePath, dest); err != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileCopyError,
+					Message:    fmt.Sprintf("failed to copy file %s: %v", sourcePath, err),
+					InnerError: err,
+				}}
+			}
+		}
+	}
+
+	return Result[string]{Data: ptrString(fmt.Sprintf("Copied %d item(s) to %s", len(files), target))}
+}
+
+func (f *FileManagerService) MoveFiles(targetDir string, files []string) Result[string] {
+	targetResult := canonicalPath(targetDir)
+	if targetResult.Error != nil {
+		return Result[string]{Error: targetResult.Error}
+	}
+	target := *targetResult.Data
+
+	for _, source := range files {
+		sourceResult := canonicalPath(source)
+		if sourceResult.Error != nil {
+			return Result[string]{Error: sourceResult.Error}
+		}
+		sourcePath := *sourceResult.Data
+		dest := filepath.Join(target, filepath.Base(sourcePath))
+
+		if err := os.Rename(sourcePath, dest); err != nil {
+			// Cross-device fallback: copy + remove
+			info, statErr := os.Stat(sourcePath)
+			if statErr != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileMoveError,
+					Message:    fmt.Sprintf("cannot access %s: %v", sourcePath, statErr),
+					InnerError: statErr,
+				}}
+			}
+
+			if info.IsDir() {
+				if err := copyDir(sourcePath, dest); err != nil {
+					return Result[string]{Error: &AppError{
+						Code:       FileMoveError,
+						Message:    fmt.Sprintf("failed to move directory %s: %v", sourcePath, err),
+						InnerError: err,
+					}}
+				}
+			} else {
+				if err := copyFile(sourcePath, dest); err != nil {
+					return Result[string]{Error: &AppError{
+						Code:       FileMoveError,
+						Message:    fmt.Sprintf("failed to move file %s: %v", sourcePath, err),
+						InnerError: err,
+					}}
+				}
+			}
+
+			if err := os.RemoveAll(sourcePath); err != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileMoveError,
+					Message:    fmt.Sprintf("failed to remove original %s after move: %v", sourcePath, err),
+					InnerError: err,
+				}}
+			}
+		}
+	}
+
+	return Result[string]{Data: ptrString(fmt.Sprintf("Moved %d item(s) to %s", len(files), target))}
+}
+
+// Helper: copy a single file
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		return err
+	}
+
+	info, err := sourceFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	return os.Chmod(dst, info.Mode())
+}
+
+// Helper: recursively copy a directory
+// WARNING: THIS doesnt handle symlinks or special files
+// to debug: node_modules from a pnpm project is a good test case
+func copyDir(src, dst string) error {
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(dst, 0755); err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			if err := copyDir(srcPath, dstPath); err != nil {
+				return err
+			}
+		} else {
+			if err := copyFile(srcPath, dstPath); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Helper: pointer to string
+func ptrString(s string) *string {
+	return &s
 }

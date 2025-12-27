@@ -16,6 +16,17 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
+ * @param {string} targetDir
+ * @param {string[]} files
+ * @returns {$CancellablePromise<$models.Result<string>>}
+ */
+export function CopyFiles(targetDir, files) {
+    return $Call.ByID(1021438870, targetDir, files).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
+/**
  * @returns {$CancellablePromise<$models.Result<string>>}
  */
 export function GetInitialPath() {
@@ -79,11 +90,34 @@ export function ListDirectory(dirPath) {
 }
 
 /**
+ * @param {string} targetDir
+ * @param {string[]} files
+ * @returns {$CancellablePromise<$models.Result<string>>}
+ */
+export function MoveFiles(targetDir, files) {
+    return $Call.ByID(3553535974, targetDir, files).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
+/**
  * @param {string} filePath
  * @returns {$CancellablePromise<$models.Result<string>>}
  */
 export function OpenFileWithDefaultApp(filePath) {
     return $Call.ByID(2060842792, filePath).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
+/**
+ * @param {string} targetDir
+ * @param {string[]} files
+ * @param {boolean} cutMode
+ * @returns {$CancellablePromise<$models.Result<string>>}
+ */
+export function PasteFiles(targetDir, files, cutMode) {
+    return $Call.ByID(415346304, targetDir, files, cutMode).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }

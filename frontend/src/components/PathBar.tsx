@@ -3,6 +3,7 @@ import { useFileSystemStore } from "../store/directoryStore";
 import { useState, useRef } from "react";
 import { PathInfo } from "../../bindings/lazydir/internal/models";
 import { useQuery } from "@tanstack/react-query";
+import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
 
 interface PathBarProps {
   pane: Pane;
@@ -53,6 +54,19 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
     if (target.tagName === "BUTTON") return;
     setEditing(true);
   };
+
+  // Ctrl L focuses input
+  useKeyboardShortcut({
+    key: "l",
+    ctrl: true,
+    preventDefault: true,
+    handler: async () => {
+      setEditing(true);
+      setTimeout(() => {
+        inputRef.current?.select();
+      }, 0);
+    },
+  });
 
   return (
     <div

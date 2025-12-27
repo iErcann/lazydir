@@ -16,6 +16,7 @@ import { formatSize } from "../utils/utils";
 import { getIconForFile, getIconForFolder } from "@react-symbols/icons/utils";
 import React from "react";
 import { ContextMenu } from "./ContextMenu";
+import { useFileSystemStore } from "../store/directoryStore";
 
 interface FileListProps {
   contents: DirectoryContents;
@@ -43,6 +44,10 @@ export function FileList({
     (state) => state.setSelectedFilePaths
   );
 
+  const createTab = useTabsStore((state) => state.createTab);
+  const copyFiles = useTabsStore((state) => state.copyFiles);
+  const pasteFiles = useFileSystemStore((state) => state.pasteFiles);
+  const clipboard = useTabsStore((state) => state.clipboard);
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString(undefined, {
@@ -322,9 +327,7 @@ export function FileList({
                         {
                           label: "Open in New Tab",
                           onClick: () => {
-                            useTabsStore
-                              .getState()
-                              .createTab(file.isDir ? file.path : undefined);
+                            createTab(file.isDir ? file.path : undefined);
                           },
                         },
                         {
@@ -342,19 +345,38 @@ export function FileList({
                         {
                           label: "Copy",
                           onClick: () => {
-                            // Add copy functionality here
+                            // TODO: Copy all selected files, not just the right-clicked one
+                            copyFiles(
+                              Array.from(selectedFilePaths || []),
+                              false
+                            ); // Copy into the store, just the paths
                           },
                         },
                         {
                           label: "Cut",
                           onClick: () => {
-                            // Add cut functionality here
+                            copyFiles(
+                              Array.from(selectedFilePaths || []),
+                              true
+                            );
                           },
                         },
                         {
                           label: "Paste",
-                          onClick: () => {
-                            // Add paste functionality here
+                          onClick: async () => {
+                            // Can only paste into directories
+                            if (!file.isDir) return;
+
+                            await pasteFiles(
+                              clipboard.filePaths,
+                              file.path, // Not the pane path, but the path of the directory we have the context opened on
+                              clipboard.cutMode
+                            );
+
+                            // TODO: CLEAR CLIPBOARD !!
+
+                            // Force a reload of the directory after pasting
+                            // onOpen(file);
                           },
                         },
                         {
