@@ -124,5 +124,5 @@ Its all CSS.
 - [ ] **LOW**: CTRL+L to focus the address bar.
 - [ ] **LOW**: Terminal integration (open terminal here) - platform-specific.
 - [ ] **LOW**: File Search in the current directory.
-- [ ] **MEDIUM**: Tab support.
+- [x] **MEDIUM**: Tab support.
 - [ ] **MEDIUM**: Split Screen support.

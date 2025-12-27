@@ -21,7 +21,7 @@ export function FileGrid({
   const [cols, setCols] = useState(8);
 
   // Since we are inside a pane, we can't rely based on window size
-    // Adjust columns based on container width (Pane width)
+  // Adjust columns based on container width (Pane width)
   useEffect(() => {
     const updateCols = () => {
       if (!gridRef.current) return;
@@ -39,7 +39,7 @@ export function FileGrid({
 
   // Calculate items per "virtual row" (actually a slice of items)
   const itemsPerRow = cols;
-  
+
   // Create rows of items for better batching
   const rows = useMemo(() => {
     const result = [];
@@ -74,7 +74,7 @@ export function FileGrid({
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const rowItems = rows[virtualRow.index];
-          
+
           return (
             <div
               key={virtualRow.key}

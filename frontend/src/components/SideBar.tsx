@@ -41,7 +41,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-48 bg-(--bg-secondary) flex flex-col hidden sm:flex">
+    <div className="w-36 bg-(--bg-secondary) flex flex-col hidden sm:flex">
       <div className="p-3">
         <h2
           className={`text-xs font-semibold text-(--text-secondary) uppercase tracking-wider px-2 mb-2 ${

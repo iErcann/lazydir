@@ -56,7 +56,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
 
   return (
     <div
-      className="mx-auto flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-secondary) backdrop-blur border border-white/5 min-w-1/2 mt-0.5 cursor-text"
+      className="mx-auto flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-primary) backdrop-blur border border-(--bg-tertiary) min-w-1/2 mt-0.5 cursor-text"
       onClick={handleBarClick}
     >
       {editing ? (
@@ -68,7 +68,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
           onBlur={() => setEditing(false)}
           onKeyDown={handleKeyDown}
           autoFocus
-          className="flex-1 px-2 py-1 rounded-md bg-(--bg-secondary) text-(--text-primary) border border-white/10 outline-none"
+          className="flex-1 px-2 py-1 rounded-md bg-(--bg-secondary) text-(--text-primary)  outline-none"
         />
       ) : (
         // Normal path buttons
@@ -90,7 +90,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
                 {part}
               </button>
               {i !== pathInfo.parts.length - 1 && (
-                <span className="text-gray-400 text-sm px-0.5">/</span>
+                <span className="text-gray-400 text-sm px-0.5"> / </span>
               )}
             </div>
           );
