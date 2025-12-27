@@ -26,6 +26,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
+
   const {
     data: contents,
     isLoading,
@@ -33,9 +34,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     isFetching,
   } = useQuery({
     queryKey: ["directory", pane.path],
-
     queryFn: () => loadDirectory(pane.path),
-
     select: (result) => {
       if (result.error) throw result.error;
       return result.data;
@@ -49,16 +48,12 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
 
   const handlePathChange = (newPath: string) => {
     updatePanePath(tab.id, pane.id, newPath);
-    console.log("Path changed to:", newPath);
   };
 
   const handleFileOpen = async (file: FileInfo) => {
     if (file.isDir) return;
-
     const opened = await OpenFileWithDefaultApp(file.path);
-    if (opened.error) {
-      setFileOpenError(opened.error.message);
-    }
+    if (opened.error) setFileOpenError(opened.error.message);
   };
 
   const handlePaneClick = (e: React.MouseEvent) => {
@@ -73,91 +68,82 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
     getPathInfo(pane.path).then((result) => {
       if (result.error || !result.data) return;
       const pathInfo = result.data;
-      const parentIndex = pathInfo.parts.length - 2; // parent is one level up
-      if (parentIndex < 0) return; // already at root
+      const parentIndex = pathInfo.parts.length - 2;
+      if (parentIndex < 0) return;
 
       getPathAtIndex(pathInfo.fullPath, parentIndex).then((res) => {
         if (res.error || !res.data) return;
-        const parentPath = res.data;
-        handlePathChange(parentPath);
+        handlePathChange(res.data);
       });
     });
   };
 
   return (
-    <div className="flex h-full" onClick={handlePaneClick}>
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="flex items-center gap-1 px-2 py-1 bg-(--bg-primary) text-(--text-primary)">
-          {/* Navigation Buttons */}
-          <button
-            className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
-            disabled={!canGoBack}
-            onClick={() => navigateBack(tab.id, pane.id)}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
+    <div className="grid grid-rows-[auto_1fr] h-full" onClick={handlePaneClick}>
+      {/* Top Bar */}
+      <div className="grid grid-cols-[auto_auto_auto_1fr_auto] items-center gap-1 px-2 py-1 bg-(--bg-primary) text-(--text-primary)">
+        {/* Navigation Buttons */}
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
+          disabled={!canGoBack}
+          onClick={() => navigateBack(tab.id, pane.id)}
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
+          disabled={!canGoForward}
+          onClick={() => navigateForward(tab.id, pane.id)}
+        >
+          <ArrowRight className="w-4 h-4" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) transition"
+          onClick={handleNavigateUp}
+        >
+          <ArrowUp className="w-4 h-4" />
+        </button>
 
-          <button
-            className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
-            disabled={!canGoForward}
-            onClick={() => navigateForward(tab.id, pane.id)}
-          >
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <button
-            className="p-1 rounded hover:bg-(--bg-secondary) transition"
-            onClick={handleNavigateUp}
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
-
-          {/* Path Bar */}
-          <div className="flex-1 ml-1">
-            <PathBar pane={pane} onPathChange={handlePathChange} />
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 ml-2">
-            <button
-              className={`
-                p-1 rounded hover:bg-(--bg-secondary) transition
-                ${pane.viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""}
-              `}
-              onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.LIST)}
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              className={`
-                p-1 rounded hover:bg-(--bg-secondary) transition
-                ${pane.viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""}
-              `}
-              onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.GRID)}
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Path Bar */}
+        <div className="mx-1">
+          <PathBar pane={pane} onPathChange={handlePathChange} />
         </div>
 
-        {/* Error message */}
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-1">
+          <button
+            className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
+              pane.viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""
+            }`}
+            onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.LIST)}
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
+              pane.viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""
+            }`}
+            onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.GRID)}
+          >
+            <Grid className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex flex-col overflow-hidden px-2">
         {(fileOpenError || error) && (
-          <div className="p-2">
-            <div className="bg-(--bg-tertiary) text-(--text-primary) p-2 rounded-md">
-              Error: {fileOpenError || error?.message}
-            </div>
+          <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
+            Error: {fileOpenError || error?.message}
           </div>
         )}
 
-        {/* Loading state */}
         {(isLoading || isFetching) && (
           <div className="p-1 text-(--text-secondary)"> </div>
         )}
 
-        {/* Directory contents */}
-        {!(fileOpenError || error) && contents && (
-          <div className="flex-1 flex flex-col overflow-hidden px-2">
+        {contents && !(fileOpenError || error) && (
+          <>
             {pane.viewMode === ViewMode.GRID ? (
               <FileGrid
                 contents={contents}
@@ -180,7 +166,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
               {formatSize(contents.directSizeBytes)} (
               {contents.directSizeBytes.toLocaleString()} bytes)
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

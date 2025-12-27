@@ -56,7 +56,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
 
   return (
     <div
-      className="mx-auto flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-primary) backdrop-blur border border-(--bg-tertiary) min-w-1/2 mt-0.5 cursor-text"
+      className="flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-primary) backdrop-blur border border-(--bg-tertiary) mt-0.5 cursor-text flex-1 overflow-x-auto"
       onClick={handleBarClick}
     >
       {editing ? (
@@ -68,33 +68,35 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
           onBlur={() => setEditing(false)}
           onKeyDown={handleKeyDown}
           autoFocus
-          className="flex-1 px-2 py-1 rounded-md bg-(--bg-secondary) text-(--text-primary)  outline-none"
+          className="flex-1 min-w-[100px] px-2 py-1 rounded-md bg-(--bg-secondary) text-(--text-primary) outline-none"
         />
       ) : (
         // Normal path buttons
-        pathInfo?.parts.map((part: string, i: number) => {
-          const isActive = i === pathInfo.parts.length - 1;
-          return (
-            <div key={i} className="flex items-center gap-1">
-              <button
-                onClick={async () => onPathChange(await fetchPathAtIndex(i))}
-                className={`
-                  px-2.5 py-1 rounded-md text-sm transition
-                  ${
-                    isActive
-                      ? "text-(--text-primary) font-bold"
-                      : "hover:bg-(--bg-tertiary) text-(--text-secondary) font-medium"
-                  }
-                `}
-              >
-                {part}
-              </button>
-              {i !== pathInfo.parts.length - 1 && (
-                <span className="text-gray-400 text-sm px-0.5"> / </span>
-              )}
-            </div>
-          );
-        })
+        <div className="inline-flex items-center gap-1">
+          {pathInfo?.parts.map((part: string, i: number) => {
+            const isActive = i === pathInfo.parts.length - 1;
+            return (
+              <div key={i} className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={async () => onPathChange(await fetchPathAtIndex(i))}
+                  className={`
+                    px-2.5 py-1 rounded-md text-sm transition
+                    ${
+                      isActive
+                        ? "text-(--text-primary) font-bold"
+                        : "hover:bg-(--bg-tertiary) text-(--text-secondary) font-medium"
+                    }
+                  `}
+                >
+                  {part}
+                </button>
+                {i !== pathInfo.parts.length - 1 && (
+                  <span className="text-gray-400 text-sm px-0.5"> / </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
