@@ -15,6 +15,7 @@ import { Pane, Tab } from "../types";
 import { formatSize } from "../utils/utils";
 import { getIconForFile, getIconForFolder } from "@react-symbols/icons/utils";
 import React from "react";
+import { ContextMenu } from "./ContextMenu";
 
 interface FileListProps {
   contents: DirectoryContents;
@@ -250,7 +251,6 @@ export function FileList({
             </React.Fragment>
           ))}
         </div>
-
         {/* Virtual rows */}
         <div
           className="relative"
@@ -301,15 +301,77 @@ export function FileList({
                   }`}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <div
-                      key={cell.id}
-                      className="min-w-0 text-left select-none text-(--text-primary)"
+                    <ContextMenu
+                      onOpen={() => {
+                        // if the file is not already selected, select it, otherwise keep the multi selection
+                        if (!selectedFilePaths?.has(file.path)) {
+                          setSelectedFilePaths(
+                            tab.id,
+                            pane.id,
+                            new Set([file.path])
+                          );
+                        }
+                      }}
+                      items={[
+                        {
+                          label: "Open",
+                          onClick: () => {
+                            onOpen(file);
+                          },
+                        },
+                        {
+                          label: "Open in New Tab",
+                          onClick: () => {
+                            useTabsStore
+                              .getState()
+                              .createTab(file.isDir ? file.path : undefined);
+                          },
+                        },
+                        {
+                          label: "Delete",
+                          onClick: () => {
+                            // Add delete functionality here
+                          },
+                        },
+                        {
+                          label: "Rename",
+                          onClick: () => {
+                            // Add rename functionality here
+                          },
+                        },
+                        {
+                          label: "Copy",
+                          onClick: () => {
+                            // Add copy functionality here
+                          },
+                        },
+                        {
+                          label: "Cut",
+                          onClick: () => {
+                            // Add cut functionality here
+                          },
+                        },
+                        {
+                          label: "Paste",
+                          onClick: () => {
+                            // Add paste functionality here
+                          },
+                        },
+                        {
+                          label: "Properties",
+                          onClick: () => {
+                            // Add properties functionality here
+                          },
+                        },
+                      ]}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </div>
+                      <div className="min-w-0 text-left select-none text-(--text-primary)">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </div>
+                    </ContextMenu>
                   ))}
                 </button>
               </div>
