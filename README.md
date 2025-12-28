@@ -123,7 +123,7 @@ Its all CSS.
 - [ ] **LOW**: CTRL+A to select all files in the current directory.
 - [x] **LOW**: CTRL+L to focus the address bar.
 - [x] **LOW**: CTRL+T to open a new tab.
-- [ ] **LOW**: CTRL+W to close the current tab.
+- [x] **LOW**: CTRL+W to close the current tab.
 - [ ] **LOW**: Terminal integration (open terminal here) - platform-specific.
 - [ ] **LOW**: File Search in the current directory.
 - [x] **MEDIUM**: Tab support.

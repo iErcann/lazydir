@@ -16,6 +16,12 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
+ * *
+ * 
+ * 	targetDir: destination directory
+ * 	files: list of source file/directory paths to copy
+ * 
+ * *
  * @param {string} targetDir
  * @param {string[]} files
  * @returns {$CancellablePromise<$models.Result<string>>}

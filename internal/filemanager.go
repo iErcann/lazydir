@@ -287,6 +287,14 @@ func (f *FileManagerService) PasteFiles(targetDir string, files []string, cutMod
 	return f.CopyFiles(targetDir, files)
 }
 
+/*
+*
+
+	targetDir: destination directory
+	files: list of source file/directory paths to copy
+
+*
+*/
 func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[string] {
 	targetResult := canonicalPath(targetDir)
 	if targetResult.Error != nil {
@@ -308,6 +316,14 @@ func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[
 				Code:       FileCopyError,
 				Message:    fmt.Sprintf("cannot access %s: %v", sourcePath, err),
 				InnerError: err,
+			}}
+		}
+
+		// Check if the dest already exists (for now, don't overwrite, maybe we could create a "copy of" file instead)
+		if _, err := os.Stat(dest); err == nil {
+			return Result[string]{Error: &AppError{
+				Code:    FileCopyError,
+				Message: fmt.Sprintf("destination %s already exists", dest),
 			}}
 		}
 
@@ -379,7 +395,7 @@ func (f *FileManagerService) MoveFiles(targetDir string, files []string) Result[
 
 			if err := os.RemoveAll(sourcePath); err != nil {
 				return Result[string]{Error: &AppError{
-					Code:       FileMoveError,
+					Code:       FileCleanupError,
 					Message:    fmt.Sprintf("failed to remove original %s after move: %v", sourcePath, err),
 					InnerError: err,
 				}}
@@ -405,6 +421,9 @@ func copyFile(src, dst string) error {
 	defer destFile.Close()
 
 	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		// Cleanup partial file
+		destFile.Close()
+		os.Remove(dst)
 		return err
 	}
 
@@ -413,6 +432,12 @@ func copyFile(src, dst string) error {
 		return err
 	}
 
+	// keep timestamps
+	if err := os.Chtimes(dst, info.ModTime(), info.ModTime()); err != nil {
+		return err
+	}
+
+	// keep permissions
 	return os.Chmod(dst, info.Mode())
 }
 
@@ -420,12 +445,23 @@ func copyFile(src, dst string) error {
 // WARNING: THIS doesnt handle symlinks or special files
 // to debug: node_modules from a pnpm project is a good test case
 func copyDir(src, dst string) error {
+	info, err := os.Stat(src)
+
+	if err != nil {
+		return err
+	}
+
+	if !info.IsDir() {
+		return fmt.Errorf("source %s is not a directory", src)
+	}
+
 	entries, err := os.ReadDir(src)
 	if err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(dst, 0755); err != nil {
+	// Keep permissions + create destination dir (this could go further maybe info mode everything inside?)
+	if err := os.MkdirAll(dst, info.Mode().Perm()); err != nil {
 		return err
 	}
 

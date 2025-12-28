@@ -48,6 +48,7 @@ const (
 	FileOpenWithDefaultAppError ErrorCode = "FileOpenWithDefaultAppError"
 	InvalidPathIndex            ErrorCode = "InvalidPathIndex"
 	FileMoveError               ErrorCode = "FileMoveError"
+	FileCleanupError            ErrorCode = "FileCleanupError"
 	FileCopyError               ErrorCode = "FileCopyError"
 )
 
