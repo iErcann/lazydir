@@ -4,7 +4,6 @@ import { FileInfo } from "../../../bindings/lazydir/internal";
 import { ContextMenu } from "../ContextMenu";
 import { useFileContextMenu } from "../../hooks/useFileContextMenu";
 import { useTabsStore } from "../../store/tabsStore";
-import { Pane, Tab } from "../../types";
 
 interface FileListRowProps {
   virtualRow: VirtualItem;
@@ -45,9 +44,25 @@ export function FileListRow({
         transform: `translateY(${virtualRow.start}px)`,
       }}
     >
-      <button
+      <div
         onDoubleClick={() => onOpen(file)}
         onClick={(e) => onClick(file, e)}
+        // onMouseDown={(e) => {
+        // !!! breaks the right click unselect, but makes a faster feeling
+        //   e.preventDefault();
+
+        //   // Only handle LEFT click here (button 0)
+        //   if (e.button !== 0) return;
+
+        //   // Optional: prevent default if you need to stop text selection, etc.
+
+        //   // Forward to the same logic as before
+        //   onClick(file, e);
+        // }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          onClick(file, e); // ← triggers selection + menu opens
+        }}
         className={`w-full py-2 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md ${
           isSelected ? "bg-(--bg-tertiary)" : ""
         }`}
@@ -63,7 +78,7 @@ export function FileListRow({
             </div>
           </ContextMenu>
         ))}
-      </button>
+      </div>
     </div>
   );
 }

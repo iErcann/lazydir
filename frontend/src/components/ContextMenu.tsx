@@ -41,6 +41,7 @@ export function ContextMenu({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      console.log("Document click detected");
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setVisible(false);
       }

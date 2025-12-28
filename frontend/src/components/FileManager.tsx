@@ -57,6 +57,54 @@ export function FileManager() {
     },
   });
 
+  // Ctrl+W to close current tab
+  useKeyboardShortcut({
+    key: "w",
+    ctrl: true,
+    preventDefault: true,
+    handler: () => {
+      const activeTab = useTabsStore.getState().getActiveTab();
+      if (activeTab) {
+        useTabsStore.getState().closeTab(activeTab.id);
+      }
+    },
+  });
+
+  // Ctrl + PageUp to switch to previous tab
+  useKeyboardShortcut({
+    key: "PageUp",
+    ctrl: true,
+    preventDefault: true,
+    handler: () => {
+      const tabs = useTabsStore.getState().tabs;
+      const activeTab = useTabsStore.getState().getActiveTab();
+      if (!activeTab || tabs.length <= 1) return;
+
+      const currentIndex = tabs.findIndex((tab) => tab.id === activeTab.id);
+      const previousIndex = (currentIndex - 1 + tabs.length) % tabs.length; // Loop around
+      const previousTab = tabs[previousIndex];
+
+      useTabsStore.getState().activateTab(previousTab.id);
+    },
+  });
+
+  // Ctrl + PageDown to switch to next tab
+  useKeyboardShortcut({
+    key: "PageDown",
+    ctrl: true,
+    preventDefault: true,
+    handler: () => {
+      const tabs = useTabsStore.getState().tabs;
+      const activeTab = useTabsStore.getState().getActiveTab();
+      if (!activeTab || tabs.length <= 1) return;
+
+      const currentIndex = tabs.findIndex((tab) => tab.id === activeTab.id);
+      const nextIndex = (currentIndex + 1) % tabs.length; // Loop around
+      const nextTab = tabs[nextIndex];
+
+      useTabsStore.getState().activateTab(nextTab.id);
+    },
+  });
   // Show loading state
   if (pathLoading)
     return <div className="p-4 text-(--text-secondary)">Loading...</div>;

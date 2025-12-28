@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   useReactTable,
@@ -30,7 +30,6 @@ export function FileList({
   tabId,
 }: FileListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-
   const pane = useTabsStore((state) => state.getPane(tabId, paneId)!);
   const selectedFilePaths = useTabsStore(
     (state) => state.getPane(tabId, paneId)?.selectedFilePaths
@@ -88,26 +87,44 @@ export function FileList({
     }
   };
 
-  const handleFileClick = (file: FileInfo, e: React.MouseEvent) => {
-    const newSelected: Set<string> = new Set(selectedFilePaths);
+  const handleFileClick = useCallback(
+    (file: FileInfo, e: React.MouseEvent) => {
+      console.log("File clicked:", file.name);
+      e.preventDefault(); // prevents default browser context menu on right-click
+      e.stopPropagation(); // optional, depending on your layout
 
-    const isMultiSelect = e.ctrlKey || e.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
+      const isRightClick = e.button === 2; // 0 = left, 2 = right
+      const isMultiSelect = e.ctrlKey || e.metaKey;
 
-    if (isMultiSelect) {
-      // Toggle selection if Ctrl/Cmd is pressed
-      if (newSelected.has(file.path)) {
-        newSelected.delete(file.path);
+      let newSelected = new Set(selectedFilePaths ?? []);
+
+      if (isRightClick) {
+        if (!newSelected.has(file.path)) {
+          // If right-clicked file is not selected yet, select only that file
+          newSelected.clear();
+          newSelected.add(file.path);
+        }
+      } else if (isMultiSelect) {
+        // Left click + Ctrl/Cmd → toggle selection
+        if (newSelected.has(file.path)) {
+          newSelected.delete(file.path);
+        } else {
+          newSelected.add(file.path);
+        }
       } else {
+        // Normal left click → single select
+        newSelected.clear();
         newSelected.add(file.path);
       }
-    } else {
-      // Single select: clear all others and select only this file
-      newSelected.clear();
-      newSelected.add(file.path);
-    }
 
-    setSelectedFilePaths(tabId, paneId, newSelected);
-  };
+      setSelectedFilePaths(tabId, paneId, newSelected);
+
+      // If it's left click, you can still call any additional logic if needed
+      // (for example, focus, preview, etc.)
+      // if (!isRightClick) { ... }
+    },
+    [selectedFilePaths, setSelectedFilePaths, tabId, paneId]
+  );
 
   const gridCols = "grid-cols-[minmax(240px,1fr)_90px_260px]";
 

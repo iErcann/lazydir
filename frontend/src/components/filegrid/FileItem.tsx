@@ -4,12 +4,10 @@ import { FileInfo } from "../../../bindings/lazydir/internal";
 import { ContextMenu } from "../ContextMenu";
 import { useFileContextMenu } from "../../hooks/useFileContextMenu";
 import { useTabsStore } from "../../store/tabsStore";
-import { Pane, Tab } from "../../types";
 
 interface FileItemProps {
   file: FileInfo;
-  onDirectoryOpen: (file: FileInfo) => void;
-  onFileOpen: (file: FileInfo) => void;
+  onOpen: (file: FileInfo) => void;
   onClick?: (file: FileInfo, e: React.MouseEvent) => void;
   paneId: string;
   tabId: string;
@@ -17,20 +15,11 @@ interface FileItemProps {
 
 export function FileItem({
   file,
-  onDirectoryOpen,
-  onFileOpen,
+  onOpen,
   onClick,
   paneId,
   tabId,
 }: FileItemProps) {
-  const onOpen = (file: FileInfo) => {
-    if (file.isDir) {
-      onDirectoryOpen(file);
-    } else {
-      onFileOpen(file);
-    }
-  };
-
   const selectedFilePaths = useTabsStore(
     (state) => state.getPane(tabId, paneId)?.selectedFilePaths
   );
@@ -43,11 +32,36 @@ export function FileItem({
     onOpen,
   });
 
+  // Truncate filename: keep beginning + ... + end  (example: verylongfi...lename.txt)
+  const maxLength = 34;
+
+  const truncate = (name: string): string => {
+    if (name.length <= maxLength) return name;
+
+    const extIndex = name.lastIndexOf(".");
+    if (extIndex <= 0 || extIndex >= name.length - 1) {
+      // No extension or weird name → just cut in middle
+      const half = Math.floor(maxLength / 2);
+      return name.slice(0, half) + "..." + name.slice(-half);
+    }
+
+    const namePart = name.slice(0, extIndex);
+    const ext = name.slice(extIndex);
+
+    const charsForName = maxLength - ext.length - 3; // 3 for "..."
+    if (charsForName <= 6) {
+      // Very long extension or tiny space → simple truncate
+      return name.slice(0, maxLength - 3) + "...";
+    }
+
+    return namePart.slice(0, charsForName) + "..." + ext;
+  };
+
   const content = (
     <div
       onDoubleClick={() => onOpen(file)}
       onClick={(e) => onClick?.(file, e)}
-      className={`flex flex-col items-center rounded-lg select-none p-4  w-24  ${
+      className={`flex flex-col items-center rounded-lg select-none py-4    w-24   ${
         isSelected ? "bg-(--bg-tertiary)" : "hover:bg-(--bg-tertiary)"
       }`}
       title={file.name}
@@ -64,7 +78,7 @@ export function FileItem({
       )}
 
       <span className="text-xs text-center text-(--text-primary) w-full wrap-break-word line-clamp-2 ">
-        {file.name}
+        {truncate(file.name)}
       </span>
     </div>
   );

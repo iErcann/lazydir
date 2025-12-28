@@ -5,9 +5,7 @@ import {
   DirectoryContents,
   FileInfo,
 } from "../../../bindings/lazydir/internal";
-import { useFileContextMenu } from "../../hooks/useFileContextMenu";
 import { useTabsStore } from "../../store/tabsStore";
-import { Pane, Tab } from "../../types";
 import { useSortedFiles } from "../../hooks/useSortedFiles";
 
 interface FileGridProps {
@@ -40,7 +38,8 @@ export function FileGrid({
       const width = gridRef.current.offsetWidth;
 
       if (width < 300) setCols(1);
-      else if (width < 600) setCols(4);
+      else if (width < 400) setCols(3);
+      else if (width < 800) setCols(4);
       else setCols(8);
     };
 
@@ -120,7 +119,7 @@ export function FileGrid({
           return (
             <div
               key={virtualRow.key}
-              className="absolute top-0 left-0 w-full grid gap-0 p-0 box-border"
+              className="absolute top-0 left-0 w-full grid gap-0 p-0 "
               style={{
                 height: `${virtualRow.size}px`,
                 transform: `translateY(${virtualRow.start}px)`,
@@ -132,8 +131,7 @@ export function FileGrid({
                   <div key={file.path} className="p-2">
                     <FileItem
                       file={file}
-                      onDirectoryOpen={onDirectoryOpen}
-                      onFileOpen={onFileOpen}
+                      onOpen={onOpen}
                       onClick={handleFileClick}
                       paneId={paneId}
                       tabId={tabId}
