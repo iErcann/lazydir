@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { PathInfo } from "../../bindings/lazydir/internal/models";
 import { useQuery } from "@tanstack/react-query";
 import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
+import { useTabsStore } from "../store/tabsStore";
 
 interface PathBarProps {
   pane: Pane;
@@ -15,6 +16,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const activePane = useTabsStore((state) => state.getActivePane);
 
   // Query PathInfo with select
   const { data: pathInfo, refetch: refetchPathInfo } = useQuery({
@@ -61,6 +63,8 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
     ctrl: true,
     preventDefault: true,
     handler: async () => {
+      // Only focus if this is the active pane
+      if (activePane()?.pane.id !== pane.id) return;
       setEditing(true);
       setTimeout(() => {
         inputRef.current?.select();
