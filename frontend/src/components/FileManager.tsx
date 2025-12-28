@@ -12,7 +12,9 @@ export function FileManager() {
   const activeTab = useTabsStore((state) => state.getActiveTab());
   const tabs = useTabsStore((state) => state.tabs);
 
-  const getOperatingSystem = useFileSystemStore((state) => state.getOperatingSystem);
+  const getOperatingSystem = useFileSystemStore(
+    (state) => state.getOperatingSystem
+  );
   const getInitialPath = useFileSystemStore((state) => state.getInitialPath);
 
   // Query OS (just populate store)
@@ -23,13 +25,18 @@ export function FileManager() {
   });
 
   // Query initial path
-  const { data: initialPath, isLoading: pathLoading, error: pathError } = useQuery({
+  const {
+    data: initialPath,
+    isLoading: pathLoading,
+    error: pathError,
+  } = useQuery({
     queryKey: ["initialPath"],
     queryFn: getInitialPath,
     staleTime: Infinity,
-    select: (res) => { 
+    select: (res) => {
       if (res.error) throw res.error;
-      return res.data ?? "."; }, // fallback to "."
+      return res.data ?? ".";
+    }, // fallback to "."
   });
 
   // Create first tab when initialPath is ready
@@ -39,7 +46,7 @@ export function FileManager() {
     }
   }, [activeTab, initialPath, createTab]);
 
-
+  // Ctrl+T to open new tab
   useKeyboardShortcut({
     key: "t",
     ctrl: true,
@@ -48,12 +55,17 @@ export function FileManager() {
       const result = await getInitialPath();
       createTab(result.data ?? ".");
     },
-  }); 
+  });
 
-  
   // Show loading state
-  if (pathLoading) return <div className="p-4 text-(--text-secondary)">Loading...</div>;
-  if (pathError) return <div className="p-4 text-red-500">Error loading path: {pathError.message}</div>;
+  if (pathLoading)
+    return <div className="p-4 text-(--text-secondary)">Loading...</div>;
+  if (pathError)
+    return (
+      <div className="p-4 text-red-500">
+        Error loading path: {pathError.message}
+      </div>
+    );
   if (!activeTab) return null;
 
   return (
@@ -62,7 +74,7 @@ export function FileManager() {
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           {tabs.length > 1 && <TabBar />}
-          <FileManagerTab tab={activeTab} />
+          <FileManagerTab tabId={activeTab.id} />
         </div>
       </div>
     </div>

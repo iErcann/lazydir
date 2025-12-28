@@ -1,32 +1,41 @@
-import { FileList } from "./FileList";
 import { ViewMode, type Pane, type Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
-import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
 import { useTabsStore } from "../store/tabsStore";
 import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 import { PathBar } from "./PathBar";
 import { formatSize } from "../utils/utils";
 import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
-import { FileGrid } from "./FileGrid";
 import { useQuery } from "@tanstack/react-query";
 import { List, Grid } from "lucide-react"; // add to your imports
+import { FileGrid } from "./filegrid/FileGrid";
+import { FileList } from "./filelist/FileList";
+import { FileInfo } from "../../bindings/lazydir/internal";
 
 interface FileManagerPaneProps {
-  tab: Tab;
-  pane: Pane;
+  tabId: string;
+  paneId: string;
 }
-export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
-  const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
-  const updatePanePath = useTabsStore((state) => state.updatePanePath);
+export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const [fileOpenError, setFileOpenError] = useState<string | null>(null);
-  const activatePane = useTabsStore((state) => state.activatePane);
-  const navigateBack = useTabsStore((state) => state.paneNavigateBack);
-  const navigateForward = useTabsStore((state) => state.paneNavigateForward);
+
+  // FileSystem actions
+  const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
+
+  // Tabs/navigation actions
+  // }));
+  const pane = useTabsStore((state) => state.getPane(tabId, paneId)!);
+  const updatePanePath = useTabsStore((state) => state.updatePanePath);
+  const activatePane = useTabsStore((state) => state.activatePane);
+  const paneNavigateBack = useTabsStore((state) => state.paneNavigateBack);
+  const paneNavigateForward = useTabsStore(
+    (state) => state.paneNavigateForward
+  );
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
 
+  // Query directory contents
   const {
     data: contents,
     isLoading,
@@ -47,7 +56,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   };
 
   const handlePathChange = (newPath: string) => {
-    updatePanePath(tab.id, pane.id, newPath);
+    updatePanePath(tabId, paneId, newPath);
   };
 
   const handleFileOpen = async (file: FileInfo) => {
@@ -58,7 +67,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
 
   const handlePaneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    activatePane(tab.id, pane.id);
+    activatePane(tabId, paneId);
   };
 
   const canGoBack = pane.historyIndex > 0;
@@ -86,14 +95,14 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
         <button
           className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
           disabled={!canGoBack}
-          onClick={() => navigateBack(tab.id, pane.id)}
+          onClick={() => paneNavigateBack(tabId, paneId)}
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <button
           className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
           disabled={!canGoForward}
-          onClick={() => navigateForward(tab.id, pane.id)}
+          onClick={() => paneNavigateForward(tabId, paneId)}
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -115,7 +124,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
             className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
               pane.viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""
             }`}
-            onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.LIST)}
+            onClick={() => setPaneViewMode(tabId, paneId, ViewMode.LIST)}
           >
             <List className="w-4 h-4" />
           </button>
@@ -123,7 +132,7 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
             className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
               pane.viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""
             }`}
-            onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.GRID)}
+            onClick={() => setPaneViewMode(tabId, paneId, ViewMode.GRID)}
           >
             <Grid className="w-4 h-4" />
           </button>
@@ -149,16 +158,16 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
                 contents={contents}
                 onDirectoryOpen={handleDirectoryOpen}
                 onFileOpen={handleFileOpen}
-                pane={pane}
-                tab={tab}
+                paneId={paneId}
+                tabId={tabId}
               />
             ) : (
               <FileList
                 contents={contents}
                 onDirectoryOpen={handleDirectoryOpen}
                 onFileOpen={handleFileOpen}
-                pane={pane}
-                tab={tab}
+                paneId={paneId}
+                tabId={tabId}
               />
             )}
             <div className="p-1 text-xs text-(--text-secondary)">

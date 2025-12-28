@@ -56,6 +56,7 @@ interface TabsStore {
   getActiveTab: () => Tab | null;
   getActivePane: () => ActivePaneResult | null;
   getPane: (tabId: string, paneId: string) => Pane | null;
+  getTab: (tabId: string) => Tab | null;
 }
 
 export const useTabsStore = create<TabsStore>()(
@@ -285,6 +286,10 @@ export const useTabsStore = create<TabsStore>()(
       const { tabs } = get();
       const tab = tabs.find((t: Tab) => t.id === tabId);
       return tab?.panes.find((p: Pane) => p.id === paneId) ?? null;
+    },
+    getTab: (tabId: string) => {
+      const { tabs } = get();
+      return tabs.find((t: Tab) => t.id === tabId) ?? null;
     },
   }))
 );
