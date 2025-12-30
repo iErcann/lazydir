@@ -8,15 +8,12 @@ import { Sidebar } from "./SideBar";
 import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
 
 export function FileManager() {
-  const createTab = useTabsStore((state) => state.createTab);
-  const activeTab = useTabsStore((state) => state.getActiveTab());
-  const tabs = useTabsStore((state) => state.tabs);
+  const createTab = useTabsStore((s) => s.createTab);
+  const tabs = useTabsStore((s) => s.tabs);
+  const activeTab = useTabsStore((s) => s.getActiveTab());
 
-  const getOperatingSystem = useFileSystemStore(
-    (state) => state.getOperatingSystem
-  );
-  const getInitialPath = useFileSystemStore((state) => state.getInitialPath);
-
+  // File system stuff
+  const { getOperatingSystem, getInitialPath } = useFileSystemStore();
   // Query OS (just populate store)
   useQuery({
     queryKey: ["os"],
@@ -31,12 +28,19 @@ export function FileManager() {
     error: pathError,
   } = useQuery({
     queryKey: ["initialPath"],
-    queryFn: getInitialPath,
+    queryFn: () => {
+      console.log("FileManager: Fetching initial path");
+      return getInitialPath();
+    },
     staleTime: Infinity,
     select: (res) => {
       if (res.error) throw res.error;
       return res.data ?? ".";
     }, // fallback to "."
+    retry: false,
+    refetchOnWindowFocus: false, // otherwise it will refetch on alt tab.
+    refetchOnMount: false,
+    gcTime: 0,
   });
 
   // Create first tab when initialPath is ready
@@ -63,7 +67,6 @@ export function FileManager() {
     ctrl: true,
     preventDefault: true,
     handler: () => {
-      const activeTab = useTabsStore.getState().getActiveTab();
       if (activeTab) {
         useTabsStore.getState().closeTab(activeTab.id);
       }
@@ -76,8 +79,6 @@ export function FileManager() {
     ctrl: true,
     preventDefault: true,
     handler: () => {
-      const tabs = useTabsStore.getState().tabs;
-      const activeTab = useTabsStore.getState().getActiveTab();
       if (!activeTab || tabs.length <= 1) return;
 
       const currentIndex = tabs.findIndex((tab) => tab.id === activeTab.id);

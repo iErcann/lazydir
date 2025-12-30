@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   DirectoryContents,
   FileManagerService,
+  DialogService, // UI
 } from "../../bindings/lazydir/internal";
 import {
   OperatingSystem,
@@ -13,7 +14,7 @@ import {
 interface FileSystemStore {
   operatingSystem: OperatingSystem;
   setOperatingSystem: (os: OperatingSystem) => void;
-  loadDirectory: (path: string) => Promise<Result<DirectoryContents>>;
+  listDirectory: (path: string) => Promise<Result<DirectoryContents>>;
   getOperatingSystem: () => Promise<Result<OperatingSystem>>;
   getPathInfo: (path: string) => Promise<Result<PathInfo>>; // Cross platform path info retrieval
   getPathAtIndex: (path: string, index: number) => Promise<Result<string>>; // Get path at specific index
@@ -24,6 +25,11 @@ interface FileSystemStore {
     destinationPath: string,
     cutMode: boolean
   ) => Promise<Result<string>>; // Paste files to destination
+  openFileWithDefaultApp: (path: string) => Promise<Result<string>>; // Open file with default application
+  // UI
+  showInfoDialog: (title: string, message: string) => void;
+  showErrorDialog: (title: string, message: string) => void;
+  showWarningDialog: (title: string, message: string) => void;
 }
 
 export const useFileSystemStore = create<FileSystemStore>((set) => ({
@@ -31,7 +37,7 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
 
   setOperatingSystem: (os: OperatingSystem) => set({ operatingSystem: os }),
 
-  loadDirectory: async (path) => {
+  listDirectory: async (path) => {
     return await FileManagerService.ListDirectory(path);
   },
 
@@ -63,5 +69,18 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
     cutMode: boolean
   ) => {
     return await FileManagerService.PasteFiles(destinationPath, files, cutMode);
+  },
+
+  showInfoDialog: (title: string, message: string) => {
+    DialogService.ShowInfoDialog(title, message);
+  },
+  showErrorDialog: (title: string, message: string) => {
+    DialogService.ShowErrorDialog(title, message);
+  },
+  showWarningDialog: (title: string, message: string) => {
+    DialogService.ShowWarningDialog(title, message);
+  },
+  openFileWithDefaultApp: async (path: string) => {
+    return await FileManagerService.OpenFileWithDefaultApp(path);
   },
 }));

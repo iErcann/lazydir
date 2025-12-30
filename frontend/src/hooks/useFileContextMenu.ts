@@ -1,6 +1,7 @@
 import { useTabsStore } from "../store/tabsStore";
 import { useFileSystemStore } from "../store/directoryStore";
-import { FileInfo } from "../../bindings/lazydir/internal";
+import { AppError, FileInfo } from "../../bindings/lazydir/internal";
+import { useState } from "react";
 
 interface UseFileContextMenuProps {
   file: FileInfo;
@@ -19,6 +20,8 @@ export function useFileContextMenu({
   const copyFiles = useTabsStore((state) => state.copyFiles);
   const pasteFiles = useFileSystemStore((state) => state.pasteFiles);
   const clipboard = useTabsStore((state) => state.clipboard);
+  const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
+  const clearClipboard = useTabsStore((state) => state.clearClipboard);
 
   const handleContextOpen = () => {
     // if the file is not already selected, select it, otherwise keep the multi selection
@@ -71,16 +74,18 @@ export function useFileContextMenu({
         // Can only paste into directories
         if (!file.isDir) return;
 
-        await pasteFiles(
+        const pasteResult = await pasteFiles(
           clipboard.filePaths,
           file.path, // Not the pane path, but the path of the directory we have the context opened on
           clipboard.cutMode
         );
 
-        // TODO: CLEAR CLIPBOARD !!
+        if (pasteResult.error) {
+          console.error(pasteResult);
+          showErrorDialog("Paste Error", pasteResult.error.message);
+        }
 
-        // Force a reload of the directory after pasting
-        // onOpen(file);
+        clearClipboard();
       },
     },
     {

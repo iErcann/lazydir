@@ -7,23 +7,35 @@ import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
 import { useTabsStore } from "../store/tabsStore";
 
 interface PathBarProps {
-  pane: Pane;
+  paneId: string;
+  tabId: string;
   onPathChange: (newPath: string) => void;
 }
 
-export function PathBar({ pane, onPathChange }: PathBarProps) {
-  const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
-  const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
+export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
+  const pane = useTabsStore((s) => s.getPane(tabId, paneId)!);
+  const activePaneId = useTabsStore((s) => s.getActivePane()?.pane.id ?? null);
+
+  const getPathInfo = useFileSystemStore((s) => s.getPathInfo);
+  const getPathAtIndex = useFileSystemStore((s) => s.getPathAtIndex);
+
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const activePane = useTabsStore((state) => state.getActivePane);
 
   // Query PathInfo with select
-  const { data: pathInfo, refetch: refetchPathInfo } = useQuery({
+  const {
+    data: pathInfo,
+    error: pathInfoError,
+    refetch: refetchPathInfo,
+  } = useQuery({
     queryKey: ["pathInfo", pane.path],
-    queryFn: () => getPathInfo(pane.path),
+    queryFn: () => {
+      console.log("PathBar: Loading path info for path", pane.path);
+      return getPathInfo(pane.path);
+    },
     select: (result) => {
-      if (!result.data) throw new Error("No path info");
+      if (result.error) throw result.error;
+      if (!result.data) throw new Error("No path info returned");
       return result.data as PathInfo;
     },
   });
@@ -64,7 +76,7 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
     preventDefault: true,
     handler: async () => {
       // Only focus if this is the active pane
-      if (activePane()?.pane.id !== pane.id) return;
+      if (activePaneId !== pane.id) return;
       setEditing(true);
       setTimeout(() => {
         inputRef.current?.select();
@@ -72,6 +84,15 @@ export function PathBar({ pane, onPathChange }: PathBarProps) {
     },
   });
 
+  if (pathInfoError) {
+    return (
+      <div className="w-full bg-(--bg-secondary) flex items-center px-3 py-1.5">
+        <div className="text-(--text-secondary) text-sm">
+          Error loading path info: {pathInfoError.message}
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className="flex items-center gap-1 px-3 py-1 rounded-md bg-(--bg-primary) backdrop-blur border border-(--bg-tertiary) mt-0.5 cursor-text flex-1 overflow-x-auto"

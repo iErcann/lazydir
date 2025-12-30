@@ -2,11 +2,10 @@ import { ViewMode, type Pane, type Tab } from "../types";
 import { useFileSystemStore } from "../store/directoryStore";
 import { useEffect, useState } from "react";
 import { useTabsStore } from "../store/tabsStore";
-import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
 import { PathBar } from "./PathBar";
 import { formatSize } from "../utils/utils";
 import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { List, Grid } from "lucide-react"; // add to your imports
 import { FileGrid } from "./filegrid/FileGrid";
 import { FileList } from "./filelist/FileList";
@@ -20,13 +19,25 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const [fileOpenError, setFileOpenError] = useState<string | null>(null);
 
   // FileSystem actions
-  const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
+  const loadDirectory = useFileSystemStore((state) => state.listDirectory);
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
+  const openFileWithDefaultApp = useFileSystemStore(
+    (state) => state.openFileWithDefaultApp
+  );
 
   // Tabs/navigation actions
-  // }));
-  const pane = useTabsStore((state) => state.getPane(tabId, paneId)!);
+  const panePath = useTabsStore((state) => state.getPane(tabId, paneId)?.path);
+  const viewMode = useTabsStore(
+    (state) => state.getPane(tabId, paneId)?.viewMode
+  );
+  const historyIndex = useTabsStore(
+    (state) => state.getPane(tabId, paneId)?.historyIndex
+  );
+  const historyLength = useTabsStore(
+    (state) => state.getPane(tabId, paneId)?.history.length
+  );
+
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const activatePane = useTabsStore((state) => state.activatePane);
   const paneNavigateBack = useTabsStore((state) => state.paneNavigateBack);
@@ -34,21 +45,41 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
     (state) => state.paneNavigateForward
   );
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
-
-  // Query directory contents
+  const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
+  // Query directory contents on pane path change
   const {
     data: contents,
     isLoading,
-    error,
+    error: loadDirectoryError,
     isFetching,
   } = useQuery({
-    queryKey: ["directory", pane.path],
-    queryFn: () => loadDirectory(pane.path),
+    queryKey: ["directory", panePath, loadDirectory],
+    queryFn: () => {
+      console.log("FileManagerPane: Loading directory for path", panePath);
+      return loadDirectory(panePath!);
+    },
     select: (result) => {
       if (result.error) throw result.error;
       return result.data;
     },
+    retry: false,
+    refetchOnWindowFocus: false, // otherwise it will refetch on alt tab.
+    refetchOnMount: false,
+    staleTime: 0,
+    gcTime: 0,
   });
+
+  // Catch file open errors and show dialog
+  useEffect(() => {
+    if (!fileOpenError && !loadDirectoryError) return;
+
+    showErrorDialog(
+      "Error",
+      fileOpenError ?? loadDirectoryError?.message ?? "Unknown error"
+    );
+
+    setFileOpenError(null);
+  }, [fileOpenError, loadDirectoryError]);
 
   const handleDirectoryOpen = (file: FileInfo) => {
     if (!file.isDir) return;
@@ -61,7 +92,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
 
   const handleFileOpen = async (file: FileInfo) => {
     if (file.isDir) return;
-    const opened = await OpenFileWithDefaultApp(file.path);
+    const opened = await openFileWithDefaultApp(file.path);
     if (opened.error) setFileOpenError(opened.error.message);
   };
 
@@ -70,11 +101,11 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
     activatePane(tabId, paneId);
   };
 
-  const canGoBack = pane.historyIndex > 0;
-  const canGoForward = pane.historyIndex < pane.history.length - 1;
+  const canGoBack = historyIndex! > 0;
+  const canGoForward = historyIndex! < historyLength! - 1;
 
   const handleNavigateUp = () => {
-    getPathInfo(pane.path).then((result) => {
+    getPathInfo(panePath!).then((result) => {
       if (result.error || !result.data) return;
       const pathInfo = result.data;
       const parentIndex = pathInfo.parts.length - 2;
@@ -115,14 +146,18 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
 
         {/* Path Bar */}
         <div className="mx-1">
-          <PathBar pane={pane} onPathChange={handlePathChange} />
+          <PathBar
+            paneId={paneId}
+            tabId={tabId}
+            onPathChange={handlePathChange}
+          />
         </div>
 
         {/* View Mode Toggle */}
         <div className="flex items-center gap-1">
           <button
             className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
-              pane.viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""
+              viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""
             }`}
             onClick={() => setPaneViewMode(tabId, paneId, ViewMode.LIST)}
           >
@@ -130,7 +165,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
           </button>
           <button
             className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
-              pane.viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""
+              viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""
             }`}
             onClick={() => setPaneViewMode(tabId, paneId, ViewMode.GRID)}
           >
@@ -141,9 +176,9 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
 
       {/* Content Area */}
       <div className="flex flex-col overflow-hidden px-2">
-        {(fileOpenError || error) && (
+        {(fileOpenError || loadDirectoryError) && (
           <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
-            Error: {fileOpenError || error?.message}
+            Error: {fileOpenError || loadDirectoryError?.message}
           </div>
         )}
 
@@ -151,9 +186,9 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
           <div className="p-1 text-(--text-secondary)"> </div>
         )}
 
-        {contents && !(fileOpenError || error) && (
+        {contents && !(fileOpenError || loadDirectoryError) && (
           <>
-            {pane.viewMode === ViewMode.GRID ? (
+            {viewMode === ViewMode.GRID ? (
               <FileGrid
                 contents={contents}
                 onDirectoryOpen={handleDirectoryOpen}

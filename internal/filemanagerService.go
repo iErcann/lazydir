@@ -8,15 +8,18 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/adrg/xdg"
 )
 
 // FileManagerService is a service for managing files
-type FileManagerService struct{}
+type FileManagerService struct {
+}
 
 // ListDirectory lists the contents of a directory.
 func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryContents] {
+	Log(fmt.Sprintf("Called ListDirectory at date %s", fmt.Sprint(time.Now().Format(time.RFC3339))))
 	pathResult := canonicalPath(dirPath)
 	if pathResult.Error != nil {
 		return Result[DirectoryContents]{Error: pathResult.Error}
@@ -24,6 +27,7 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 	absPath := *pathResult.Data
 	entries, err := os.ReadDir(absPath)
 	if err != nil {
+		// Most likely a permission error.
 		return Result[DirectoryContents]{Error: &AppError{Code: ReadDirectoryError, Message: fmt.Sprintf("read directory error: %v", err), InnerError: err}}
 	}
 
@@ -319,7 +323,7 @@ func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[
 			}}
 		}
 
-		// Check if the dest already exists (for now, don't overwrite, maybe we could create a "copy of" file instead)
+		// Check if the dest already exists (for now, don't overwrite, maybe we could create a "Copy of" file instead)
 		if _, err := os.Stat(dest); err == nil {
 			return Result[string]{Error: &AppError{
 				Code:    FileCopyError,
@@ -331,7 +335,7 @@ func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[
 			if err := copyDir(sourcePath, dest); err != nil {
 				return Result[string]{Error: &AppError{
 					Code:       FileCopyError,
-					Message:    fmt.Sprintf("failed to copy directory %s: %v", sourcePath, err),
+					Message:    fmt.Sprintf("failed to copy directory %s: \n%v", info.Name(), err),
 					InnerError: err,
 				}}
 			}
@@ -339,7 +343,7 @@ func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[
 			if err := copyFile(sourcePath, dest); err != nil {
 				return Result[string]{Error: &AppError{
 					Code:       FileCopyError,
-					Message:    fmt.Sprintf("failed to copy file %s: %v", sourcePath, err),
+					Message:    fmt.Sprintf("failed to copy file %s: \n%v", info.Name(), err),
 					InnerError: err,
 				}}
 			}

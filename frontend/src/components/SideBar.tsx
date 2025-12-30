@@ -15,7 +15,10 @@ export function Sidebar() {
   const { data: shortcuts, error } = useQuery({
     queryKey: ["sidebarShortcuts"],
 
-    queryFn: () => getShortcuts(),
+    queryFn: () => {
+      console.log("Sidebar: Loading shortcuts");
+      return getShortcuts();
+    },
 
     select: (result) => {
       if (result.error) throw result.error;
@@ -25,7 +28,7 @@ export function Sidebar() {
 
   if (error) {
     return (
-      <div className="w-48 bg-(--bg-secondary) flex flex-col hidden sm:flex p-3">
+      <div className="w-48 bg-(--bg-secondary) flex-col hidden sm:flex p-3">
         <div className="text-red-500 text-sm">
           Error loading shortcuts: {error.message}
         </div>
@@ -41,7 +44,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-36 bg-(--bg-secondary) flex flex-col hidden sm:flex">
+    <div className="w-36 bg-(--bg-secondary) flex-col hidden sm:flex">
       <div className="p-3">
         <h2
           className={`text-xs font-semibold text-(--text-secondary) uppercase tracking-wider px-2 mb-2 ${

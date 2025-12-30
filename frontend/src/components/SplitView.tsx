@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import type { Tab } from "../types";
 import { FileManagerPane } from "./FileManagerPane";
 import { useTabsStore } from "../store/tabsStore";
 

@@ -25,6 +25,7 @@ interface TabsStore {
     filePaths: string[];
     cutMode: boolean; // if its a cut, then we move files, else we copy
   };
+  clearClipboard: () => void;
   copyFiles: (filePaths: string[], cutMode?: boolean) => void;
   createTab: (path?: string) => Tab;
   closeTab: (tabId: string) => void;
@@ -64,6 +65,13 @@ export const useTabsStore = create<TabsStore>()(
     tabs: [],
     activeTabId: null,
     clipboard: { filePaths: [], cutMode: false },
+
+    clearClipboard: () => {
+      set((state) => {
+        state.clipboard.filePaths = [];
+        state.clipboard.cutMode = false;
+      });
+    },
 
     copyFiles: (files, cutMode = false) => {
       set((state) => {
