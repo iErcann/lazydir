@@ -31,6 +31,12 @@ interface FileSystemStore {
   showInfoDialog: (title: string, message: string) => void;
   showErrorDialog: (title: string, message: string) => void;
   showWarningDialog: (title: string, message: string) => void;
+  showQuestionDialog: (
+    title: string,
+    message: string,
+    buttons: string[],
+    defaultButton: string
+  ) => Promise<string>;
 }
 
 export const useFileSystemStore = create<FileSystemStore>((set) => ({
@@ -80,6 +86,14 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
   },
   showWarningDialog: (title: string, message: string) => {
     DialogService.ShowWarningDialog(title, message);
+  },
+  showQuestionDialog: async (
+    title: string,
+    message: string,
+    buttons: string[],
+    defaultButton: string
+  ) => {
+    return await DialogService.ShowQuestionDialog(title, message, buttons, defaultButton);
   },
   openFileWithDefaultApp: async (path: string) => {
     return await FileManagerService.OpenFileWithDefaultApp(path);

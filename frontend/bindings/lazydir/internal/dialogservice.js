@@ -27,6 +27,17 @@ export function ShowInfoDialog(title, message) {
 /**
  * @param {string} title
  * @param {string} message
+ * @param {string[]} buttons
+ * @param {string} defaultButton
+ * @returns {$CancellablePromise<string>}
+ */
+export function ShowQuestionDialog(title, message, buttons, defaultButton) {
+    return $Call.ByID(3183784430, title, message, buttons, defaultButton);
+}
+
+/**
+ * @param {string} title
+ * @param {string} message
  * @returns {$CancellablePromise<void>}
  */
 export function ShowWarningDialog(title, message) {

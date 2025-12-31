@@ -25,9 +25,9 @@ export function useFileContextMenu({
   const deleteFiles = useFileSystemStore((state) => state.deleteFiles);
   const clipboard = useTabsStore((state) => state.clipboard);
   const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
+  const showQuestionDialog = useFileSystemStore((state) => state.showQuestionDialog);
   const clearClipboard = useTabsStore((state) => state.clearClipboard);
   const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
-
   const handleContextOpen = () => {
     // if the file is not already selected, select it, otherwise keep the multi selection
     if (onSelectFile && !selectedFilePaths?.has(file.path)) {
@@ -54,14 +54,17 @@ export function useFileContextMenu({
         const files = Array.from(selectedFilePaths || []);
         const fileCount = files.length;
 
-        // Simple confirmation
-        const confirmed = window.confirm(
+        // Native confirmation dialog
+        const result = await showQuestionDialog(
+          'Confirm Delete',
           `Are you sure you want to delete ${fileCount} ${
             fileCount === 1 ? 'item' : 'items'
-          }? This action cannot be undone.`
+          }? This action cannot be undone.`,
+          ['Delete', 'Cancel'],
+          'Cancel'
         );
 
-        if (!confirmed) return;
+        if (result !== 'Delete') return;
 
         setPaneStatus(
           tabId,
@@ -76,6 +79,8 @@ export function useFileContextMenu({
           showErrorDialog('Delete Error', deleteResult.error.message);
           setPaneStatus(tabId, paneId, 'Delete failed');
         } else {
+          // TODO: add a refreshPaneContents function to the tabs store and call it here.
+          // Inspired from PathBar implemnetation (goes to the backend)
           setPaneStatus(
             tabId,
             paneId,
