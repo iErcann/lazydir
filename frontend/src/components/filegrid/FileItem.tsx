@@ -55,23 +55,23 @@ export function FileItem({ file, onOpen, onClick, paneId, tabId }: FileItemProps
     <div
       onDoubleClick={() => onOpen(file)}
       onClick={(e) => onClick?.(file, e)}
-      className={`flex flex-col items-center rounded-lg select-none py-4    w-24   ${
+      className={`flex flex-col items-center rounded-lg select-none p-2 w-24 ${
         isSelected ? 'bg-(--bg-tertiary)' : 'hover:bg-(--bg-tertiary)'
       }`}
       title={file.name}
     >
       {file.isDir ? (
-        <div className="text-(--accent) mb-2 ">
+        <div className="text-(--accent) mb-1">
           <Folder className="w-16 h-16 fill-(--accent)" />
         </div>
       ) : (
         getIconForFile({
           fileName: `${file.name}`,
-          className: 'w-16 h-16 text-(--accent) mb-2 ',
+          className: 'w-16 h-16 text-(--accent) mb-1',
         })
       )}
 
-      <span className="text-xs text-center text-(--text-primary) w-full wrap-break-word line-clamp-2 ">
+      <span className="text-xs text-center text-(--text-primary) w-full wrap-break-word line-clamp-2">
         {truncate(file.name)}
       </span>
     </div>
