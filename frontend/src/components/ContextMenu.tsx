@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect, useRef, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 export type ContextMenuItem = {
   label: string;
@@ -14,12 +14,7 @@ type ContextMenuProps = {
   onClose?: () => void;
 };
 
-export function ContextMenu({
-  children,
-  items,
-  onOpen,
-  onClose,
-}: ContextMenuProps) {
+export function ContextMenu({ children, items, onOpen, onClose }: ContextMenuProps) {
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
@@ -35,27 +30,30 @@ export function ContextMenu({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    setPosition({ x: e.clientX, y: e.clientY });
+    const yPosition = e.clientY;
+    // Prevent menu from going off the bottom of the screen bcz its not native.
+    const adjustedY = yPosition > window.innerHeight - 120 ? window.innerHeight - 270 : yPosition;
+    setPosition({ x: e.clientX, y: adjustedY });
     setVisible(true);
   };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      console.log("Document click detected");
+      console.log('Document click detected');
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setVisible(false);
       }
     };
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setVisible(false);
+      if (e.key === 'Escape') setVisible(false);
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, []);
 
@@ -74,9 +72,7 @@ export function ContextMenu({
             setVisible(false);
           }}
           className={`w-full px-3 py-1 text-left cursor-pointer select-none rounded-sm
-            hover:bg-(--bg-secondary) ${
-              item.disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            hover:bg-(--bg-secondary) ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {item.label}
         </div>
