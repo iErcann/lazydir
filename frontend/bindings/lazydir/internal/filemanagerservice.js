@@ -33,6 +33,16 @@ export function CopyFiles(targetDir, files) {
 }
 
 /**
+ * @param {string[]} files
+ * @returns {$CancellablePromise<$models.Result<string>>}
+ */
+export function DeleteFiles(files) {
+    return $Call.ByID(2996324152, files).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
+/**
  * @returns {$CancellablePromise<$models.Result<string>>}
  */
 export function GetInitialPath() {

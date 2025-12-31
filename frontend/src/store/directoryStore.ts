@@ -1,15 +1,15 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 import {
   DirectoryContents,
   FileManagerService,
   DialogService, // UI
-} from "../../bindings/lazydir/internal";
+} from '../../bindings/lazydir/internal';
 import {
   OperatingSystem,
   Result,
   PathInfo,
   Shortcut,
-} from "../../bindings/lazydir/internal/models";
+} from '../../bindings/lazydir/internal/models';
 
 interface FileSystemStore {
   operatingSystem: OperatingSystem;
@@ -25,6 +25,7 @@ interface FileSystemStore {
     destinationPath: string,
     cutMode: boolean
   ) => Promise<Result<string>>; // Paste files to destination
+  deleteFiles: (files: string[]) => Promise<Result<string>>; // Delete files
   openFileWithDefaultApp: (path: string) => Promise<Result<string>>; // Open file with default application
   // UI
   showInfoDialog: (title: string, message: string) => void;
@@ -63,12 +64,12 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
     return await FileManagerService.GetShortcuts();
   },
 
-  pasteFiles: async (
-    files: string[],
-    destinationPath: string,
-    cutMode: boolean
-  ) => {
+  pasteFiles: async (files: string[], destinationPath: string, cutMode: boolean) => {
     return await FileManagerService.PasteFiles(destinationPath, files, cutMode);
+  },
+
+  deleteFiles: async (files: string[]) => {
+    return await FileManagerService.DeleteFiles(files);
   },
 
   showInfoDialog: (title: string, message: string) => {

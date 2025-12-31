@@ -22,6 +22,7 @@ export function useFileContextMenu({
   const createTab = useTabsStore((state) => state.createTab);
   const copyFiles = useTabsStore((state) => state.copyFiles);
   const pasteFiles = useFileSystemStore((state) => state.pasteFiles);
+  const deleteFiles = useFileSystemStore((state) => state.deleteFiles);
   const clipboard = useTabsStore((state) => state.clipboard);
   const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
   const clearClipboard = useTabsStore((state) => state.clearClipboard);
@@ -49,8 +50,38 @@ export function useFileContextMenu({
     },
     {
       label: 'Delete',
-      onClick: () => {
-        // Add delete functionality here
+      onClick: async () => {
+        const files = Array.from(selectedFilePaths || []);
+        const fileCount = files.length;
+
+        // Simple confirmation
+        const confirmed = window.confirm(
+          `Are you sure you want to delete ${fileCount} ${
+            fileCount === 1 ? 'item' : 'items'
+          }? This action cannot be undone.`
+        );
+
+        if (!confirmed) return;
+
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Deleting ${fileCount} ${fileCount === 1 ? 'item' : 'items'}...`
+        );
+
+        const deleteResult = await deleteFiles(files);
+
+        if (deleteResult.error) {
+          console.error(deleteResult);
+          showErrorDialog('Delete Error', deleteResult.error.message);
+          setPaneStatus(tabId, paneId, 'Delete failed');
+        } else {
+          setPaneStatus(
+            tabId,
+            paneId,
+            `Deleted ${fileCount} ${fileCount === 1 ? 'item' : 'items'}`
+          );
+        }
       },
     },
     {

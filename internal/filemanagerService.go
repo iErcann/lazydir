@@ -410,6 +410,26 @@ func (f *FileManagerService) MoveFiles(targetDir string, files []string) Result[
 	return Result[string]{Data: ptrString(fmt.Sprintf("Moved %d item(s) to %s", len(files), target))}
 }
 
+func (f *FileManagerService) DeleteFiles(files []string) Result[string] {
+	for _, source := range files {
+		sourceResult := canonicalPath(source)
+		if sourceResult.Error != nil {
+			return Result[string]{Error: sourceResult.Error}
+		}
+		sourcePath := *sourceResult.Data
+
+		if err := os.RemoveAll(sourcePath); err != nil {
+			return Result[string]{Error: &AppError{
+				Code:       FileDeleteError,
+				Message:    fmt.Sprintf("failed to delete %s: %v", sourcePath, err),
+				InnerError: err,
+			}}
+		}
+	}
+
+	return Result[string]{Data: ptrString(fmt.Sprintf("Deleted %d item(s)", len(files)))}
+}
+
 // Helper: copy a single file
 func copyFile(src, dst string) error {
 	sourceFile, err := os.Open(src)

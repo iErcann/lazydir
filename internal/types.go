@@ -50,6 +50,7 @@ const (
 	FileMoveError               ErrorCode = "FileMoveError"
 	FileCleanupError            ErrorCode = "FileCleanupError"
 	FileCopyError               ErrorCode = "FileCopyError"
+	FileDeleteError             ErrorCode = "FileDeleteError"
 )
 
 // AppError implements error.

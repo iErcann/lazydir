@@ -129,6 +129,7 @@ export const ErrorCode = {
     FileMoveError: "FileMoveError",
     FileCleanupError: "FileCleanupError",
     FileCopyError: "FileCopyError",
+    FileDeleteError: "FileDeleteError",
 };
 
 /**
