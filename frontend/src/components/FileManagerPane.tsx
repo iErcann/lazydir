@@ -1,15 +1,15 @@
-import { ViewMode, type Pane, type Tab } from "../types";
-import { useFileSystemStore } from "../store/directoryStore";
-import { useEffect, useState } from "react";
-import { useTabsStore } from "../store/tabsStore";
-import { PathBar } from "./PathBar";
-import { formatSize } from "../utils/utils";
-import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { List, Grid } from "lucide-react"; // add to your imports
-import { FileGrid } from "./filegrid/FileGrid";
-import { FileList } from "./filelist/FileList";
-import { FileInfo } from "../../bindings/lazydir/internal";
+import { ViewMode, type Pane, type Tab } from '../types';
+import { useFileSystemStore } from '../store/directoryStore';
+import { useEffect, useState } from 'react';
+import { useTabsStore } from '../store/tabsStore';
+import { PathBar } from './PathBar';
+import { formatSize } from '../utils/utils';
+import { ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { List, Grid } from 'lucide-react'; // add to your imports
+import { FileGrid } from './filegrid/FileGrid';
+import { FileList } from './filelist/FileList';
+import { FileInfo } from '../../bindings/lazydir/internal';
 
 interface FileManagerPaneProps {
   tabId: string;
@@ -22,28 +22,18 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const loadDirectory = useFileSystemStore((state) => state.listDirectory);
   const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
   const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
-  const openFileWithDefaultApp = useFileSystemStore(
-    (state) => state.openFileWithDefaultApp
-  );
+  const openFileWithDefaultApp = useFileSystemStore((state) => state.openFileWithDefaultApp);
 
   // Tabs/navigation actions
   const panePath = useTabsStore((state) => state.getPane(tabId, paneId)?.path);
-  const viewMode = useTabsStore(
-    (state) => state.getPane(tabId, paneId)?.viewMode
-  );
-  const historyIndex = useTabsStore(
-    (state) => state.getPane(tabId, paneId)?.historyIndex
-  );
-  const historyLength = useTabsStore(
-    (state) => state.getPane(tabId, paneId)?.history.length
-  );
+  const viewMode = useTabsStore((state) => state.getPane(tabId, paneId)?.viewMode);
+  const historyIndex = useTabsStore((state) => state.getPane(tabId, paneId)?.historyIndex);
+  const historyLength = useTabsStore((state) => state.getPane(tabId, paneId)?.history.length);
 
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const activatePane = useTabsStore((state) => state.activatePane);
   const paneNavigateBack = useTabsStore((state) => state.paneNavigateBack);
-  const paneNavigateForward = useTabsStore(
-    (state) => state.paneNavigateForward
-  );
+  const paneNavigateForward = useTabsStore((state) => state.paneNavigateForward);
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
   const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
   // Query directory contents on pane path change
@@ -53,9 +43,9 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
     error: loadDirectoryError,
     isFetching,
   } = useQuery({
-    queryKey: ["directory", panePath, loadDirectory],
+    queryKey: ['directory', panePath, loadDirectory],
     queryFn: () => {
-      console.log("FileManagerPane: Loading directory for path", panePath);
+      console.log('FileManagerPane: Loading directory for path', panePath);
       return loadDirectory(panePath!);
     },
     select: (result) => {
@@ -73,10 +63,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   useEffect(() => {
     if (!fileOpenError && !loadDirectoryError) return;
 
-    showErrorDialog(
-      "Error",
-      fileOpenError ?? loadDirectoryError?.message ?? "Unknown error"
-    );
+    showErrorDialog('Error', fileOpenError ?? loadDirectoryError?.message ?? 'Unknown error');
 
     setFileOpenError(null);
   }, [fileOpenError, loadDirectoryError]);
@@ -145,19 +132,15 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
         </button>
 
         {/* Path Bar */}
-        <div className="mx-1">
-          <PathBar
-            paneId={paneId}
-            tabId={tabId}
-            onPathChange={handlePathChange}
-          />
+        <div className="mx-1 min-w-0 overflow-hidden">
+          <PathBar paneId={paneId} tabId={tabId} onPathChange={handlePathChange} />
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
             className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
-              viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""
+              viewMode === ViewMode.LIST ? 'bg-(--bg-accent)' : ''
             }`}
             onClick={() => setPaneViewMode(tabId, paneId, ViewMode.LIST)}
           >
@@ -165,7 +148,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
           </button>
           <button
             className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
-              viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""
+              viewMode === ViewMode.GRID ? 'bg-(--bg-accent)' : ''
             }`}
             onClick={() => setPaneViewMode(tabId, paneId, ViewMode.GRID)}
           >
@@ -182,9 +165,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
           </div>
         )}
 
-        {(isLoading || isFetching) && (
-          <div className="p-1 text-(--text-secondary)"> </div>
-        )}
+        {(isLoading || isFetching) && <div className="p-1 text-(--text-secondary)"> </div>}
 
         {contents && !(fileOpenError || loadDirectoryError) && (
           <>
@@ -206,9 +187,9 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
               />
             )}
             <div className="p-1 text-xs text-(--text-secondary)">
-              {contents.dirCount} folders | {contents.fileCount} files :{" "}
-              {formatSize(contents.directSizeBytes)} (
-              {contents.directSizeBytes.toLocaleString()} bytes)
+              {contents.dirCount} folders | {contents.fileCount} files :{' '}
+              {formatSize(contents.directSizeBytes)} ({contents.directSizeBytes.toLocaleString()}{' '}
+              bytes)
             </div>
           </>
         )}

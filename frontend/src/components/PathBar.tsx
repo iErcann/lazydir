@@ -1,26 +1,26 @@
-import { Pane } from '../types'
-import { useFileSystemStore } from '../store/directoryStore'
-import { useState, useRef } from 'react'
-import { PathInfo } from '../../bindings/lazydir/internal/models'
-import { useQuery } from '@tanstack/react-query'
-import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut'
-import { useTabsStore } from '../store/tabsStore'
+import { Pane } from '../types';
+import { useFileSystemStore } from '../store/directoryStore';
+import { useState, useRef } from 'react';
+import { PathInfo } from '../../bindings/lazydir/internal/models';
+import { useQuery } from '@tanstack/react-query';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
+import { useTabsStore } from '../store/tabsStore';
 
 interface PathBarProps {
-  paneId: string
-  tabId: string
-  onPathChange: (newPath: string) => void
+  paneId: string;
+  tabId: string;
+  onPathChange: (newPath: string) => void;
 }
 
 export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
-  const pane = useTabsStore((s) => s.getPane(tabId, paneId)!)
-  const activePaneId = useTabsStore((s) => s.getActivePane()?.pane.id ?? null)
+  const pane = useTabsStore((s) => s.getPane(tabId, paneId)!);
+  const activePaneId = useTabsStore((s) => s.getActivePane()?.pane.id ?? null);
 
-  const getPathInfo = useFileSystemStore((s) => s.getPathInfo)
-  const getPathAtIndex = useFileSystemStore((s) => s.getPathAtIndex)
+  const getPathInfo = useFileSystemStore((s) => s.getPathInfo);
+  const getPathAtIndex = useFileSystemStore((s) => s.getPathAtIndex);
 
-  const [editing, setEditing] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Query PathInfo with select
   const {
@@ -30,44 +30,44 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
   } = useQuery({
     queryKey: ['pathInfo', pane.path],
     queryFn: () => {
-      console.log('PathBar: Loading path info for path', pane.path)
-      return getPathInfo(pane.path)
+      console.log('PathBar: Loading path info for path', pane.path);
+      return getPathInfo(pane.path);
     },
     select: (result) => {
-      if (result.error) throw result.error
-      if (!result.data) throw new Error('No path info returned')
-      return result.data as PathInfo
+      if (result.error) throw result.error;
+      if (!result.data) throw new Error('No path info returned');
+      return result.data as PathInfo;
     },
-  })
+  });
 
   // Get the path corresponding to a specific part index
   const fetchPathAtIndex = async (index: number) => {
-    if (!pathInfo) return ''
-    const result = await getPathAtIndex(pathInfo.fullPath, index)
+    if (!pathInfo) return '';
+    const result = await getPathAtIndex(pathInfo.fullPath, index);
     if (result.error) {
-      console.error('Error getting path at index:', result.error)
-      return ''
+      console.error('Error getting path at index:', result.error);
+      return '';
     }
-    return result.data ?? ''
-  }
+    return result.data ?? '';
+  };
 
   // Handle Enter / Escape keys
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      onPathChange(e.currentTarget.value)
-      setEditing(false)
-      refetchPathInfo()
+      onPathChange(e.currentTarget.value);
+      setEditing(false);
+      refetchPathInfo();
     } else if (e.key === 'Escape') {
-      setEditing(false)
+      setEditing(false);
     }
-  }
+  };
 
   // Click on bar (not buttons) activates editing
   const handleBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement
-    if (target.tagName === 'BUTTON') return
-    setEditing(true)
-  }
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'BUTTON') return;
+    setEditing(true);
+  };
 
   // Ctrl L focuses input
   useKeyboardShortcut({
@@ -76,13 +76,13 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
     preventDefault: true,
     handler: async () => {
       // Only focus if this is the active pane
-      if (activePaneId !== pane.id) return
-      setEditing(true)
+      if (activePaneId !== pane.id) return;
+      setEditing(true);
       setTimeout(() => {
-        inputRef.current?.select()
-      }, 0)
+        inputRef.current?.select();
+      }, 0);
     },
-  })
+  });
 
   if (pathInfoError) {
     return (
@@ -91,7 +91,7 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
           Error loading path info: {pathInfoError.message}
         </div>
       </div>
-    )
+    );
   }
   return (
     <div
@@ -101,7 +101,7 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
     rounded-xl
     backdrop-blur-md
     shadow-sm
-    cursor-text flex-1 overflow-x-auto
+    cursor-text w-full min-w-0
   "
       onClick={handleBarClick}
     >
@@ -118,9 +118,9 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
         />
       ) : (
         // Normal path buttons
-        <div className="inline-flex items-center gap-1">
+        <div className="inline-flex items-center gap-1 overflow-x-auto max-w-full">
           {pathInfo?.parts.map((part: string, i: number) => {
-            const isActive = i === pathInfo.parts.length - 1
+            const isActive = i === pathInfo.parts.length - 1;
             return (
               <div key={i} className="flex items-center gap-1 shrink-0">
                 <button
@@ -140,10 +140,10 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
                   <span className="text-gray-400 text-sm "> &gt; </span>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }
