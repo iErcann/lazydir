@@ -44,6 +44,7 @@ interface TabsStore {
   setPaneSorting: (tabId: string, paneId: string, sorting: SortingState) => void;
 
   setPaneViewMode: (tabId: string, paneId: string, viewMode: ViewMode) => void;
+  setPaneStatus: (tabId: string, paneId: string, message?: string) => void;
 
   // Getters (unchanged - they don't mutate)
   getActiveTab: () => Tab | null;
@@ -264,6 +265,18 @@ export const useTabsStore = create<TabsStore>()(
         if (!pane) return;
 
         pane.viewMode = viewMode;
+      });
+    },
+
+    setPaneStatus: (tabId: string, paneId: string, message?: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        pane.statusMessage = message;
       });
     },
 

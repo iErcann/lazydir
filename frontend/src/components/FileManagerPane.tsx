@@ -3,10 +3,10 @@ import { useFileSystemStore } from '../store/directoryStore';
 import { useEffect, useState } from 'react';
 import { useTabsStore } from '../store/tabsStore';
 import { PathBar } from './PathBar';
-import { formatSize } from '../utils/utils';
+import { StatusBar } from './StatusBar';
 import { ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { List, Grid } from 'lucide-react'; // add to your imports
+import { List, Grid } from 'lucide-react';
 import { FileGrid } from './filegrid/FileGrid';
 import { FileList } from './filelist/FileList';
 import { FileInfo } from '../../bindings/lazydir/internal';
@@ -158,41 +158,39 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
       </div>
 
       {/* Content Area */}
-      <div className="flex flex-col overflow-hidden px-2">
-        {(fileOpenError || loadDirectoryError) && (
-          <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
-            Error: {fileOpenError || loadDirectoryError?.message}
-          </div>
-        )}
-
-        {(isLoading || isFetching) && <div className="p-1 text-(--text-secondary)"> </div>}
-
-        {contents && !(fileOpenError || loadDirectoryError) && (
-          <>
-            {viewMode === ViewMode.GRID ? (
-              <FileGrid
-                contents={contents}
-                onDirectoryOpen={handleDirectoryOpen}
-                onFileOpen={handleFileOpen}
-                paneId={paneId}
-                tabId={tabId}
-              />
-            ) : (
-              <FileList
-                contents={contents}
-                onDirectoryOpen={handleDirectoryOpen}
-                onFileOpen={handleFileOpen}
-                paneId={paneId}
-                tabId={tabId}
-              />
-            )}
-            <div className="p-1 text-xs text-(--text-secondary)">
-              {contents.dirCount} folders | {contents.fileCount} files :{' '}
-              {formatSize(contents.directSizeBytes)} ({contents.directSizeBytes.toLocaleString()}{' '}
-              bytes)
+      <div className="relative overflow-hidden px-2 h-full">
+        <div className="h-full overflow-auto pb-8">
+          {(fileOpenError || loadDirectoryError) && (
+            <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
+              Error: {fileOpenError || loadDirectoryError?.message}
             </div>
-          </>
-        )}
+          )}
+
+          {(isLoading || isFetching) && <div className="p-1 text-(--text-secondary)"> </div>}
+
+          {contents && !(fileOpenError || loadDirectoryError) && (
+            <>
+              {viewMode === ViewMode.GRID ? (
+                <FileGrid
+                  contents={contents}
+                  onDirectoryOpen={handleDirectoryOpen}
+                  onFileOpen={handleFileOpen}
+                  paneId={paneId}
+                  tabId={tabId}
+                />
+              ) : (
+                <FileList
+                  contents={contents}
+                  onDirectoryOpen={handleDirectoryOpen}
+                  onFileOpen={handleFileOpen}
+                  paneId={paneId}
+                  tabId={tabId}
+                />
+              )}
+            </>
+          )}
+        </div>
+        <StatusBar tabId={tabId} paneId={paneId} contents={contents} />
       </div>
     </div>
   );
