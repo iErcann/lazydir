@@ -30,12 +30,36 @@ export function ContextMenu({ children, items, onOpen, onClose }: ContextMenuPro
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    const yPosition = e.clientY;
-    // Prevent menu from going off the bottom of the screen bcz its not native.
-    const adjustedY = yPosition > window.innerHeight - 120 ? window.innerHeight - 270 : yPosition;
-    setPosition({ x: e.clientX, y: adjustedY });
+    setPosition({ x: e.clientX, y: e.clientY });
     setVisible(true);
   };
+
+  // Adjust menu position after it's rendered to prevent overflow
+  useEffect(() => {
+    if (visible && menuRef.current) {
+      const menu = menuRef.current;
+      const menuRect = menu.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let { x, y } = position;
+
+      // Adjust X position if menu overflows right edge
+      if (x + menuRect.width > viewportWidth) {
+        x = Math.max(0, viewportWidth - menuRect.width - 5);
+      }
+
+      // Adjust Y position if menu overflows bottom edge
+      if (y + menuRect.height > viewportHeight) {
+        y = Math.max(0, viewportHeight - menuRect.height - 5);
+      }
+
+      // Update position if it changed
+      if (x !== position.x || y !== position.y) {
+        setPosition({ x, y });
+      }
+    }
+  }, [visible, position]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
