@@ -204,3 +204,36 @@
   --text-primary: #f0f0f0;
   --text-secondary: #b0b0c0;
 }
+
+/* ===== Default / Global Scrollbar (for all themes) ===== */
+* {
+  scrollbar-width: thin;           /* Firefox */
+  scrollbar-color: #555 #333;      /* Firefox (thumb + track) */
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;                    /* for horizontal scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  border: 2px solid var(--bg-secondary); /* creates nice padding effect */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Optional: even more subtle active/pressed state */
+*::-webkit-scrollbar-thumb:active {
+  background: color-mix(in srgb, var(--accent) 70%, white 30%);
+}
+

@@ -1,9 +1,9 @@
-import { Row, flexRender } from "@tanstack/react-table";
-import { VirtualItem } from "@tanstack/react-virtual";
-import { FileInfo } from "../../../bindings/lazydir/internal";
-import { ContextMenu } from "../ContextMenu";
-import { useFileContextMenu } from "../../hooks/useFileContextMenu";
-import { useTabsStore } from "../../store/tabsStore";
+import { Row, flexRender } from '@tanstack/react-table';
+import { VirtualItem } from '@tanstack/react-virtual';
+import { FileInfo } from '../../../bindings/lazydir/internal';
+import { ContextMenu } from '../ContextMenu';
+import { useFileContextMenu } from '../../hooks/useFileContextMenu';
+import { useTabsStore } from '../../store/tabsStore';
 
 interface FileListRowProps {
   virtualRow: VirtualItem;
@@ -63,17 +63,13 @@ export function FileListRow({
           e.preventDefault();
           onClick(file, e); // ← triggers selection + menu opens
         }}
-        className={`w-full py-2 grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md ${
-          isSelected ? "bg-(--bg-tertiary)" : ""
+        className={`w-full   grid ${gridCols} items-center text-left min-w-0 w-full rounded-b-md ${
+          isSelected ? 'bg-(--bg-tertiary)' : ''
         }`}
       >
         {row.getVisibleCells().map((cell) => (
-          <ContextMenu
-            key={cell.id}
-            onOpen={handleContextOpen}
-            items={contextMenuItems}
-          >
-            <div className="min-w-0 text-left select-none text-(--text-primary)">
+          <ContextMenu key={cell.id} onOpen={handleContextOpen} items={contextMenuItems}>
+            <div className="min-w-0 text-left select-none text-(--text-primary) py-2">
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </div>
           </ContextMenu>
