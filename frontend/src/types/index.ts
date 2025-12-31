@@ -24,6 +24,9 @@ export interface Pane {
 
   // Status message
   statusMessage?: string;
+
+  // Refresh key for forcing directory reload
+  refreshKey: number;
 }
 
 export interface Tab {

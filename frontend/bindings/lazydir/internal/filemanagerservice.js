@@ -63,6 +63,17 @@ export function GetOperatingSystem() {
 }
 
 /**
+ * GetParentFolder returns the parent directory of a given path
+ * @param {string} filePath
+ * @returns {$CancellablePromise<$models.Result<string>>}
+ */
+export function GetParentFolder(filePath) {
+    return $Call.ByID(2089132398, filePath).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
+/**
  * GetPathAtIndex returns the absolute path corresponding to a breadcrumb index
  * @param {string} fullPath
  * @param {number} index

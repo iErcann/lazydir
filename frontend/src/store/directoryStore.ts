@@ -18,6 +18,7 @@ interface FileSystemStore {
   getOperatingSystem: () => Promise<Result<OperatingSystem>>;
   getPathInfo: (path: string) => Promise<Result<PathInfo>>; // Cross platform path info retrieval
   getPathAtIndex: (path: string, index: number) => Promise<Result<string>>; // Get path at specific index
+  getParentFolder: (path: string) => Promise<Result<string>>; // Get parent folder of a path
   getInitialPath: () => Promise<Result<string>>; // Get initial path based on OS
   getShortcuts: () => Promise<Result<Shortcut[]>>; // Get sidebar shortcuts
   pasteFiles: (
@@ -61,6 +62,10 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
   },
   getPathAtIndex: async (path: string, index: number) => {
     return await FileManagerService.GetPathAtIndex(path, index);
+  },
+
+  getParentFolder: async (path: string) => {
+    return await FileManagerService.GetParentFolder(path);
   },
 
   getInitialPath: async () => {

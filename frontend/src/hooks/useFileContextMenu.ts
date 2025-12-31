@@ -28,6 +28,7 @@ export function useFileContextMenu({
   const showQuestionDialog = useFileSystemStore((state) => state.showQuestionDialog);
   const clearClipboard = useTabsStore((state) => state.clearClipboard);
   const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
+  const refreshPane = useTabsStore((state) => state.refreshPane);
   const handleContextOpen = () => {
     // if the file is not already selected, select it, otherwise keep the multi selection
     if (onSelectFile && !selectedFilePaths?.has(file.path)) {
@@ -79,8 +80,7 @@ export function useFileContextMenu({
           showErrorDialog('Delete Error', deleteResult.error.message);
           setPaneStatus(tabId, paneId, 'Delete failed');
         } else {
-          // TODO: add a refreshPaneContents function to the tabs store and call it here.
-          // Inspired from PathBar implemnetation (goes to the backend)
+          refreshPane(tabId, paneId);
           setPaneStatus(
             tabId,
             paneId,
@@ -145,6 +145,7 @@ export function useFileContextMenu({
           showErrorDialog('Paste Error', pasteResult.error.message);
           setPaneStatus(tabId, paneId, 'Paste failed :(');
         } else {
+          refreshPane(tabId, paneId);
           setPaneStatus(tabId, paneId, `Pasted ${fileCount} ${fileCount === 1 ? 'item' : 'items'}`);
         }
 

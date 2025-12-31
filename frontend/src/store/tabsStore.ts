@@ -35,6 +35,7 @@ interface TabsStore {
   createPane: (tabId: string, path?: string) => Pane;
   closePane: (tabId: string, paneId: string) => void;
   updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
+  refreshPane: (tabId: string, paneId: string) => void;
 
   // History navigation
   paneNavigateBack: (tabId: string, paneId: string) => void;
@@ -83,6 +84,7 @@ export const useTabsStore = create<TabsStore>()(
         selectedFilePaths: new Set<string>(),
         history: [path],
         historyIndex: 0,
+        refreshKey: 0,
       };
       const newTab: Tab = {
         id: generateUUID(),
@@ -155,6 +157,7 @@ export const useTabsStore = create<TabsStore>()(
         selectedFilePaths: new Set<string>(),
         history: [path],
         historyIndex: 0,
+        refreshKey: 0,
       };
 
       set((state) => {
@@ -184,6 +187,18 @@ export const useTabsStore = create<TabsStore>()(
           pane.historyIndex = pane.history.length - 1;
           pane.path = newPath;
         }
+      });
+    },
+
+    refreshPane: (tabId: string, paneId: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        // Increment refresh key to trigger React Query refetch
+        pane.refreshKey++;
       });
     },
 

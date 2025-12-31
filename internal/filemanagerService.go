@@ -430,6 +430,28 @@ func (f *FileManagerService) DeleteFiles(files []string) Result[string] {
 	return Result[string]{Data: ptrString(fmt.Sprintf("Deleted %d item(s)", len(files)))}
 }
 
+// GetParentFolder returns the parent directory of a given path
+func (f *FileManagerService) GetParentFolder(filePath string) Result[string] {
+	pathResult := canonicalPath(filePath)
+	if pathResult.Error != nil {
+		return Result[string]{Error: pathResult.Error}
+	}
+	absPath := *pathResult.Data
+
+	// Get parent directory
+	parentDir := filepath.Dir(absPath)
+
+	// Check if we're already at the root
+	if parentDir == absPath {
+		return Result[string]{Error: &AppError{
+			Code:    ResolvePathError,
+			Message: "already at root directory",
+		}}
+	}
+
+	return Result[string]{Data: &parentDir}
+}
+
 // Helper: copy a single file
 func copyFile(src, dst string) error {
 	sourceFile, err := os.Open(src)

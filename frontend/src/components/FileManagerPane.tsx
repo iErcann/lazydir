@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import { useTabsStore } from '../store/tabsStore';
 import { PathBar } from './PathBar';
 import { StatusBar } from './StatusBar';
-import { ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUp, RefreshCw } from 'lucide-react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { List, Grid } from 'lucide-react';
 import { FileGrid } from './filegrid/FileGrid';
 import { FileList } from './filelist/FileList';
 import { FileInfo } from '../../bindings/lazydir/internal';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 
 interface FileManagerPaneProps {
   tabId: string;
@@ -20,8 +21,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
 
   // FileSystem actions
   const loadDirectory = useFileSystemStore((state) => state.listDirectory);
-  const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
-  const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
+  const getParentFolder = useFileSystemStore((state) => state.getParentFolder);
   const openFileWithDefaultApp = useFileSystemStore((state) => state.openFileWithDefaultApp);
 
   // Tabs/navigation actions
@@ -29,6 +29,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const viewMode = useTabsStore((state) => state.getPane(tabId, paneId)?.viewMode);
   const historyIndex = useTabsStore((state) => state.getPane(tabId, paneId)?.historyIndex);
   const historyLength = useTabsStore((state) => state.getPane(tabId, paneId)?.history.length);
+  const refreshKey = useTabsStore((state) => state.getPane(tabId, paneId)?.refreshKey ?? 0);
 
   const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const activatePane = useTabsStore((state) => state.activatePane);
@@ -36,6 +37,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const paneNavigateForward = useTabsStore((state) => state.paneNavigateForward);
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
   const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
+  const refreshPane = useTabsStore((state) => state.refreshPane);
   const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
   // Query directory contents on pane path change
   const {
@@ -44,7 +46,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
     error: loadDirectoryError,
     isFetching,
   } = useQuery({
-    queryKey: ['directory', panePath, loadDirectory],
+    queryKey: ['directory', panePath, refreshKey, loadDirectory],
     queryFn: () => {
       console.log('FileManagerPane: Loading directory for path', panePath);
       return loadDirectory(panePath!);
@@ -93,24 +95,30 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const canGoBack = historyIndex! > 0;
   const canGoForward = historyIndex! < historyLength! - 1;
 
-  const handleNavigateUp = () => {
-    getPathInfo(panePath!).then((result) => {
-      if (result.error || !result.data) return;
-      const pathInfo = result.data;
-      const parentIndex = pathInfo.parts.length - 2;
-      if (parentIndex < 0) return;
-
-      getPathAtIndex(pathInfo.fullPath, parentIndex).then((res) => {
-        if (res.error || !res.data) return;
-        handlePathChange(res.data);
-      });
-    });
+  const handleNavigateUp = async () => {
+    const result = await getParentFolder(panePath!);
+    if (result.error || !result.data) return;
+    handlePathChange(result.data);
   };
 
+  const handleRefresh = () => {
+    refreshPane(tabId, paneId);
+  };
+
+  // F5 to refresh
+  useKeyboardShortcut({
+    key: 'F5',
+    handler: handleRefresh,
+  });
+  useKeyboardShortcut({
+    key: 'r',
+    ctrl: true,
+    handler: handleRefresh,
+  });
   return (
     <div className="grid grid-rows-[auto_1fr] h-full" onClick={handlePaneClick}>
       {/* Top Bar */}
-      <div className="grid grid-cols-[auto_auto_auto_1fr_auto] items-center gap-1 px-2 py-1 bg-(--bg-primary) text-(--text-primary)">
+      <div className="grid grid-cols-[auto_auto_auto_auto_1fr_auto] items-center gap-1 px-2 py-1 bg-(--bg-primary) text-(--text-primary)">
         {/* Navigation Buttons */}
         <button
           className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
@@ -131,6 +139,13 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
           onClick={handleNavigateUp}
         >
           <ArrowUp className="w-4 h-4" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) transition"
+          onClick={handleRefresh}
+          title="Refresh (F5)"
+        >
+          <RefreshCw className="w-4 h-4" />
         </button>
 
         {/* Path Bar */}
