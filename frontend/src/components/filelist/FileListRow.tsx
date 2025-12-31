@@ -34,6 +34,8 @@ export function FileListRow({
     file,
     selectedFilePaths,
     onOpen,
+    tabId,
+    paneId,
   });
 
   return (

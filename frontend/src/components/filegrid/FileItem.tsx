@@ -24,6 +24,8 @@ export function FileItem({ file, onOpen, onClick, paneId, tabId }: FileItemProps
     file,
     selectedFilePaths,
     onOpen,
+    tabId,
+    paneId,
   });
 
   // Truncate filename: keep beginning + ... + end  (example: verylongfi...lename.txt)

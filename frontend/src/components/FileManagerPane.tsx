@@ -35,6 +35,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const paneNavigateBack = useTabsStore((state) => state.paneNavigateBack);
   const paneNavigateForward = useTabsStore((state) => state.paneNavigateForward);
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
+  const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
   const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
   // Query directory contents on pane path change
   const {
@@ -75,6 +76,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
 
   const handlePathChange = (newPath: string) => {
     updatePanePath(tabId, paneId, newPath);
+    setPaneStatus(tabId, paneId); // Clear status on navigation
   };
 
   const handleFileOpen = async (file: FileInfo) => {

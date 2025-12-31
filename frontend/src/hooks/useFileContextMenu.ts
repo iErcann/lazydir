@@ -1,13 +1,14 @@
-import { useTabsStore } from "../store/tabsStore";
-import { useFileSystemStore } from "../store/directoryStore";
-import { AppError, FileInfo } from "../../bindings/lazydir/internal";
-import { useState } from "react";
+import { useTabsStore } from '../store/tabsStore';
+import { useFileSystemStore } from '../store/directoryStore';
+import { AppError, FileInfo } from '../../bindings/lazydir/internal';
 
 interface UseFileContextMenuProps {
   file: FileInfo;
   selectedFilePaths: Set<string> | undefined;
   onOpen: (file: FileInfo) => void;
   onSelectFile?: (file: FileInfo) => void;
+  tabId: string;
+  paneId: string;
 }
 
 export function useFileContextMenu({
@@ -15,6 +16,8 @@ export function useFileContextMenu({
   selectedFilePaths,
   onOpen,
   onSelectFile,
+  tabId,
+  paneId,
 }: UseFileContextMenuProps) {
   const createTab = useTabsStore((state) => state.createTab);
   const copyFiles = useTabsStore((state) => state.copyFiles);
@@ -22,6 +25,7 @@ export function useFileContextMenu({
   const clipboard = useTabsStore((state) => state.clipboard);
   const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
   const clearClipboard = useTabsStore((state) => state.clearClipboard);
+  const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
 
   const handleContextOpen = () => {
     // if the file is not already selected, select it, otherwise keep the multi selection
@@ -32,47 +36,65 @@ export function useFileContextMenu({
 
   const contextMenuItems = [
     {
-      label: "Open",
+      label: 'Open',
       onClick: () => {
         onOpen(file);
       },
     },
     {
-      label: "Open in New Tab",
+      label: 'Open in New Tab',
       onClick: () => {
         createTab(file.isDir ? file.path : undefined);
       },
     },
     {
-      label: "Delete",
+      label: 'Delete',
       onClick: () => {
         // Add delete functionality here
       },
     },
     {
-      label: "Rename",
+      label: 'Rename',
       onClick: () => {
         // Add rename functionality here
       },
     },
     {
-      label: "Copy",
+      label: 'Copy',
       onClick: () => {
-        // TODO: Copy all selected files, not just the right-clicked one
-        copyFiles(Array.from(selectedFilePaths || []), false); // Copy into the store, just the paths
+        const files = Array.from(selectedFilePaths || []);
+        copyFiles(files, false);
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Copied ${files.length} ${files.length === 1 ? 'item' : 'items'}`
+        );
       },
     },
     {
-      label: "Cut",
+      label: 'Cut',
       onClick: () => {
-        copyFiles(Array.from(selectedFilePaths || []), true);
+        const files = Array.from(selectedFilePaths || []);
+        copyFiles(files, true);
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Cut ${files.length} ${files.length === 1 ? 'item' : 'items'}`
+        );
       },
     },
     {
-      label: "Paste",
+      label: 'Paste',
       onClick: async () => {
         // Can only paste into directories
         if (!file.isDir) return;
+
+        const fileCount = clipboard.filePaths.length;
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Pasting ${fileCount} ${fileCount === 1 ? 'item' : 'items'}...`
+        );
 
         const pasteResult = await pasteFiles(
           clipboard.filePaths,
@@ -80,16 +102,21 @@ export function useFileContextMenu({
           clipboard.cutMode
         );
 
+        // TODO : Stream the progress from wails events.
+        // Also could return the time taken and show that in the status (pasteFiles can return it)
         if (pasteResult.error) {
           console.error(pasteResult);
-          showErrorDialog("Paste Error", pasteResult.error.message);
+          showErrorDialog('Paste Error', pasteResult.error.message);
+          setPaneStatus(tabId, paneId, 'Paste failed :(');
+        } else {
+          setPaneStatus(tabId, paneId, `Pasted ${fileCount} ${fileCount === 1 ? 'item' : 'items'}`);
         }
 
         clearClipboard();
       },
     },
     {
-      label: "Properties",
+      label: 'Properties',
       onClick: () => {
         // Add properties functionality here
       },
