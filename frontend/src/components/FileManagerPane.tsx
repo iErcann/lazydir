@@ -187,10 +187,10 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
                   tabId={tabId}
                 />
               )}
+              <StatusBar tabId={tabId} paneId={paneId} contents={contents} />
             </>
           )}
         </div>
-        <StatusBar tabId={tabId} paneId={paneId} contents={contents} />
       </div>
     </div>
   );
