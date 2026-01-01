@@ -175,39 +175,38 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
       </div>
 
       {/* Content Area */}
-      <div className="relative overflow-hidden px-2 h-full">
-        <div className="h-full overflow-auto pb-8">
-          {(fileOpenError || loadDirectoryError) && (
-            <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
-              Error: {fileOpenError || loadDirectoryError?.message}
-            </div>
-          )}
+      {/* WARNING : Modifying this section can break the virtualization, which makes it unusable for big directories (e.g /usr/bin on Linux.) */}
+      <div className="flex flex-col overflow-hidden px-2">
+        {(fileOpenError || loadDirectoryError) && (
+          <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
+            Error: {fileOpenError || loadDirectoryError?.message}
+          </div>
+        )}
 
-          {(isLoading || isFetching) && <div className="p-1 text-(--text-secondary)"> </div>}
+        {(isLoading || isFetching) && <div className="p-1 text-(--text-secondary)"> </div>}
 
-          {contents && !(fileOpenError || loadDirectoryError) && (
-            <>
-              {viewMode === ViewMode.GRID ? (
-                <FileGrid
-                  contents={contents}
-                  onDirectoryOpen={handleDirectoryOpen}
-                  onFileOpen={handleFileOpen}
-                  paneId={paneId}
-                  tabId={tabId}
-                />
-              ) : (
-                <FileList
-                  contents={contents}
-                  onDirectoryOpen={handleDirectoryOpen}
-                  onFileOpen={handleFileOpen}
-                  paneId={paneId}
-                  tabId={tabId}
-                />
-              )}
-              <StatusBar tabId={tabId} paneId={paneId} contents={contents} />
-            </>
-          )}
-        </div>
+        {contents && !(fileOpenError || loadDirectoryError) && (
+          <>
+            {viewMode === ViewMode.GRID ? (
+              <FileGrid
+                contents={contents}
+                onDirectoryOpen={handleDirectoryOpen}
+                onFileOpen={handleFileOpen}
+                paneId={paneId}
+                tabId={tabId}
+              />
+            ) : (
+              <FileList
+                contents={contents}
+                onDirectoryOpen={handleDirectoryOpen}
+                onFileOpen={handleFileOpen}
+                paneId={paneId}
+                tabId={tabId}
+              />
+            )}
+            <StatusBar tabId={tabId} paneId={paneId} contents={contents} />
+          </>
+        )}
       </div>
     </div>
   );
