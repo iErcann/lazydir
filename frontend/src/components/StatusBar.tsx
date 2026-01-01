@@ -12,7 +12,7 @@ export function StatusBar({ tabId, paneId, contents }: StatusBarProps) {
   const statusMessage = useTabsStore((state) => state.getPane(tabId, paneId)?.statusMessage);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 p-1 px-3 text-xs text-(--text-secondary) bg-(--bg-primary) border-t border-(--bg-tertiary) z-10 flex items-center justify-between gap-4">
+    <div className="p-1 px-3 text-xs text-(--text-secondary) bg-(--bg-primary) border-t border-(--bg-tertiary) z-10 flex items-center justify-between gap-4">
       <div className="flex-1 truncate">
         {contents ? (
           <>
