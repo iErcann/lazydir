@@ -20,6 +20,7 @@ export function useFileContextMenu({
   paneId,
 }: UseFileContextMenuProps) {
   const createTab = useTabsStore((state) => state.createTab);
+  const createPane = useTabsStore((state) => state.createPane);
   const copyFiles = useTabsStore((state) => state.copyFiles);
   const pasteFiles = useFileSystemStore((state) => state.pasteFiles);
   const deleteFiles = useFileSystemStore((state) => state.deleteFiles);
@@ -47,6 +48,12 @@ export function useFileContextMenu({
       label: 'Open in New Tab',
       onClick: () => {
         createTab(file.isDir ? file.path : undefined);
+      },
+    },
+    {
+      label: 'Split Right',
+      onClick: () => {
+        createPane(tabId, file.isDir ? file.path : undefined);
       },
     },
     {

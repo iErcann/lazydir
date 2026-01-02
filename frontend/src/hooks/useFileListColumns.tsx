@@ -1,18 +1,18 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { Folder } from "lucide-react";
-import { FileInfo } from "../../bindings/lazydir/internal";
-import { formatSize } from "../utils/utils";
-import { getIconForFile } from "@react-symbols/icons/utils";
-import { useMemo } from "react";
+import { ColumnDef } from '@tanstack/react-table';
+import { Folder } from 'lucide-react';
+import { FileInfo } from '../../bindings/lazydir/internal';
+import { formatSize } from '../utils/utils';
+import { getIconForFile } from '@react-symbols/icons/utils';
+import { useMemo } from 'react';
 
 const formatDate = (isoDate: string) => {
   const date = new Date(isoDate);
   return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 };
 
@@ -20,8 +20,8 @@ export function useFileListColumns() {
   const columns = useMemo<ColumnDef<FileInfo>[]>(
     () => [
       {
-        accessorKey: "name",
-        header: "Name",
+        accessorKey: 'name',
+        header: 'Name',
         cell: ({ getValue, row }) => (
           <div className="flex items-center gap-2 min-w-0 px-2">
             <div className="w-6 h-6 flex items-center justify-center">
@@ -38,10 +38,7 @@ export function useFileListColumns() {
               )}
             </div>
 
-            <div
-              className="truncate text-sm font-medium min-w-0"
-              title={getValue() as string}
-            >
+            <div className="truncate text-sm font-medium min-w-0" title={getValue() as string}>
               {getValue() as string}
             </div>
           </div>
@@ -52,7 +49,7 @@ export function useFileListColumns() {
           const b = rowB.original;
 
           const getPriority = (item: FileInfo) => {
-            const isDot = item.name.startsWith(".");
+            const isDot = item.name.startsWith('.');
 
             if (item.isDir) return isDot ? 2 : 1;
             return isDot ? 4 : 3;
@@ -66,11 +63,11 @@ export function useFileListColumns() {
         },
       },
       {
-        accessorKey: "size",
-        header: "Size",
+        accessorKey: 'size',
+        header: 'Size',
         cell: ({ row, getValue }) => (
           <div className="text-sm text-(--text-secondary)">
-            {row.original.isDir ? "-" : formatSize(getValue() as number)}
+            {row.original.isDir ? '-' : formatSize(getValue() as number)}
           </div>
         ),
         sortingFn: (rowA, rowB) => {
@@ -84,25 +81,29 @@ export function useFileListColumns() {
         },
       },
       {
-        accessorKey: "modified",
-        header: "Modified",
+        accessorKey: 'modified',
+        header: 'Modified',
         cell: ({ getValue }) => {
           const value = getValue() as string | undefined;
           return (
-            <div className="text-sm text-(--text-secondary)">
-              {value ? formatDate(value) : "-"}
-            </div>
+            <div className="text-sm text-(--text-secondary)">{value ? formatDate(value) : '-'}</div>
           );
         },
+
         sortingFn: (rowA, rowB) => {
-          const a = rowA.original.modified;
-          const b = rowB.original.modified;
+          const a = rowA.original;
+          const b = rowB.original;
 
-          if (!a && !b) return 0;
-          if (!a) return 1;
-          if (!b) return -1;
+          // Step 1: Folder priority — folders always on top
+          if (a.isDir && !b.isDir) return -1;
+          if (!a.isDir && b.isDir) return 1;
 
-          return new Date(a).getTime() - new Date(b).getTime();
+          // Step 2: Both same type, sort by modified date
+          const dateA = a.modified ? new Date(a.modified).getTime() : 0;
+          const dateB = b.modified ? new Date(b.modified).getTime() : 0;
+
+          // Step 3: Apply asc/desc based on the table's sort direction
+          return dateA - dateB; // ascending
         },
       },
     ],
