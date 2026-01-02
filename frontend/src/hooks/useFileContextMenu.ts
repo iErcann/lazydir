@@ -1,6 +1,7 @@
 import { useTabsStore } from '../store/tabsStore';
 import { useFileSystemStore } from '../store/directoryStore';
-import { AppError, FileInfo } from '../../bindings/lazydir/internal';
+import { FileInfo } from '../../bindings/lazydir/internal';
+import { ContextMenuItem } from '../components/ContextMenu';
 
 interface UseFileContextMenuProps {
   file: FileInfo;
@@ -20,7 +21,6 @@ export function useFileContextMenu({
   paneId,
 }: UseFileContextMenuProps) {
   const createTab = useTabsStore((state) => state.createTab);
-  const createPane = useTabsStore((state) => state.createPane);
   const copyFiles = useTabsStore((state) => state.copyFiles);
   const pasteFiles = useFileSystemStore((state) => state.pasteFiles);
   const deleteFiles = useFileSystemStore((state) => state.deleteFiles);
@@ -30,39 +30,96 @@ export function useFileContextMenu({
   const clearClipboard = useTabsStore((state) => state.clearClipboard);
   const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
   const refreshPane = useTabsStore((state) => state.refreshPane);
+
   const handleContextOpen = () => {
-    // if the file is not already selected, select it, otherwise keep the multi selection
     if (onSelectFile && !selectedFilePaths?.has(file.path)) {
       onSelectFile(file);
     }
   };
 
-  const contextMenuItems = [
+  const contextMenuItems: ContextMenuItem[] = [
+    // --- Open actions ---
+    { kind: 'item', label: 'Open', onClick: () => onOpen(file) },
     {
-      label: 'Open',
-      onClick: () => {
-        onOpen(file);
-      },
-    },
-    {
+      kind: 'item',
       label: 'Open in New Tab',
+      onClick: () => createTab(file.isDir ? file.path : undefined),
+    },
+
+    // --- Separator ---
+    { kind: 'separator' },
+    // --- Clipboard actions ---
+    {
+      kind: 'item',
+      label: 'Copy',
       onClick: () => {
-        createTab(file.isDir ? file.path : undefined);
+        const files = Array.from(selectedFilePaths || []);
+        copyFiles(files, false);
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Copied ${files.length} ${files.length === 1 ? 'item' : 'items'}`
+        );
       },
     },
     {
-      label: 'Split Right',
+      kind: 'item',
+      label: 'Cut',
       onClick: () => {
-        createPane(tabId, file.isDir ? file.path : undefined);
+        const files = Array.from(selectedFilePaths || []);
+        copyFiles(files, true);
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Cut ${files.length} ${files.length === 1 ? 'item' : 'items'}`
+        );
       },
     },
     {
+      kind: 'item',
+      label: 'Paste',
+      onClick: async () => {
+        // Can only paste into directories
+        if (!file.isDir) return;
+        const fileCount = clipboard.filePaths.length;
+        setPaneStatus(
+          tabId,
+          paneId,
+          `Pasting ${fileCount} ${fileCount === 1 ? 'item' : 'items'}...`
+        );
+        const pasteResult = await pasteFiles(clipboard.filePaths, file.path, clipboard.cutMode);
+
+        // TODO : Stream the progress from wails events.
+        // Also could return the time taken and show that in the status (pasteFiles can return it)
+        if (pasteResult.error) {
+          console.error(pasteResult);
+          showErrorDialog('Paste Error', pasteResult.error.message);
+          setPaneStatus(tabId, paneId, 'Paste failed :(');
+        } else {
+          refreshPane(tabId, paneId);
+          setPaneStatus(tabId, paneId, `Pasted ${fileCount} ${fileCount === 1 ? 'item' : 'items'}`);
+        }
+        clearClipboard();
+      },
+    },
+
+    // --- Separator ---
+    { kind: 'separator' },
+
+    // --- File operations ---
+    {
+      kind: 'item',
+      label: 'Rename',
+      onClick: () => {
+        /* TODO: add rename */
+      },
+    },
+    {
+      kind: 'item',
       label: 'Delete',
       onClick: async () => {
         const files = Array.from(selectedFilePaths || []);
         const fileCount = files.length;
-
-        // Native confirmation dialog
         const result = await showQuestionDialog(
           'Confirm Delete',
           `Are you sure you want to delete ${fileCount} ${
@@ -71,7 +128,6 @@ export function useFileContextMenu({
           ['Delete', 'Cancel'],
           'Cancel'
         );
-
         if (result !== 'Delete') return;
 
         setPaneStatus(
@@ -79,7 +135,6 @@ export function useFileContextMenu({
           paneId,
           `Deleting ${fileCount} ${fileCount === 1 ? 'item' : 'items'}...`
         );
-
         const deleteResult = await deleteFiles(files);
 
         if (deleteResult.error) {
@@ -96,73 +151,16 @@ export function useFileContextMenu({
         }
       },
     },
-    {
-      label: 'Rename',
-      onClick: () => {
-        // Add rename functionality here
-      },
-    },
-    {
-      label: 'Copy',
-      onClick: () => {
-        const files = Array.from(selectedFilePaths || []);
-        copyFiles(files, false);
-        setPaneStatus(
-          tabId,
-          paneId,
-          `Copied ${files.length} ${files.length === 1 ? 'item' : 'items'}`
-        );
-      },
-    },
-    {
-      label: 'Cut',
-      onClick: () => {
-        const files = Array.from(selectedFilePaths || []);
-        copyFiles(files, true);
-        setPaneStatus(
-          tabId,
-          paneId,
-          `Cut ${files.length} ${files.length === 1 ? 'item' : 'items'}`
-        );
-      },
-    },
-    {
-      label: 'Paste',
-      onClick: async () => {
-        // Can only paste into directories
-        if (!file.isDir) return;
 
-        const fileCount = clipboard.filePaths.length;
-        setPaneStatus(
-          tabId,
-          paneId,
-          `Pasting ${fileCount} ${fileCount === 1 ? 'item' : 'items'}...`
-        );
+    // --- Separator ---
+    { kind: 'separator' },
 
-        const pasteResult = await pasteFiles(
-          clipboard.filePaths,
-          file.path, // Not the pane path, but the path of the directory we have the context opened on
-          clipboard.cutMode
-        );
-
-        // TODO : Stream the progress from wails events.
-        // Also could return the time taken and show that in the status (pasteFiles can return it)
-        if (pasteResult.error) {
-          console.error(pasteResult);
-          showErrorDialog('Paste Error', pasteResult.error.message);
-          setPaneStatus(tabId, paneId, 'Paste failed :(');
-        } else {
-          refreshPane(tabId, paneId);
-          setPaneStatus(tabId, paneId, `Pasted ${fileCount} ${fileCount === 1 ? 'item' : 'items'}`);
-        }
-
-        clearClipboard();
-      },
-    },
+    // --- Properties ---
     {
+      kind: 'item',
       label: 'Properties',
       onClick: () => {
-        // Add properties functionality here
+        /* TODO: add properties */
       },
     },
   ];

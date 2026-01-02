@@ -89,13 +89,7 @@ export const useTabsStore = create<TabsStore>()(
       const newTab: Tab = {
         id: generateUUID(),
         activePaneId: defaultPane.id,
-        panes: [
-          defaultPane,
-          // {
-          //   ...defaultPane,
-          //   id: generateUUID(),
-          // },
-        ],
+        panes: [defaultPane],
       };
 
       set((state) => {

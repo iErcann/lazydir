@@ -26,7 +26,7 @@ export function Sidebar() {
 
   if (error) {
     return (
-      <aside className="w-36 bg-(--bg-secondary) hidden sm:flex p-3">
+      <aside className="max-w-48 bg-(--bg-secondary) hidden sm:flex p-3">
         <p className="text-xs text-red-500">Error loading shortcuts</p>
       </aside>
     );
@@ -40,7 +40,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-36 bg-(--bg-secondary) hidden sm:flex flex-col">
+    <aside className="max-w-48 bg-(--bg-secondary) hidden sm:flex flex-col">
       <div className={`p-3 ${operatingSystem === OperatingSystem.OSMac ? 'pt-8' : ''}`}>
         <h2 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wider px-2 mb-2">
           lazydir

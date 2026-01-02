@@ -118,7 +118,13 @@ export function PathBar({ paneId, tabId, onPathChange }: PathBarProps) {
         />
       ) : (
         // Normal path buttons
-        <div className="inline-flex items-center gap-1 overflow-x-auto max-w-full">
+        <div
+          className="
+              inline-flex items-center gap-1
+              max-w-full overflow-hidden
+              justify-end
+            "
+        >
           {pathInfo?.parts.map((part: string, i: number) => {
             const isActive = i === pathInfo.parts.length - 1;
             return (

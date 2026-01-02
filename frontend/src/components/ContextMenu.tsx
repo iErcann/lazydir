@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-export type ContextMenuItem = {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-};
+export type ContextMenuItem =
+  | { kind: 'item'; label: string; onClick: () => void; disabled?: boolean }
+  | { kind: 'separator' };
 
 type ContextMenuProps = {
   children: ReactNode;
@@ -85,22 +83,38 @@ export function ContextMenu({ children, items, onOpen, onClose }: ContextMenuPro
     <div
       ref={menuRef}
       style={{ top: position.y, left: position.x }}
-      className="fixed z-50 bg-(--bg-primary) text-(--text-primary) border border-(--bg-tertiary) rounded-md shadow-lg min-w-40"
+      className="fixed z-50 bg-(--bg-secondary) text-(--text-primary) border border-(--bg-tertiary) rounded-md min-w-40"
     >
-      {items.map((item, i) => (
-        <div
-          key={i}
-          onClick={() => {
-            if (item.disabled) return;
-            item.onClick();
-            setVisible(false);
-          }}
-          className={`w-full px-3 py-1 text-left cursor-pointer select-none rounded-sm
-            hover:bg-(--bg-secondary) ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          {item.label}
-        </div>
-      ))}
+      {items.map((item, i) => {
+        if (item.kind === 'separator') {
+          // Render separator
+          return <div key={i} className="my-1 border-t border-(--bg-tertiary)" />;
+        }
+
+        // Render normal item
+        return (
+          <div
+            key={i}
+            onClick={() => {
+              if (item.disabled) return;
+              item.onClick();
+              setVisible(false);
+            }}
+            className={`
+            w-full px-3 py-[2px]
+            text-sm
+            text-left
+            cursor-pointer
+            select-none
+            whitespace-nowrap
+            hover:bg-(--bg-primary)
+            ${item.disabled ? 'opacity-50 pointer-events-none' : ''}
+          `}
+          >
+            {item.label}
+          </div>
+        );
+      })}
     </div>
   ) : null;
 
