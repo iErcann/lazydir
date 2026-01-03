@@ -1,5 +1,5 @@
-import { useTabsStore } from "../store/tabsStore";
-import { TabItem } from "./TabItem";
+import { useTabsStore } from '../store/tabsStore';
+import { TabItem } from './TabItem';
 
 export function TabBar() {
   const tabs = useTabsStore((state) => state.tabs);

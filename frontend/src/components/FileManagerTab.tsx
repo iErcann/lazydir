@@ -1,13 +1,12 @@
-import { Tab } from "../types";
 import { SplitView } from "./SplitView";
 
 interface FileManagerTabProps {
-  tab: Tab;
+  tabId: string;
 }
-export function FileManagerTab({ tab }: FileManagerTabProps) {
+export function FileManagerTab({ tabId }: FileManagerTabProps) {
   return (
     <>
-      <SplitView tab={tab} />
+      <SplitView tabId={tabId} />
     </>
   );
 }

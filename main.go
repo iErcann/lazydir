@@ -38,9 +38,7 @@ func main() {
 	app := application.New(application.Options{
 		Name:        "lazydir",
 		Description: "A lazy file manager built with Go & React",
-		Services: []application.Service{
-			application.NewService(&internal.FileManagerService{}),
-		},
+		Services:    []application.Service{},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
@@ -48,6 +46,12 @@ func main() {
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
 	})
+
+	fmService := application.NewService(&internal.FileManagerService{})
+	app.RegisterService(fmService)
+
+	dialogService := application.NewService(&internal.DialogService{App: app})
+	app.RegisterService(dialogService)
 
 	// Create a new window with the necessary options.
 	// 'Title' is the title of the window.

@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/wailsapp/wails/v3 v3.0.0-alpha.51
+	github.com/wailsapp/wails/v3 v3.0.0-alpha.54
 )
 
 require (

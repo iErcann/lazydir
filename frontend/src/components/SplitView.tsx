@@ -1,18 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import type { Tab } from "../types";
 import { FileManagerPane } from "./FileManagerPane";
+import { useTabsStore } from "../store/tabsStore";
 
 export interface SplitViewProps {
-  tab: Tab;
+  tabId: string;
 }
-export function SplitView({ tab }: SplitViewProps) {
+export function SplitView({ tabId }: SplitViewProps) {
+  const tab = useTabsStore((state) => state.getTab(tabId)!);
   const [splitPercentage, setSplitPercentage] = useState(50); // 50% by default
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Single pane
   if (tab.panes.length === 1) {
-    return <FileManagerPane tab={tab} pane={tab.panes[0]} />;
+    return <FileManagerPane tabId={tabId} paneId={tab.panes[0].id} />;
   }
 
   const handleDragMouseDown = (e: React.MouseEvent) => {
@@ -60,7 +61,7 @@ export function SplitView({ tab }: SplitViewProps) {
     >
       {/* Left Pane */}
       <div style={{ width: `${splitPercentage}%` }} className="overflow-hidden">
-        <FileManagerPane tab={tab} pane={tab.panes[0]} />
+        <FileManagerPane tabId={tabId} paneId={tab.panes[0].id} />
       </div>
 
       {/* Draggable Divider */}
@@ -78,7 +79,7 @@ export function SplitView({ tab }: SplitViewProps) {
         style={{ width: `${100 - splitPercentage}%` }}
         className="overflow-hidden"
       >
-        <FileManagerPane tab={tab} pane={tab.panes[1]} />
+        <FileManagerPane tabId={tabId} paneId={tab.panes[1].id} />
       </div>
     </div>
   );
