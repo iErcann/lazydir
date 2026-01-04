@@ -1,35 +1,48 @@
-import { useTabsStore } from "../store/tabsStore";
-import { FileManagerTab } from "./FileManagerTab";
-import { TabBar } from "./TabBar";
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useFileSystemStore } from "../store/directoryStore";
-import { Sidebar } from "./SideBar";
-import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut";
+import { useTabsStore } from '../store/tabsStore';
+import { FileManagerTab } from './FileManagerTab';
+import { TabBar } from './TabBar';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useFileSystemStore } from '../store/directoryStore';
+import { Sidebar } from './SideBar';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 
 export function FileManager() {
-  const createTab = useTabsStore((state) => state.createTab);
-  const activeTab = useTabsStore((state) => state.getActiveTab());
-  const tabs = useTabsStore((state) => state.tabs);
+  const createTab = useTabsStore((s) => s.createTab);
+  const tabs = useTabsStore((s) => s.tabs);
+  const activeTab = useTabsStore((s) => s.getActiveTab());
+  const closeTab = useTabsStore((s) => s.closeTab);
+  const activateTab = useTabsStore((s) => s.activateTab);
 
-  const getOperatingSystem = useFileSystemStore((state) => state.getOperatingSystem);
-  const getInitialPath = useFileSystemStore((state) => state.getInitialPath);
-
+  // File system stuff
+  const { getOperatingSystem, getInitialPath } = useFileSystemStore();
   // Query OS (just populate store)
   useQuery({
-    queryKey: ["os"],
+    queryKey: ['os'],
     queryFn: getOperatingSystem,
     staleTime: Infinity,
   });
 
   // Query initial path
-  const { data: initialPath, isLoading: pathLoading, error: pathError } = useQuery({
-    queryKey: ["initialPath"],
-    queryFn: getInitialPath,
+  const {
+    data: initialPath,
+    isLoading: pathLoading,
+    error: pathError,
+  } = useQuery({
+    queryKey: ['initialPath'],
+    queryFn: () => {
+      console.log('FileManager: Fetching initial path');
+      return getInitialPath();
+    },
     staleTime: Infinity,
-    select: (res) => { 
+    select: (res) => {
       if (res.error) throw res.error;
-      return res.data ?? "."; }, // fallback to "."
+      return res.data ?? '.';
+    }, // fallback to "."
+    retry: false,
+    refetchOnWindowFocus: false, // otherwise it will refetch on alt tab.
+    refetchOnMount: false,
+    gcTime: 0,
   });
 
   // Create first tab when initialPath is ready
@@ -39,21 +52,64 @@ export function FileManager() {
     }
   }, [activeTab, initialPath, createTab]);
 
-
+  // Ctrl+T to open new tab
   useKeyboardShortcut({
-    key: "t",
+    key: 't',
     ctrl: true,
     preventDefault: true,
     handler: async () => {
       const result = await getInitialPath();
-      createTab(result.data ?? ".");
+      createTab(result.data ?? '.');
     },
-  }); 
+  });
 
-  
+  // Ctrl+W to close current tab
+  useKeyboardShortcut({
+    key: 'w',
+    ctrl: true,
+    preventDefault: true,
+    handler: () => {
+      if (activeTab) {
+        closeTab(activeTab.id);
+      }
+    },
+  });
+
+  // Ctrl + PageUp to switch to previous tab
+  useKeyboardShortcut({
+    key: 'PageUp',
+    ctrl: true,
+    preventDefault: true,
+    handler: () => {
+      if (!activeTab || tabs.length <= 1) return;
+
+      const currentIndex = tabs.findIndex((tab) => tab.id === activeTab.id);
+      const previousIndex = (currentIndex - 1 + tabs.length) % tabs.length; // Loop around
+      const previousTab = tabs[previousIndex];
+
+      useTabsStore.getState().activateTab(previousTab.id);
+    },
+  });
+
+  // Ctrl + PageDown to switch to next tab
+  useKeyboardShortcut({
+    key: 'PageDown',
+    ctrl: true,
+    preventDefault: true,
+    handler: () => {
+      if (!activeTab || tabs.length <= 1) return;
+
+      const currentIndex = tabs.findIndex((tab) => tab.id === activeTab.id);
+      const nextIndex = (currentIndex + 1) % tabs.length; // Loop around
+      const nextTab = tabs[nextIndex];
+
+      activateTab(nextTab.id);
+    },
+  });
   // Show loading state
   if (pathLoading) return <div className="p-4 text-(--text-secondary)">Loading...</div>;
-  if (pathError) return <div className="p-4 text-red-500">Error loading path: {pathError.message}</div>;
+  if (pathError)
+    return <div className="p-4 text-red-500">Error loading path: {pathError.message}</div>;
   if (!activeTab) return null;
 
   return (
@@ -62,7 +118,7 @@ export function FileManager() {
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           {tabs.length > 1 && <TabBar />}
-          <FileManagerTab tab={activeTab} />
+          <FileManagerTab tabId={activeTab.id} />
         </div>
       </div>
     </div>

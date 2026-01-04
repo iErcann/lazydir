@@ -1,8 +1,8 @@
-import { SortingState } from "@tanstack/react-table";
+import { SortingState } from '@tanstack/react-table';
 
 export enum ViewMode {
-  GRID = "grid",
-  LIST = "list",
+  GRID = 'grid',
+  LIST = 'list',
 }
 export interface Pane {
   id: string;
@@ -19,8 +19,14 @@ export interface Pane {
   selectedFilePaths: Set<string>; // array of file paths
 
   // Navigation history
-  history: string[];        // all visited paths
-  historyIndex: number;     // points to the current path in history
+  history: string[]; // all visited paths
+  historyIndex: number; // points to the current path in history
+
+  // Status message
+  statusMessage?: string;
+
+  // Refresh key for forcing directory reload
+  refreshKey: number;
 }
 
 export interface Tab {

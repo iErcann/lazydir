@@ -2,20 +2,24 @@ package internal
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/adrg/xdg"
 )
 
 // FileManagerService is a service for managing files
-type FileManagerService struct{}
+type FileManagerService struct {
+}
 
 // ListDirectory lists the contents of a directory.
 func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryContents] {
+	Log(fmt.Sprintf("Called ListDirectory at date %s", fmt.Sprint(time.Now().Format(time.RFC3339))))
 	pathResult := canonicalPath(dirPath)
 	if pathResult.Error != nil {
 		return Result[DirectoryContents]{Error: pathResult.Error}
@@ -23,6 +27,7 @@ func (f *FileManagerService) ListDirectory(dirPath string) Result[DirectoryConte
 	absPath := *pathResult.Data
 	entries, err := os.ReadDir(absPath)
 	if err != nil {
+		// Most likely a permission error.
 		return Result[DirectoryContents]{Error: &AppError{Code: ReadDirectoryError, Message: fmt.Sprintf("read directory error: %v", err), InnerError: err}}
 	}
 
@@ -277,4 +282,253 @@ func (f *FileManagerService) GetShortcuts() Result[[]Shortcut] {
 	addIfExists("Videos", xdg.UserDirs.Videos, ShortcutLogoVideos)
 
 	return Result[[]Shortcut]{Data: &shortcuts}
+}
+
+func (f *FileManagerService) PasteFiles(targetDir string, files []string, cutMode bool) Result[string] {
+	if cutMode {
+		return f.MoveFiles(targetDir, files)
+	}
+	return f.CopyFiles(targetDir, files)
+}
+
+/*
+*
+
+	targetDir: destination directory
+	files: list of source file/directory paths to copy
+
+*
+*/
+func (f *FileManagerService) CopyFiles(targetDir string, files []string) Result[string] {
+	targetResult := canonicalPath(targetDir)
+	if targetResult.Error != nil {
+		return Result[string]{Error: targetResult.Error}
+	}
+	target := *targetResult.Data
+
+	for _, source := range files {
+		sourceResult := canonicalPath(source)
+		if sourceResult.Error != nil {
+			return Result[string]{Error: sourceResult.Error}
+		}
+		sourcePath := *sourceResult.Data
+		dest := filepath.Join(target, filepath.Base(sourcePath))
+
+		info, err := os.Stat(sourcePath)
+		if err != nil {
+			return Result[string]{Error: &AppError{
+				Code:       FileCopyError,
+				Message:    fmt.Sprintf("cannot access %s: %v", sourcePath, err),
+				InnerError: err,
+			}}
+		}
+
+		// Check if the dest already exists (for now, don't overwrite, maybe we could create a "Copy of" file instead)
+		if _, err := os.Stat(dest); err == nil {
+			return Result[string]{Error: &AppError{
+				Code:    FileCopyError,
+				Message: fmt.Sprintf("destination %s already exists", dest),
+			}}
+		}
+
+		if info.IsDir() {
+			if err := copyDir(sourcePath, dest); err != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileCopyError,
+					Message:    fmt.Sprintf("failed to copy directory %s: \n%v", info.Name(), err),
+					InnerError: err,
+				}}
+			}
+		} else {
+			if err := copyFile(sourcePath, dest); err != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileCopyError,
+					Message:    fmt.Sprintf("failed to copy file %s: \n%v", info.Name(), err),
+					InnerError: err,
+				}}
+			}
+		}
+	}
+
+	return Result[string]{Data: ptrString(fmt.Sprintf("Copied %d item(s) to %s", len(files), target))}
+}
+
+func (f *FileManagerService) MoveFiles(targetDir string, files []string) Result[string] {
+	targetResult := canonicalPath(targetDir)
+	if targetResult.Error != nil {
+		return Result[string]{Error: targetResult.Error}
+	}
+	target := *targetResult.Data
+
+	for _, source := range files {
+		sourceResult := canonicalPath(source)
+		if sourceResult.Error != nil {
+			return Result[string]{Error: sourceResult.Error}
+		}
+		sourcePath := *sourceResult.Data
+		dest := filepath.Join(target, filepath.Base(sourcePath))
+
+		if err := os.Rename(sourcePath, dest); err != nil {
+			// Cross-device fallback: copy + remove
+			info, statErr := os.Stat(sourcePath)
+			if statErr != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileMoveError,
+					Message:    fmt.Sprintf("cannot access %s: %v", sourcePath, statErr),
+					InnerError: statErr,
+				}}
+			}
+
+			if info.IsDir() {
+				if err := copyDir(sourcePath, dest); err != nil {
+					return Result[string]{Error: &AppError{
+						Code:       FileMoveError,
+						Message:    fmt.Sprintf("failed to move directory %s: %v", sourcePath, err),
+						InnerError: err,
+					}}
+				}
+			} else {
+				if err := copyFile(sourcePath, dest); err != nil {
+					return Result[string]{Error: &AppError{
+						Code:       FileMoveError,
+						Message:    fmt.Sprintf("failed to move file %s: %v", sourcePath, err),
+						InnerError: err,
+					}}
+				}
+			}
+
+			if err := os.RemoveAll(sourcePath); err != nil {
+				return Result[string]{Error: &AppError{
+					Code:       FileCleanupError,
+					Message:    fmt.Sprintf("failed to remove original %s after move: %v", sourcePath, err),
+					InnerError: err,
+				}}
+			}
+		}
+	}
+
+	return Result[string]{Data: ptrString(fmt.Sprintf("Moved %d item(s) to %s", len(files), target))}
+}
+
+func (f *FileManagerService) DeleteFiles(files []string) Result[string] {
+	for _, source := range files {
+		sourceResult := canonicalPath(source)
+		if sourceResult.Error != nil {
+			return Result[string]{Error: sourceResult.Error}
+		}
+		sourcePath := *sourceResult.Data
+
+		if err := os.RemoveAll(sourcePath); err != nil {
+			return Result[string]{Error: &AppError{
+				Code:       FileDeleteError,
+				Message:    fmt.Sprintf("failed to delete %s: %v", sourcePath, err),
+				InnerError: err,
+			}}
+		}
+	}
+
+	return Result[string]{Data: ptrString(fmt.Sprintf("Deleted %d item(s)", len(files)))}
+}
+
+// GetParentFolder returns the parent directory of a given path
+func (f *FileManagerService) GetParentFolder(filePath string) Result[string] {
+	pathResult := canonicalPath(filePath)
+	if pathResult.Error != nil {
+		return Result[string]{Error: pathResult.Error}
+	}
+	absPath := *pathResult.Data
+
+	// Get parent directory
+	parentDir := filepath.Dir(absPath)
+
+	// Check if we're already at the root
+	if parentDir == absPath {
+		return Result[string]{Error: &AppError{
+			Code:    ResolvePathError,
+			Message: "already at root directory",
+		}}
+	}
+
+	return Result[string]{Data: &parentDir}
+}
+
+// Helper: copy a single file
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		// Cleanup partial file
+		destFile.Close()
+		os.Remove(dst)
+		return err
+	}
+
+	info, err := sourceFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	// keep timestamps
+	if err := os.Chtimes(dst, info.ModTime(), info.ModTime()); err != nil {
+		return err
+	}
+
+	// keep permissions
+	return os.Chmod(dst, info.Mode())
+}
+
+// Helper: recursively copy a directory
+// WARNING: THIS doesnt handle symlinks or special files
+// to debug: node_modules from a pnpm project is a good test case
+func copyDir(src, dst string) error {
+	info, err := os.Stat(src)
+
+	if err != nil {
+		return err
+	}
+
+	if !info.IsDir() {
+		return fmt.Errorf("source %s is not a directory", src)
+	}
+
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	// Keep permissions + create destination dir (this could go further maybe info mode everything inside?)
+	if err := os.MkdirAll(dst, info.Mode().Perm()); err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+
+		if entry.IsDir() {
+			if err := copyDir(srcPath, dstPath); err != nil {
+				return err
+			}
+		} else {
+			if err := copyFile(srcPath, dstPath); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Helper: pointer to string
+func ptrString(s string) *string {
+	return &s
 }

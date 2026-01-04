@@ -1,25 +1,43 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 import {
   DirectoryContents,
   FileManagerService,
-} from "../../bindings/lazydir/internal";
+  DialogService, // UI
+} from '../../bindings/lazydir/internal';
 import {
   OperatingSystem,
   Result,
   PathInfo,
   Shortcut,
-} from "../../bindings/lazydir/internal/models";
+} from '../../bindings/lazydir/internal/models';
 
 interface FileSystemStore {
   operatingSystem: OperatingSystem;
   setOperatingSystem: (os: OperatingSystem) => void;
-  // Actions
-  loadDirectory: (path: string) => Promise<Result<DirectoryContents>>;
+  listDirectory: (path: string) => Promise<Result<DirectoryContents>>;
   getOperatingSystem: () => Promise<Result<OperatingSystem>>;
   getPathInfo: (path: string) => Promise<Result<PathInfo>>; // Cross platform path info retrieval
   getPathAtIndex: (path: string, index: number) => Promise<Result<string>>; // Get path at specific index
+  getParentFolder: (path: string) => Promise<Result<string>>; // Get parent folder of a path
   getInitialPath: () => Promise<Result<string>>; // Get initial path based on OS
   getShortcuts: () => Promise<Result<Shortcut[]>>; // Get sidebar shortcuts
+  pasteFiles: (
+    files: string[],
+    destinationPath: string,
+    cutMode: boolean
+  ) => Promise<Result<string>>; // Paste files to destination
+  deleteFiles: (files: string[]) => Promise<Result<string>>; // Delete files
+  openFileWithDefaultApp: (path: string) => Promise<Result<string>>; // Open file with default application
+  // UI
+  showInfoDialog: (title: string, message: string) => void;
+  showErrorDialog: (title: string, message: string) => void;
+  showWarningDialog: (title: string, message: string) => void;
+  showQuestionDialog: (
+    title: string,
+    message: string,
+    buttons: string[],
+    defaultButton: string
+  ) => Promise<string>;
 }
 
 export const useFileSystemStore = create<FileSystemStore>((set) => ({
@@ -27,7 +45,7 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
 
   setOperatingSystem: (os: OperatingSystem) => set({ operatingSystem: os }),
 
-  loadDirectory: async (path) => {
+  listDirectory: async (path) => {
     return await FileManagerService.ListDirectory(path);
   },
 
@@ -46,10 +64,43 @@ export const useFileSystemStore = create<FileSystemStore>((set) => ({
     return await FileManagerService.GetPathAtIndex(path, index);
   },
 
+  getParentFolder: async (path: string) => {
+    return await FileManagerService.GetParentFolder(path);
+  },
+
   getInitialPath: async () => {
     return await FileManagerService.GetInitialPath();
   },
   getShortcuts: async () => {
     return await FileManagerService.GetShortcuts();
-  }
+  },
+
+  pasteFiles: async (files: string[], destinationPath: string, cutMode: boolean) => {
+    return await FileManagerService.PasteFiles(destinationPath, files, cutMode);
+  },
+
+  deleteFiles: async (files: string[]) => {
+    return await FileManagerService.DeleteFiles(files);
+  },
+
+  showInfoDialog: (title: string, message: string) => {
+    DialogService.ShowInfoDialog(title, message);
+  },
+  showErrorDialog: (title: string, message: string) => {
+    DialogService.ShowErrorDialog(title, message);
+  },
+  showWarningDialog: (title: string, message: string) => {
+    DialogService.ShowWarningDialog(title, message);
+  },
+  showQuestionDialog: async (
+    title: string,
+    message: string,
+    buttons: string[],
+    defaultButton: string
+  ) => {
+    return await DialogService.ShowQuestionDialog(title, message, buttons, defaultButton);
+  },
+  openFileWithDefaultApp: async (path: string) => {
+    return await FileManagerService.OpenFileWithDefaultApp(path);
+  },
 }));

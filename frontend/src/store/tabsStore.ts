@@ -1,12 +1,12 @@
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { ViewMode, type Pane, type Tab } from "../types";
-import { SortingState } from "@tanstack/react-table";
+import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { ViewMode, type Pane, type Tab } from '../types';
+import { SortingState } from '@tanstack/react-table';
 
 function generateUUID() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -20,6 +20,12 @@ interface TabsStore {
   tabs: Tab[];
   activeTabId: string | null;
 
+  clipboard: {
+    filePaths: string[];
+    cutMode: boolean; // if its a cut, then we move files, else we copy
+  };
+  clearClipboard: () => void;
+  copyFiles: (filePaths: string[], cutMode?: boolean) => void;
   createTab: (path?: string) => Tab;
   closeTab: (tabId: string) => void;
   activateTab: (tabId: string) => void;
@@ -28,56 +34,61 @@ interface TabsStore {
   createPane: (tabId: string, path?: string) => Pane;
   closePane: (tabId: string, paneId: string) => void;
   updatePanePath: (tabId: string, paneId: string, newPath: string) => void;
+  refreshPane: (tabId: string, paneId: string) => void;
 
   // History navigation
   paneNavigateBack: (tabId: string, paneId: string) => void;
   paneNavigateForward: (tabId: string, paneId: string) => void;
 
-  setSelectedFilePaths: (
-    tabId: string,
-    paneId: string,
-    selectedFilePaths: Set<string>
-  ) => void;
-  setPaneSorting: (
-    tabId: string,
-    paneId: string,
-    sorting: SortingState
-  ) => void;
+  setSelectedFilePaths: (tabId: string, paneId: string, selectedFilePaths: Set<string>) => void;
+  setPaneSorting: (tabId: string, paneId: string, sorting: SortingState) => void;
 
   setPaneViewMode: (tabId: string, paneId: string, viewMode: ViewMode) => void;
+  setPaneStatus: (tabId: string, paneId: string, message?: string) => void;
 
   // Getters (unchanged - they don't mutate)
   getActiveTab: () => Tab | null;
   getActivePane: () => ActivePaneResult | null;
   getPane: (tabId: string, paneId: string) => Pane | null;
+  getTab: (tabId: string) => Tab | null;
 }
 
 export const useTabsStore = create<TabsStore>()(
   immer((set, get) => ({
     tabs: [],
     activeTabId: null,
+    clipboard: { filePaths: [], cutMode: false },
 
-    createTab: (path = ".") => {
+    clearClipboard: () => {
+      set((state) => {
+        state.clipboard.filePaths = [];
+        state.clipboard.cutMode = false;
+      });
+    },
+
+    copyFiles: (files, cutMode = false) => {
+      set((state) => {
+        state.clipboard.filePaths = files;
+        state.clipboard.cutMode = cutMode;
+      });
+    },
+
+    createTab: (path = '.') => {
       const defaultPane: Pane = {
         id: generateUUID(),
         path,
         active: true,
         viewMode: ViewMode.LIST,
-        sorting: [{ id: "name", desc: false }],
+        sorting: [{ id: 'name', desc: false }],
         selectedFilePaths: new Set<string>(),
         history: [path],
         historyIndex: 0,
+        refreshKey: 0,
       };
       const newTab: Tab = {
         id: generateUUID(),
         activePaneId: defaultPane.id,
-        panes: [
-          defaultPane,
-          {
-            ...defaultPane,
-            id: generateUUID(),
-          },
-        ],
+        panes: [defaultPane],
       };
 
       set((state) => {
@@ -129,16 +140,17 @@ export const useTabsStore = create<TabsStore>()(
       });
     },
 
-    createPane: (tabId: string, path = ".") => {
+    createPane: (tabId: string, path = '.') => {
       const newPane: Pane = {
         id: generateUUID(),
         path,
         active: false, // no longer used
         viewMode: ViewMode.LIST,
-        sorting: [{ id: "name", desc: false }],
+        sorting: [{ id: 'name', desc: false }],
         selectedFilePaths: new Set<string>(),
         history: [path],
         historyIndex: 0,
+        refreshKey: 0,
       };
 
       set((state) => {
@@ -168,6 +180,18 @@ export const useTabsStore = create<TabsStore>()(
           pane.historyIndex = pane.history.length - 1;
           pane.path = newPath;
         }
+      });
+    },
+
+    refreshPane: (tabId: string, paneId: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        // Increment refresh key to trigger React Query refetch
+        pane.refreshKey++;
       });
     },
 
@@ -216,11 +240,7 @@ export const useTabsStore = create<TabsStore>()(
       });
     },
 
-    setSelectedFilePaths: (
-      tabId: string,
-      paneId: string,
-      selectedFilePaths: Set<string>
-    ) => {
+    setSelectedFilePaths: (tabId: string, paneId: string, selectedFilePaths: Set<string>) => {
       set((state) => {
         const tab = state.tabs.find((t) => t.id === tabId);
         if (!tab) return;
@@ -256,6 +276,18 @@ export const useTabsStore = create<TabsStore>()(
       });
     },
 
+    setPaneStatus: (tabId: string, paneId: string, message?: string) => {
+      set((state) => {
+        const tab = state.tabs.find((t) => t.id === tabId);
+        if (!tab) return;
+
+        const pane = tab.panes.find((p) => p.id === paneId);
+        if (!pane) return;
+
+        pane.statusMessage = message;
+      });
+    },
+
     // Getters
     getActiveTab: () => {
       const { tabs, activeTabId } = get();
@@ -277,6 +309,10 @@ export const useTabsStore = create<TabsStore>()(
       const { tabs } = get();
       const tab = tabs.find((t: Tab) => t.id === tabId);
       return tab?.panes.find((p: Pane) => p.id === paneId) ?? null;
+    },
+    getTab: (tabId: string) => {
+      const { tabs } = get();
+      return tabs.find((t: Tab) => t.id === tabId) ?? null;
     },
   }))
 );

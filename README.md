@@ -12,18 +12,15 @@ Lazydir is a file manager built with Go, Wails and React.
 
 (i like [thunar](https://gitlab.xfce.org/xfce/thunar))
 
-![Lazydir Screenshot](branding/lazydirmac.png)
+![Lazydir Screenshot](branding/main.png)
 
 ## Features
 
-- **Split-Screen View**: Manage files and directories side-by-side with dual panes for maximum productivity.
-  ![Split](branding/splitscreen.png)
-
 - **Tabbed Interface**: Keep multiple directories open in tabs and switch between them effortlessly.
+- **Split-Screen View**: Manage files and directories side-by-side with dual panes for maximum productivity.
+
 - **Cross-Platform**: A single, consistent experience on Linux, Windows, and macOS.
 - **Custom Themes**: Personalize the look and feel to match your style.
-
-![FileGrid](branding/filegrid.png)
 
 ## Installation
 
@@ -101,16 +98,17 @@ Its all CSS.
 - [ ] **HIGH**: Keep it fast even though it's React (lazy loading, virtualized list, Go backend for first operations).
 - [x] **HIGH**: Move state to the Tab/Pane level to maintain context after switching.
 - [x] **MEDIUM**: Navigation buttons (Up, Left, Right) with history tracking.
-- [ ] **MEDIUM**: Support for Mouse4 (Back) and Mouse5 (Forward) buttons.
+- [ ] **MEDIUM**: Support for Mouse4 (Back) and Mouse5 (Forward) buttons. (needs to be done Golang side directly)
 - [ ] **HIGH**: Context Menu on right-click.
 - [ ] **HIGH**: File Operations:
-  - [ ] **HIGH**: Copy-Paste.
-  - [ ] **LOW**: Cut-Paste.
-  - [ ] **HIGH**: Delete.
+  - [x] **HIGH**: Copy-Paste.
+    - [ ] **MEDIUM**: Stream large file operation progress and display them in the UI.(progress bar)
+  - [x] **LOW**: Cut-Paste.
+  - [x] **HIGH**: Delete.
   - [ ] **MEDIUM**: Rename.
   - [ ] **HIGH**: New Folder.
   - [ ] **HIGH**: New File.
-  - [ ] **MEDIUM**: Drag and Drop (complex):
+  - [ ] **HIGH**: Drag and Drop (complex):
     - [ ] Drag from lazydir to lazydir.
     - [ ] Drag from one lazydir pane to another pane.
     - [ ] Drag between tabs in lazydir.
@@ -121,8 +119,11 @@ Its all CSS.
 - [x] **HIGH** Switch between List View and Grid View.
 - [ ] **LOW**: Press a key to jump to files starting with that letter (like Thunar).
 - [ ] **LOW**: CTRL+A to select all files in the current directory.
-- [ ] **LOW**: CTRL+L to focus the address bar.
+- [x] **LOW**: CTRL+L to focus the address bar.
+- [x] **LOW**: CTRL+T to open a new tab.
+- [x] **LOW**: CTRL+W to close the current tab.
 - [ ] **LOW**: Terminal integration (open terminal here) - platform-specific.
 - [ ] **LOW**: File Search in the current directory.
-- [ ] **MEDIUM**: Tab support.
-- [ ] **MEDIUM**: Split Screen support.
+- [x] **MEDIUM**: Tab support.
+- [x] **MEDIUM**: Split Screen support.
+- [ ] **MEDIUM** SYMLINK support in copy/move operations.

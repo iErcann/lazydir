@@ -1,6 +1,6 @@
-import { useTabsStore } from "../store/tabsStore";
-import { Tab } from "../types";
-import { useMemo } from "react";
+import { useTabsStore } from '../store/tabsStore';
+import { Tab } from '../types';
+import { useMemo } from 'react';
 
 interface TabItemProps {
   tab: Tab;
@@ -20,19 +20,14 @@ export function TabItem({ tab, isActive }: TabItemProps) {
    */
   const tabName = useMemo(() => {
     if (tab.panes.length === 0) {
-      return "Untitled";
+      return 'Untitled';
     }
 
-    const parts = (tab.panes[0].path ?? "")
-      .split(/[/\\]+/)
-      .filter(Boolean);
+    const parts = (tab.panes[0].path ?? '').split(/[/\\]+/).filter(Boolean);
 
-    const firstName =
-      parts.at(-1) || tab.panes[0].path || "Untitled";
+    const firstName = parts.at(-1) || tab.panes[0].path || 'Untitled';
 
-    return tab.panes.length > 1
-      ? `${firstName} (${tab.panes.length} panes)`
-      : firstName;
+    return tab.panes.length > 1 ? `${firstName} (${tab.panes.length} panes)` : firstName;
   }, [tab.panes]);
 
   // Activate tab on left click
@@ -43,9 +38,7 @@ export function TabItem({ tab, isActive }: TabItemProps) {
    * - button === 1 → middle click
    * - buttons === 4 → middle button held (browser-dependent)
    */
-  const handleMiddleClick = (
-    event: React.MouseEvent<HTMLDivElement>
-  ) => {
+  const handleMiddleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.button === 1 || event.buttons === 4) {
       event.preventDefault();
       closeTab(tab.id);
@@ -53,9 +46,7 @@ export function TabItem({ tab, isActive }: TabItemProps) {
   };
 
   // Close button click should not activate the tab
-  const handleCloseClick = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleCloseClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     closeTab(tab.id);
   };
@@ -66,12 +57,11 @@ export function TabItem({ tab, isActive }: TabItemProps) {
      * Used to reveal the close button only when hovering the tab
      */
     <div
-      className={`group flex-1 flex items-center justify-center cursor-pointer relative
-        border-b-2 pb-1 transition
+      className={`group flex-1 flex items-center justify-center text-sm cursor-pointer relative border-b-2 
         ${
           isActive
-            ? "border-(--accent) font-semibold"
-            : "border-transparent text-(--text-secondary) text-sm"
+            ? 'border-(--accent) font-semibold text-(--text-primary)'
+            : 'border-transparent text-(--text-secondary)'
         }`}
       onClick={handleClick}
       onMouseDown={handleMiddleClick}

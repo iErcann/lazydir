@@ -1,46 +1,76 @@
-import { FileList } from "./FileList";
-import { ViewMode, type Pane, type Tab } from "../types";
-import { useFileSystemStore } from "../store/directoryStore";
-import { useEffect, useState } from "react";
-import { DirectoryContents, FileInfo } from "../../bindings/lazydir/internal";
-import { useTabsStore } from "../store/tabsStore";
-import { OpenFileWithDefaultApp } from "../../bindings/lazydir/internal/filemanagerservice";
-import { PathBar } from "./PathBar";
-import { formatSize } from "../utils/utils";
-import { ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
-import { FileGrid } from "./FileGrid";
-import { useQuery } from "@tanstack/react-query";
-import { List, Grid } from "lucide-react"; // add to your imports
+import { ViewMode } from '../types';
+import { useFileSystemStore } from '../store/directoryStore';
+import { useEffect, useState } from 'react';
+import { useTabsStore } from '../store/tabsStore';
+import { PathBar } from './PathBar';
+import { StatusBar } from './StatusBar';
+import { ArrowLeft, ArrowRight, ArrowUp, RefreshCw } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { List, Grid } from 'lucide-react';
+import { FileGrid } from './filegrid/FileGrid';
+import { FileList } from './filelist/FileList';
+import { FileInfo } from '../../bindings/lazydir/internal';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 
 interface FileManagerPaneProps {
-  tab: Tab;
-  pane: Pane;
+  tabId: string;
+  paneId: string;
 }
-export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
-  const loadDirectory = useFileSystemStore((state) => state.loadDirectory);
-  const updatePanePath = useTabsStore((state) => state.updatePanePath);
+export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
   const [fileOpenError, setFileOpenError] = useState<string | null>(null);
+
+  // FileSystem actions
+  const loadDirectory = useFileSystemStore((state) => state.listDirectory);
+  const getParentFolder = useFileSystemStore((state) => state.getParentFolder);
+  const openFileWithDefaultApp = useFileSystemStore((state) => state.openFileWithDefaultApp);
+
+  // Tabs/navigation actions
+  const panePath = useTabsStore((state) => state.getPane(tabId, paneId)?.path);
+  const viewMode = useTabsStore((state) => state.getPane(tabId, paneId)?.viewMode);
+  const historyIndex = useTabsStore((state) => state.getPane(tabId, paneId)?.historyIndex);
+  const historyLength = useTabsStore((state) => state.getPane(tabId, paneId)?.history.length);
+  const refreshKey = useTabsStore((state) => state.getPane(tabId, paneId)?.refreshKey ?? 0);
+
+  const updatePanePath = useTabsStore((state) => state.updatePanePath);
   const activatePane = useTabsStore((state) => state.activatePane);
-  const navigateBack = useTabsStore((state) => state.paneNavigateBack);
-  const navigateForward = useTabsStore((state) => state.paneNavigateForward);
-  const getPathInfo = useFileSystemStore((state) => state.getPathInfo);
-  const getPathAtIndex = useFileSystemStore((state) => state.getPathAtIndex);
+  const paneNavigateBack = useTabsStore((state) => state.paneNavigateBack);
+  const paneNavigateForward = useTabsStore((state) => state.paneNavigateForward);
   const setPaneViewMode = useTabsStore((state) => state.setPaneViewMode);
+  const setPaneStatus = useTabsStore((state) => state.setPaneStatus);
+  const refreshPane = useTabsStore((state) => state.refreshPane);
+  const showErrorDialog = useFileSystemStore((state) => state.showErrorDialog);
+  // Query directory contents on pane path change
   const {
     data: contents,
     isLoading,
-    error,
+    error: loadDirectoryError,
     isFetching,
   } = useQuery({
-    queryKey: ["directory", pane.path],
-
-    queryFn: () => loadDirectory(pane.path),
-
+    queryKey: ['directory', panePath, refreshKey],
+    queryFn: () => {
+      console.log('FileManagerPane: Loading directory for path', panePath);
+      return loadDirectory(panePath!);
+    },
+    enabled: !!panePath, // only run when panePath exists
     select: (result) => {
       if (result.error) throw result.error;
       return result.data;
     },
+    retry: false,
+    refetchOnWindowFocus: false, // otherwise it will refetch on alt tab.
+    refetchOnMount: false,
+    staleTime: 0,
+    gcTime: 0,
   });
+
+  // Catch file open errors and show dialog
+  useEffect(() => {
+    if (!fileOpenError && !loadDirectoryError) return;
+
+    showErrorDialog('Error', fileOpenError ?? loadDirectoryError?.message ?? 'Unknown error');
+
+    setFileOpenError(null);
+  }, [fileOpenError, loadDirectoryError]);
 
   const handleDirectoryOpen = (file: FileInfo) => {
     if (!file.isDir) return;
@@ -48,139 +78,136 @@ export function FileManagerPane({ tab, pane }: FileManagerPaneProps) {
   };
 
   const handlePathChange = (newPath: string) => {
-    updatePanePath(tab.id, pane.id, newPath);
-    console.log("Path changed to:", newPath);
+    updatePanePath(tabId, paneId, newPath);
+    setPaneStatus(tabId, paneId); // Clear status on navigation
   };
 
   const handleFileOpen = async (file: FileInfo) => {
     if (file.isDir) return;
-
-    const opened = await OpenFileWithDefaultApp(file.path);
-    if (opened.error) {
-      setFileOpenError(opened.error.message);
-    }
+    const opened = await openFileWithDefaultApp(file.path);
+    if (opened.error) setFileOpenError(opened.error.message);
   };
 
   const handlePaneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    activatePane(tab.id, pane.id);
+    console.log('Activating pane', paneId);
+    activatePane(tabId, paneId);
   };
 
-  const canGoBack = pane.historyIndex > 0;
-  const canGoForward = pane.historyIndex < pane.history.length - 1;
+  const canGoBack = historyIndex! > 0;
+  const canGoForward = historyIndex! < historyLength! - 1;
 
-  const handleNavigateUp = () => {
-    getPathInfo(pane.path).then((result) => {
-      if (result.error || !result.data) return;
-      const pathInfo = result.data;
-      const parentIndex = pathInfo.parts.length - 2; // parent is one level up
-      if (parentIndex < 0) return; // already at root
-
-      getPathAtIndex(pathInfo.fullPath, parentIndex).then((res) => {
-        if (res.error || !res.data) return;
-        const parentPath = res.data;
-        handlePathChange(parentPath);
-      });
-    });
+  const handleNavigateUp = async () => {
+    const result = await getParentFolder(panePath!);
+    if (result.error || !result.data) return;
+    handlePathChange(result.data);
   };
 
+  const handleRefresh = () => {
+    refreshPane(tabId, paneId);
+  };
+
+  // F5 to refresh
+  useKeyboardShortcut({
+    key: 'F5',
+    handler: handleRefresh,
+  });
+  useKeyboardShortcut({
+    key: 'r',
+    ctrl: true,
+    handler: handleRefresh,
+  });
   return (
-    <div className="flex h-full" onClick={handlePaneClick}>
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="flex items-center gap-1 px-2 py-1 bg-(--bg-primary) text-(--text-primary)">
-          {/* Navigation Buttons */}
-          <button
-            className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
-            disabled={!canGoBack}
-            onClick={() => navigateBack(tab.id, pane.id)}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
+    <div className="grid grid-rows-[auto_1fr] h-full" onClick={handlePaneClick}>
+      {/* Top Bar */}
+      <div className="grid grid-cols-[auto_auto_auto_auto_1fr_auto] items-center gap-1 px-2 py-1 bg-(--bg-primary) text-(--text-primary)">
+        {/* Navigation Buttons */}
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
+          disabled={!canGoBack}
+          onClick={() => paneNavigateBack(tabId, paneId)}
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
+          disabled={!canGoForward}
+          onClick={() => paneNavigateForward(tabId, paneId)}
+        >
+          <ArrowRight className="w-4 h-4" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) transition"
+          onClick={handleNavigateUp}
+        >
+          <ArrowUp className="w-4 h-4" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-(--bg-secondary) transition"
+          onClick={handleRefresh}
+          title="Refresh (F5)"
+        >
+          <RefreshCw className="w-4 h-4" />
+        </button>
 
-          <button
-            className="p-1 rounded hover:bg-(--bg-secondary) disabled:opacity-40 transition"
-            disabled={!canGoForward}
-            onClick={() => navigateForward(tab.id, pane.id)}
-          >
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <button
-            className="p-1 rounded hover:bg-(--bg-secondary) transition"
-            onClick={handleNavigateUp}
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
-
-          {/* Path Bar */}
-          <div className="flex-1 ml-1">
-            <PathBar pane={pane} onPathChange={handlePathChange} />
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 ml-2">
-            <button
-              className={`
-                p-1 rounded hover:bg-(--bg-secondary) transition
-                ${pane.viewMode === ViewMode.LIST ? "bg-(--bg-accent)" : ""}
-              `}
-              onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.LIST)}
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              className={`
-                p-1 rounded hover:bg-(--bg-secondary) transition
-                ${pane.viewMode === ViewMode.GRID ? "bg-(--bg-accent)" : ""}
-              `}
-              onClick={() => setPaneViewMode(tab.id, pane.id, ViewMode.GRID)}
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Path Bar */}
+        <div className="mx-1 min-w-0 overflow-hidden">
+          <PathBar paneId={paneId} tabId={tabId} onPathChange={handlePathChange} />
         </div>
 
-        {/* Error message */}
-        {(fileOpenError || error) && (
-          <div className="p-2">
-            <div className="bg-(--bg-tertiary) text-(--text-primary) p-2 rounded-md">
-              Error: {fileOpenError || error?.message}
-            </div>
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
+              viewMode === ViewMode.LIST ? 'bg-(--bg-accent)' : ''
+            }`}
+            onClick={() => setPaneViewMode(tabId, paneId, ViewMode.LIST)}
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            className={`p-1 rounded hover:bg-(--bg-secondary) transition ${
+              viewMode === ViewMode.GRID ? 'bg-(--bg-accent)' : ''
+            }`}
+            onClick={() => setPaneViewMode(tabId, paneId, ViewMode.GRID)}
+          >
+            <Grid className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      {/* WARNING : Modifying this section can break the virtualization, which makes it unusable for big directories (e.g /usr/bin on Linux.) */}
+      <div className="flex flex-col overflow-hidden px-2">
+        {(fileOpenError || loadDirectoryError) && (
+          <div className="p-2 bg-(--bg-tertiary) text-(--text-primary) rounded-md">
+            Error: {fileOpenError || loadDirectoryError?.message}
           </div>
         )}
 
-        {/* Loading state */}
-        {(isLoading || isFetching) && (
-          <div className="p-1 text-(--text-secondary)"> </div>
-        )}
+        {(isLoading || isFetching) && <div className="p-1 text-(--text-secondary)"> </div>}
 
-        {/* Directory contents */}
-        {!(fileOpenError || error) && contents && (
-          <div className="flex-1 flex flex-col overflow-hidden px-2">
-            {pane.viewMode === ViewMode.GRID ? (
+        {contents && !(fileOpenError || loadDirectoryError) && (
+          <>
+            {viewMode === ViewMode.GRID ? (
               <FileGrid
                 contents={contents}
                 onDirectoryOpen={handleDirectoryOpen}
                 onFileOpen={handleFileOpen}
-                pane={pane}
-                tab={tab}
+                paneId={paneId}
+                tabId={tabId}
               />
             ) : (
               <FileList
                 contents={contents}
                 onDirectoryOpen={handleDirectoryOpen}
                 onFileOpen={handleFileOpen}
-                pane={pane}
-                tab={tab}
+                paneId={paneId}
+                tabId={tabId}
               />
             )}
-            <div className="p-1 text-xs text-(--text-secondary)">
-              {contents.dirCount} folders | {contents.fileCount} files :{" "}
-              {formatSize(contents.directSizeBytes)} (
-              {contents.directSizeBytes.toLocaleString()} bytes)
-            </div>
-          </div>
+            <StatusBar tabId={tabId} paneId={paneId} contents={contents} />
+          </>
         )}
       </div>
     </div>

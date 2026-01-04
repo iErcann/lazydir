@@ -126,6 +126,10 @@ export const ErrorCode = {
     FileInfoError: "FileInfoError",
     FileOpenWithDefaultAppError: "FileOpenWithDefaultAppError",
     InvalidPathIndex: "InvalidPathIndex",
+    FileMoveError: "FileMoveError",
+    FileCleanupError: "FileCleanupError",
+    FileCopyError: "FileCopyError",
+    FileDeleteError: "FileDeleteError",
 };
 
 /**
