@@ -1,10 +1,12 @@
+<h1 align="center">
+  <img src="build/appicon.png" width="40" style="vertical-align: middle;" />
+  lazydir
+</h1>
+
 <p align="center">
-  <img width="150" height="150" src="build/appicon.png" alt="lazydir">
-  <h1 align="center">lazydir</h1>
-  <p align="center">
-    A cross platform file manager you <em>probably</em> don't need.
-  </p>
+  A cross-platform file manager you <em>probably</em> don’t need.
 </p>
+
 
 ### WIP not finished at all
 
