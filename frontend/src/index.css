@@ -208,7 +208,7 @@
 /* ===== Default / Global Scrollbar (for all themes) ===== */
 * {
   scrollbar-width: thin;           /* Firefox */
-  scrollbar-color: #555 #333;      /* Firefox (thumb + track) */
+  scrollbar-color: var(--bg-tertiary) var(--bg-secondary); /* Firefox (thumb + track) */
 }
 
 /* Chrome, Edge, Safari */

@@ -1,11 +1,11 @@
-import { ViewMode, type Pane, type Tab } from '../types';
+import { ViewMode } from '../types';
 import { useFileSystemStore } from '../store/directoryStore';
 import { useEffect, useState } from 'react';
 import { useTabsStore } from '../store/tabsStore';
 import { PathBar } from './PathBar';
 import { StatusBar } from './StatusBar';
 import { ArrowLeft, ArrowRight, ArrowUp, RefreshCw } from 'lucide-react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { List, Grid } from 'lucide-react';
 import { FileGrid } from './filegrid/FileGrid';
 import { FileList } from './filelist/FileList';
@@ -46,11 +46,12 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
     error: loadDirectoryError,
     isFetching,
   } = useQuery({
-    queryKey: ['directory', panePath, refreshKey, loadDirectory],
+    queryKey: ['directory', panePath, refreshKey],
     queryFn: () => {
       console.log('FileManagerPane: Loading directory for path', panePath);
       return loadDirectory(panePath!);
     },
+    enabled: !!panePath, // only run when panePath exists
     select: (result) => {
       if (result.error) throw result.error;
       return result.data;
@@ -89,6 +90,7 @@ export function FileManagerPane({ tabId, paneId }: FileManagerPaneProps) {
 
   const handlePaneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('Activating pane', paneId);
     activatePane(tabId, paneId);
   };
 

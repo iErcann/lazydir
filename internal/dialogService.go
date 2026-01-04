@@ -52,6 +52,7 @@ func (d *DialogService) ShowQuestionDialog(title, message string, buttons []stri
 	// Show the dialog
 	dialog.Show()
 
+	// TODO: Check for cancellation scenario
 	// Wait for result
 	result := <-resultChan
 	return result

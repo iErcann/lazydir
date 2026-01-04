@@ -98,8 +98,8 @@ export function useFileContextMenu({
         } else {
           refreshPane(tabId, paneId);
           setPaneStatus(tabId, paneId, `Pasted ${fileCount} ${fileCount === 1 ? 'item' : 'items'}`);
+          clearClipboard();
         }
-        clearClipboard();
       },
     },
 

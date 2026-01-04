@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { ViewMode, type Pane, type Tab } from '../types';
 import { SortingState } from '@tanstack/react-table';
-import { FileInfo } from '../../bindings/lazydir/internal';
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

@@ -1,4 +1,3 @@
-import { Pane } from '../types';
 import { useFileSystemStore } from '../store/directoryStore';
 import { useState, useRef } from 'react';
 import { PathInfo } from '../../bindings/lazydir/internal/models';
